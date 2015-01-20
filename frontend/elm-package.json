@@ -1,0 +1,13 @@
+{
+    "version": "0.1.0",
+    "summary": "reading in comfort",
+    "repository": "https://github.com/aupiff/boustro.git",
+    "license": "BSD3",
+    "source-directories": [
+        "."
+    ],
+    "exposed-modules": [],
+    "dependencies": {
+        "elm-lang/core": "1.1.0 <= v < 2.0.0"
+    }
+}
