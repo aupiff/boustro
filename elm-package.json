@@ -4,7 +4,7 @@
     "repository": "https://github.com/aupiff/boustro.git",
     "license": "BSD3",
     "source-directories": [
-        "."
+        "frontend"
     ],
     "exposed-modules": [],
     "dependencies": {
