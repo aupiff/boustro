@@ -15,5 +15,18 @@ cabal-version:       >=1.10
 executable boustro
   main-is:             Main.hs
   hs-source-dirs:      backend
-  build-depends:       base >=4.7 && <4.8
+  build-depends:       base >=4.7 && <4.8,
+                       bytestring,
+                       xmlhtml,
+                       text,
+                       time,
+                       MonadCatchIO-transformers,
+                       mtl,
+                       lens,
+                       snap,
+                       snap-core,
+                       snap-server,
+                       snaplet-postgresql-simple,
+                       postgresql-simple,
+                       heist
   default-language:    Haskell2010
