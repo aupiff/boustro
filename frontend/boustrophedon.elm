@@ -9,8 +9,12 @@ import Http
 import Signal as S
 import Transform2D (scaleX)
 import Color (grayscale, rgb)
+import Html (..)
+import Html.Attributes (..)
+import Html.Events (..)
+import Html.Lazy (lazy, lazy2)
 
-type alias RenderState = (Float, List Element)
+type alias RenderState = (Float, List Html)
 
 serverUrl = "http://localhost:8000/"
 
@@ -33,23 +37,27 @@ charPerLine = 80
 parBreak : String
 parBreak = String.fromList <| L.repeat charPerLine ' '
 
+
+-- small reusable CSS properties
+reverseProps : Attribute
+reverseProps = style [ ("-moz-transform", "scaleX(-1)")
+                     , ("-o-transform", "scaleX(-1)")
+                     , ("-webkit-transform",  "scaleX(-1)")
+                     , ("transform", "scaleX(-1)")
+                     , ("filter", "FlipH")
+                     , ("-ms-filter", "FlipH")
+                     ]
+
 boustrophedon : String -> RenderState -> RenderState
 boustrophedon str (lineState, elList) =
-    let xScale = scaleX lineState
-        isParagraphStart = L.any (\x -> x == '¶') <| String.toList str
-        lineColor = if | isParagraphStart -> rgb 200 210 220
-                       | lineState > 0    -> grayscale 0.1
-                       | otherwise        -> grayscale 0.14
-        background = rect 1000 lineHeight |> filled lineColor
-        formText = toForm <| justified << T.monospace <| T.fromString str
-        txtWidth = (String.length str) * 9
-        nextEl = collage txtWidth lineHeight [
-                      background
-                    , groupTransform xScale [ formText ]
-                 ]
+    let props = if lineState == 1 then [] else [ reverseProps ]
+        nextEl = p props [ text str ]
         nextLineState = if | str == parBreak -> 1
                            | otherwise       -> lineState * -1
     in (nextLineState, nextEl :: elList)
+
+view : List Html -> Html
+view = div []
 
 toParLines : Int -> List Char -> List (List Char)
 toParLines n xs =
@@ -68,8 +76,8 @@ paragraphToLines par =
 main : Signal Element
 main = let nonEmptyLines : String -> List String
            nonEmptyLines = filter (not << String.isEmpty) << String.lines
-           txtLines : List String -> List Element
+           txtLines : List String -> List Html
            txtLines = snd << foldr boustrophedon (-1, [])
                           << L.concatMap paragraphToLines
            getLineElements = txtLines << nonEmptyLines
-       in  S.map (flow down << getLineElements) content
+       in  S.map (toElement 700 1000<< view << getLineElements) content
