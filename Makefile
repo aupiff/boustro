@@ -1,6 +1,6 @@
-ELM_SRC=boustrophedon.elm
+ELM_SRC=frontend/boustrophedon.elm
 
 default: build
 
 build:
-	elm-make $(ELM_SRC) --output=bous.html
+	elm-make $(ELM_SRC) --output=frontend/bous.html
