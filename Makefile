@@ -3,4 +3,4 @@ ELM_SRC=frontend/boustrophedon.elm
 default: build
 
 build:
-	elm-make $(ELM_SRC) --output=frontend/bous.html
+	elm-make $(ELM_SRC) --output=frontend/boustro.html

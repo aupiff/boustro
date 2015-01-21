@@ -46,16 +46,17 @@ instance HasPostgres (Handler b App) where
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
 routes = [ ("/",   writeText "hello")
-         , ("app", serveFile "../frontend/bous.html")
-         , ("foo", fooHandler)
-         , ("add/:uname", addHandler)
+         , ("app", serveFile "frontend/boustro.html")
+         , ("texts", serveDirectory "texts")
+         , ("user", showUsersHandler)
+         , ("user/:uname", addUserHandler)
          ]
 
-fooHandler = do
+showUsersHandler = do
     results <- query_ "select * from snap_auth_user"
     liftIO $ print (results :: [AuthUser])
 
-addHandler = do
+addUserHandler = do
     mname <- getParam "uname"
     let name = maybe "guest" T.decodeUtf8 mname
     u <- with auth $ createUser name ""
