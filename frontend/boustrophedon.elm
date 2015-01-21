@@ -67,10 +67,9 @@ paragraphToLines par =
 
 main : Signal Element
 main = let nonEmptyLines : String -> List String
-           nonEmptyLines = filter (\x -> not <| String.isEmpty x) << String.lines
-           txtLines : List String -> List String
-           txtLines = L.concatMap paragraphToLines
-           bLines : List String -> List Element
-           bLines = snd << foldr boustrophedon (-1, [])
-           getLineElements = bLines << txtLines << nonEmptyLines
+           nonEmptyLines = filter (not << String.isEmpty) << String.lines
+           txtLines : List String -> List Element
+           txtLines = snd << foldr boustrophedon (-1, [])
+                          << L.concatMap paragraphToLines
+           getLineElements = txtLines << nonEmptyLines
        in  S.map (flow down << getLineElements) content
