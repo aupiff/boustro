@@ -28,9 +28,6 @@ state = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fileName
                 Http.Failure _ _ -> "http request failed."
         in S.map getContent response
 
-lineHeight = 24
-charPerLine = 80
-
 boustrophedon : String -> RenderState -> RenderState
 boustrophedon str (reverseState, elList) =
     let classes =  classList [ ("fulljustify", True)
@@ -70,6 +67,8 @@ scene : ViewDimensions -> AppState -> Element
 scene viewDims content =
     let nonEmptyLines : String -> List String
         nonEmptyLines = filter (not << String.isEmpty) << String.lines
+        textWidth = min (viewDims.fullContainerWidth - 40) 660
+        charPerLine = floor <| toFloat textWidth / 8.5
         txtLines : List String -> List Html
         txtLines = snd << foldr boustrophedon (False, [])
                        << L.map String.fromList << toParLines charPerLine
@@ -78,9 +77,8 @@ scene viewDims content =
         fullContainer = container viewDims.fullContainerWidth
                                   viewDims.fullContainerHeight
                                   middle
-        renderTextView = toElement (viewDims.fullContainerWidth - 10)
-                                   viewDims.fullContainerHeight
-        textWidth = min viewDims.fullContainerWidth 660
+        renderTextView = toElement textWidth
+                                   (viewDims.fullContainerHeight - 10)
         containerDivProps = style [ ("width", (toString textWidth) ++ "px")
                                   , ("margin", "0 auto")
                                   ]

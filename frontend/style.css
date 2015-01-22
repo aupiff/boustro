@@ -10,7 +10,7 @@
 .fulljustify {
   text-align: justify;
   width: 100%;
-  margin-bottom: 0px;
+  margin-bottom: -10px;
   margin-top: 0px;
 }
 
