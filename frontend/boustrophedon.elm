@@ -1,18 +1,13 @@
-import Graphics.Collage (..)
-import Graphics.Element (..)
-import Text (plainText, justified, leftAligned, rightAligned)
-import Text as T
 import List (foldr, filter, (::), take, drop)
 import List as L
 import String
-import Http
-import Signal as S
-import Transform2D (scaleX)
-import Color (grayscale, rgb)
 import Html (..)
 import Html.Attributes (..)
-import Html.Events (..)
-import Html.Lazy (lazy, lazy2)
+import Graphics.Element (..)
+import Http
+import Signal as S
+import Signal ((<~), (~), Signal)
+import Window
 
 type alias RenderState = (Float, List Html)
 
@@ -39,25 +34,44 @@ parBreak = String.fromList <| L.repeat charPerLine ' '
 
 
 -- small reusable CSS properties
-reverseProps : Attribute
-reverseProps = style [ ("-moz-transform", "scaleX(-1)")
-                     , ("-o-transform", "scaleX(-1)")
-                     , ("-webkit-transform",  "scaleX(-1)")
-                     , ("transform", "scaleX(-1)")
-                     , ("filter", "FlipH")
-                     , ("-ms-filter", "FlipH")
-                     ]
+reverseProps = [ ("-moz-transform", "scaleX(-1)")
+               , ("-o-transform", "scaleX(-1)")
+               , ("-webkit-transform",  "scaleX(-1)")
+               , ("transform", "scaleX(-1)")
+               , ("filter", "FlipH")
+               , ("-ms-filter", "FlipH")
+               ]
+
+mainTextProps = [ ("text-align", "justify")
+                , ("width", "100%")
+                ]
 
 boustrophedon : String -> RenderState -> RenderState
 boustrophedon str (lineState, elList) =
-    let props = if lineState == 1 then [] else [ reverseProps ]
-        nextEl = p props [ text str ]
+    let props = if lineState == 1 then style mainTextProps else style <| mainTextProps ++ reverseProps
+        nextEl = p [ props ] [ text str ]
         nextLineState = if | str == parBreak -> 1
                            | otherwise       -> lineState * -1
     in (nextLineState, nextEl :: elList)
 
-view : List Html -> Html
-view = div []
+containerDivProps = style [ ("width", "660px")
+                          , ("margin", "0 auto")
+                          ]
+
+textView : List Html -> Html
+textView = div [containerDivProps]
+
+type alias ViewDimensions = { fullContainerWidth : Int
+                            , fullContainerHeight : Int
+                            }
+
+viewHelper : (Int, Int) -> ViewDimensions
+viewHelper (w, h) = { fullContainerWidth = w
+                    , fullContainerHeight = h
+                    }
+
+currentViewDimensions : Signal ViewDimensions
+currentViewDimensions = viewHelper <~ Window.dimensions
 
 toParLines : Int -> List Char -> List (List Char)
 toParLines n xs =
@@ -72,12 +86,21 @@ paragraphToLines par =
         charLineList = toParLines charPerLine charList
     in (L.map String.fromList charLineList)
 
-
 main : Signal Element
-main = let nonEmptyLines : String -> List String
-           nonEmptyLines = filter (not << String.isEmpty) << String.lines
-           txtLines : List String -> List Html
-           txtLines = snd << foldr boustrophedon (-1, [])
-                          << L.concatMap paragraphToLines
-           getLineElements = txtLines << nonEmptyLines
-       in  S.map (toElement 700 1000<< view << getLineElements) content
+main = scene <~ currentViewDimensions
+              ~ content
+
+scene : ViewDimensions -> String -> Element
+scene viewDims content =
+    let nonEmptyLines : String -> List String
+        nonEmptyLines = filter (not << String.isEmpty) << String.lines
+        txtLines : List String -> List Html
+        txtLines = snd << foldr boustrophedon (1, [])
+                       << L.concatMap paragraphToLines
+        getLineElements = txtLines << nonEmptyLines
+        fullContainer = container viewDims.fullContainerWidth
+                                  viewDims.fullContainerHeight
+                                  middle
+        mainContainer = container 700 700 middle
+        textViewEl = toElement 700 700 << textView <| getLineElements content
+    in  fullContainer textViewEl
