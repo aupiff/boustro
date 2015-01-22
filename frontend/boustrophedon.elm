@@ -31,17 +31,13 @@ state = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fileName
 lineHeight = 24
 charPerLine = 80
 
-parBreak : String
-parBreak = String.fromList <| L.repeat charPerLine ' '
-
 boustrophedon : String -> RenderState -> RenderState
 boustrophedon str (reverseState, elList) =
     let classes =  classList [ ("fulljustify", True)
                              , ("reverse", reverseState)
                              ]
         nextEl = p [ classes ] [ text str ]
-        nextLineState = if | str == parBreak -> False
-                           | otherwise       -> not reverseState
+        nextLineState = not reverseState
     in (nextLineState, nextEl :: elList)
 
 type alias ViewDimensions = { fullContainerWidth : Int
@@ -63,11 +59,8 @@ toParLines n xs =
          [] -> []
          xs -> pad n (take n xs) :: (toParLines n <| drop n xs)
 
-paragraphToLines : String -> List String
-paragraphToLines par =
-    let charList = '¶' :: ' ' :: String.toList par
-        charLineList = toParLines charPerLine charList
-    in (L.map String.fromList charLineList)
+paragraphPrefix : List Char -> List Char
+paragraphPrefix str = ('¶' :: ' ' :: str) ++ [' ', ' ']
 
 main : Signal Element
 main = scene <~ currentViewDimensions
@@ -79,7 +72,8 @@ scene viewDims content =
         nonEmptyLines = filter (not << String.isEmpty) << String.lines
         txtLines : List String -> List Html
         txtLines = snd << foldr boustrophedon (False, [])
-                       << L.concatMap paragraphToLines
+                       << L.map String.fromList << toParLines charPerLine
+                       << L.concatMap (paragraphPrefix << String.toList)
         getLineElements = txtLines << nonEmptyLines
         fullContainer = container viewDims.fullContainerWidth
                                   viewDims.fullContainerHeight
