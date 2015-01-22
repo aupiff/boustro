@@ -47,6 +47,8 @@ instance HasPostgres (Handler b App) where
 routes :: [(ByteString, Handler App App ())]
 routes = [ ("/",   writeText "hello")
          , ("app", serveFile "frontend/boustro.html")
+         , ("elm.js", serveFile "frontend/elm.js")
+         , ("style.css", serveFile "frontend/style.css")
          , ("texts", serveDirectory "texts")
          , ("user", showUsersHandler)
          , ("user/:uname", addUserHandler)
