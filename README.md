@@ -13,6 +13,7 @@ frontend
 - justification
     + display the letter widths of various alphabets nicely to test out the
       typogaphy library I started
+    + write minimum adjustment ration `r_j` code
 
 backend
 
