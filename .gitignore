@@ -7,3 +7,4 @@ site_key.txt
 log/
 cabal.sandbox.config
 texts/
+repl*

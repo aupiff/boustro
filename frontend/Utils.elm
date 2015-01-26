@@ -15,3 +15,9 @@ onFalseTrueTransition sig =
       isFalseTrueTrans : Signal Bool
       isFalseTrueTrans = S.map (\(x, y) -> x && not y) lastTwo
   in  S.map (\_ -> ()) <| S.dropWhen (S.map not isFalseTrueTrans) (False, False) lastTwo
+
+uniq : List a -> List a
+uniq xs = case xs of
+    []        -> []
+    (y :: ys) -> if | L.member y ys -> uniq ys
+                    | otherwise     -> y :: uniq ys

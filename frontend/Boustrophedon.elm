@@ -10,13 +10,14 @@ import Signal ((<~), (~), Signal)
 import Window
 import UI (..)
 import Model (..)
+import Utils
 
 type alias RenderState = (Bool, List Html)
 
-serverUrl = "http://192.168.1.212:8000/"
+serverUrl = "http://192.168.17.55:8000/"
 
 fileName : Signal String
-fileName = S.constant "jaures.txt"
+fileName = S.constant "dec.txt"
 
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
@@ -34,6 +35,7 @@ stringToState str viewDims =
                         _  -> take n xs :: (groupN n <| drop n xs)
         pages = L.map (div []) <| groupN linesPerPage txtLines
     in  { fullText    = str
+        , uniqChars   = Utils.uniq <| String.toList str
         , currentPage = L.head pages
         , priorPages  = []
         , futurePages = L.tail pages
