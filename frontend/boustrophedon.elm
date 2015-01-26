@@ -22,8 +22,8 @@ type alias AppState = { fullText     : String
                       , futurePages  : List Html
                       }
 
-type UserInput = NextPage
-               | PrevPage
+type SwipeDir = Next | Prev
+type UserInput = Swipe SwipeDir
                | SetText String
 
 userInput : Signal UserInput
@@ -36,24 +36,40 @@ stringToState str viewDims =
     let nonEmptyLines : String -> List String
         nonEmptyLines = filter (not << String.isEmpty) << String.lines
         charPerLine = floor <| toFloat viewDims.textWidth / 7.25
-        pageLines = floor <| toFloat viewDims.textHeight / 18
+        linesPerPage = floor <| toFloat viewDims.textHeight / 18
         txtLines : List Html
         txtLines = snd << foldr boustrophedon (True, [])
                        << L.map String.fromList << toParLines charPerLine
                        << L.concatMap (paragraphPrefix << String.toList)
                        <| nonEmptyLines str
+        groupN n xs = case xs of
+                        [] -> []
+                        _  -> take n xs :: (groupN n <| drop n xs)
+        pages = L.map (div []) <| groupN linesPerPage txtLines
     in  { fullText    = str
-        , currentPage = div [] <| L.take pageLines txtLines
+        , currentPage = L.head pages
         , priorPages  = []
-        , futurePages = L.tail txtLines
+        , futurePages = L.tail pages
         }
 
 nextState : InputData -> AppState -> AppState
 nextState (userInput, viewDimensions) pState =
     case userInput of
         SetText str -> stringToState str viewDimensions
-        NextPage    -> pState
-        PrevPage    -> pState
+        Swipe Next  -> if | L.isEmpty pState.futurePages -> pState
+                          | otherwise ->
+                                { fullText    = pState.fullText
+                                , currentPage = L.head pState.futurePages
+                                , priorPages  = pState.currentPage :: pState.priorPages
+                                , futurePages = L.tail pState.futurePages
+                                }
+        Swipe Prev  -> if | L.isEmpty pState.priorPages -> pState
+                          | otherwise ->
+                                { fullText    = pState.fullText
+                                , currentPage = L.head pState.priorPages
+                                , priorPages  = L.tail pState.priorPages
+                                , futurePages = pState.currentPage :: pState.futurePages
+                                }
 
 emptyState = { fullText     = "empty"
              , currentPage  = (text "empty")
