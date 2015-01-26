@@ -4,10 +4,14 @@ import String
 import Html (..)
 import Html.Attributes (style, classList)
 import Graphics.Element (..)
+import Text (plainText)
 import Http
 import Signal as S
 import Signal ((<~), (~), Signal)
 import Window
+import Touch
+import Maybe as M
+import Time (Time, every, millisecond, second, timestamp)
 
 type alias RenderState = (Bool, List Html)
 
@@ -22,12 +26,14 @@ type alias AppState = { fullText     : String
                       , futurePages  : List Html
                       }
 
-type SwipeDir = Next | Prev
+type SwipeDir = Next | Prev | NoSwipe
 type UserInput = Swipe SwipeDir
                | SetText String
 
 userInput : Signal UserInput
-userInput = S.mergeMany [ S.map SetText textContent ]
+userInput = S.mergeMany [ S.map SetText textContent
+                        , S.map Swipe swipe
+                        ]
 
 type alias InputData = (UserInput, ViewDimensions)
 
@@ -56,20 +62,23 @@ nextState : InputData -> AppState -> AppState
 nextState (userInput, viewDimensions) pState =
     case userInput of
         SetText str -> stringToState str viewDimensions
-        Swipe Next  -> if | L.isEmpty pState.futurePages -> pState
-                          | otherwise ->
-                                { fullText    = pState.fullText
-                                , currentPage = L.head pState.futurePages
-                                , priorPages  = pState.currentPage :: pState.priorPages
-                                , futurePages = L.tail pState.futurePages
-                                }
-        Swipe Prev  -> if | L.isEmpty pState.priorPages -> pState
-                          | otherwise ->
-                                { fullText    = pState.fullText
-                                , currentPage = L.head pState.priorPages
-                                , priorPages  = L.tail pState.priorPages
-                                , futurePages = pState.currentPage :: pState.futurePages
-                                }
+        Swipe Next  ->
+            if | L.isEmpty pState.futurePages -> pState
+               | otherwise ->
+                     { fullText    = pState.fullText
+                     , currentPage = L.head pState.futurePages
+                     , priorPages  = pState.currentPage :: pState.priorPages
+                     , futurePages = L.tail pState.futurePages
+                     }
+        Swipe Prev  ->
+            if | L.isEmpty pState.priorPages -> pState
+               | otherwise ->
+                     { fullText    = pState.fullText
+                     , currentPage = L.head pState.priorPages
+                     , priorPages  = L.tail pState.priorPages
+                     , futurePages = pState.currentPage :: pState.futurePages
+                     }
+        Swipe NoSwipe -> pState
 
 emptyState = { fullText     = "empty"
              , currentPage  = (text "empty")
@@ -79,6 +88,57 @@ emptyState = { fullText     = "empty"
 
 appState : Signal AppState
 appState = S.foldp nextState emptyState (S.map2 (,) userInput currentViewDimensions)
+
+listToMaybe : List a -> Maybe a
+listToMaybe xs = if | L.isEmpty xs -> Nothing
+                    | otherwise  -> Just <| L.head xs
+
+touchDir : List Touch.Touch -> SwipeDir
+touchDir ts = let getxOrDefault = M.withDefault 0 << M.map .x
+                  firstTouch = getxOrDefault << listToMaybe <| ts
+                  lastTouch  = getxOrDefault << listToMaybe << L.reverse <| ts
+                  touchDist : Int
+                  touchDist = firstTouch - lastTouch
+              in  if | touchDist > 20 -> Prev
+                     | touchDist < 20 -> Next
+                     | otherwise      -> NoSwipe
+
+type alias Tap = { x : Int, y : Int }
+
+onFalseTrueTransition : Signal Bool -> Signal ()
+onFalseTrueTransition sig =
+  let storeLastTwo c (p1, p2) = (c, p1)
+      lastTwo : Signal (Bool, Bool)
+      lastTwo = S.foldp storeLastTwo (False, False) sig
+      isFalseTrueTrans : Signal Bool
+      isFalseTrueTrans = S.map (\(x, y) -> x && not y) lastTwo
+  in  S.map (\_ -> ()) <| S.dropWhen (S.map not isFalseTrueTrans) (False, False) lastTwo
+
+swipe : Signal SwipeDir
+swipe = let untappedValue : (Time, Tap, Bool)
+            untappedValue = (0, { x = -1, y = -1 }, False)
+            doubleTap = S.foldp isDoubleTap untappedValue <| timestamp Touch.taps
+            thrd (x,y,z) = z
+            toSwipeDir tap viewDims = if | tap.x < (floor <| (toFloat viewDims.fullContainerWidth / 2) - 10) -> Prev
+                                         | tap.x > (floor <| (toFloat viewDims.fullContainerWidth / 2) + 10) -> Next
+                                         | otherwise -> NoSwipe
+        in  S.sampleOn (onFalseTrueTransition <| S.map thrd doubleTap) <| S.map2 toSwipeDir Touch.taps currentViewDimensions
+
+isDoubleTap : (Time, Tap) -> (Time, Tap, Bool) -> (Time, Tap, Bool)
+isDoubleTap (newTapTime, newTap) (oldTapTime, oldTap, wasDoubleTap) =
+    let doubleTapMargin : Int
+        doubleTapMargin = 40
+        maxDoubleTapInteval : Time
+        maxDoubleTapInteval = 0.5 * second
+    in if | wasDoubleTap -> (newTapTime, newTap, False)
+          | newTapTime - oldTapTime < maxDoubleTapInteval &&
+              abs (newTap.x - oldTap.x) < doubleTapMargin &&
+              abs (newTap.y - oldTap.y) < doubleTapMargin ->
+                            (newTapTime, newTap, True)
+          | otherwise    -> (newTapTime, newTap, False)
+
+debug : Signal String
+debug = S.map toString Touch.taps
 
 textContent : Signal String
 textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fileName
@@ -128,9 +188,10 @@ paragraphPrefix str = ('¶' :: ' ' :: str) ++ [' ', ' ']
 main : Signal Element
 main = scene <~ currentViewDimensions
               ~ appState
+              ~ debug
 
-scene : ViewDimensions -> AppState -> Element
-scene viewDims appState =
+scene : ViewDimensions -> AppState -> String -> Element
+scene viewDims appState debug =
     let renderTextView = toElement viewDims.textWidth viewDims.textHeight
         containerDivProps = style [ ("width", (toString viewDims.textWidth) ++ "px")
                                   , ("margin", "0 auto") ]
@@ -139,4 +200,5 @@ scene viewDims appState =
         fullContainer = container viewDims.fullContainerWidth
                                   viewDims.fullContainerHeight
                                   middle
-    in  fullContainer << renderTextView << textView <| [ appState.currentPage ]
+    in  layers [ fullContainer << renderTextView << textView <| [ appState.currentPage ]
+               , plainText debug ]
