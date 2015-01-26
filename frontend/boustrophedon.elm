@@ -11,7 +11,7 @@ import Window
 
 type alias RenderState = (Bool, List Html)
 
-serverUrl = "http://192.168.1.65:8000/"
+serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
 fileName = S.constant "jaures.txt"
@@ -36,13 +36,14 @@ stringToState str viewDims =
     let nonEmptyLines : String -> List String
         nonEmptyLines = filter (not << String.isEmpty) << String.lines
         charPerLine = floor <| toFloat viewDims.textWidth / 7.25
+        pageLines = floor <| toFloat viewDims.textHeight / 18
         txtLines : List Html
         txtLines = snd << foldr boustrophedon (True, [])
                        << L.map String.fromList << toParLines charPerLine
                        << L.concatMap (paragraphPrefix << String.toList)
                        <| nonEmptyLines str
     in  { fullText    = str
-        , currentPage = L.head txtLines
+        , currentPage = div [] <| L.take pageLines txtLines
         , priorPages  = []
         , futurePages = L.tail txtLines
         }
