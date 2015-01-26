@@ -9,10 +9,7 @@ import Http
 import Signal as S
 import Signal ((<~), (~), Signal)
 import Window
-import Touch
-import Maybe as M
-import Time (Time, second, timestamp)
-import Utils as U
+import UI (..)
 
 type alias RenderState = (Bool, List Html)
 
@@ -27,7 +24,6 @@ type alias AppState = { fullText     : String
                       , futurePages  : List Html
                       }
 
-type SwipeDir = Next | Prev | NoSwipe
 type UserInput = Swipe SwipeDir
                | SetText String
 
@@ -90,42 +86,8 @@ emptyState = { fullText     = "empty"
 appState : Signal AppState
 appState = S.foldp nextState emptyState (S.map2 (,) userInput currentViewDimensions)
 
-touchDir : List Touch.Touch -> SwipeDir
-touchDir ts = let getxOrDefault = M.withDefault 0 << M.map .x
-                  firstTouch = getxOrDefault << U.listToMaybe <| ts
-                  lastTouch  = getxOrDefault << U.listToMaybe << L.reverse <| ts
-                  touchDist : Int
-                  touchDist = firstTouch - lastTouch
-              in  if | touchDist > 20 -> Prev
-                     | touchDist < 20 -> Next
-                     | otherwise      -> NoSwipe
-
-type alias Tap = { x : Int, y : Int }
-
-swipe : Signal SwipeDir
-swipe = let untappedValue : (Time, Tap, Bool)
-            untappedValue = (0, { x = -1, y = -1 }, False)
-            doubleTap = S.map (\(x,y,z) -> z) <| S.foldp isDoubleTap untappedValue <| timestamp Touch.taps
-            toSwipeDir tap viewDims = if | tap.x < (floor <| (toFloat viewDims.fullContainerWidth / 2) - 10) -> Prev
-                                         | tap.x > (floor <| (toFloat viewDims.fullContainerWidth / 2) + 10) -> Next
-                                         | otherwise -> NoSwipe
-        in  S.sampleOn (U.onFalseTrueTransition doubleTap) <| S.map2 toSwipeDir Touch.taps currentViewDimensions
-
-isDoubleTap : (Time, Tap) -> (Time, Tap, Bool) -> (Time, Tap, Bool)
-isDoubleTap (newTapTime, newTap) (oldTapTime, oldTap, wasDoubleTap) =
-    let doubleTapMargin : Int
-        doubleTapMargin = 40
-        maxDoubleTapInteval : Time
-        maxDoubleTapInteval = 0.5 * second
-    in if | wasDoubleTap -> (newTapTime, newTap, False)
-          | newTapTime - oldTapTime < maxDoubleTapInteval &&
-              abs (newTap.x - oldTap.x) < doubleTapMargin &&
-              abs (newTap.y - oldTap.y) < doubleTapMargin ->
-                            (newTapTime, newTap, True)
-          | otherwise    -> (newTapTime, newTap, False)
-
 debug : Signal String
-debug = S.map toString Touch.taps
+debug = S.map toString currentViewDimensions
 
 textContent : Signal String
 textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fileName
@@ -146,22 +108,6 @@ boustrophedon str (reverseState, elList) =
         nextLineState = not reverseState
     in (nextLineState, nextEl :: elList)
 
-type alias ViewDimensions = { fullContainerWidth : Int
-                            , fullContainerHeight : Int
-                            , textWidth : Int
-                            , textHeight : Int
-                            }
-
-viewHelper : (Int, Int) -> ViewDimensions
-viewHelper (w, h) = { fullContainerWidth = w
-                    , fullContainerHeight = h
-                    , textWidth = min (w - 40) 660
-                    , textHeight = h - 10
-                    }
-
-currentViewDimensions : Signal ViewDimensions
-currentViewDimensions = viewHelper <~ Window.dimensions
-
 toParLines : Int -> List Char -> List (List Char)
 toParLines n xs =
     let pad len ys = ys ++ L.repeat (len - L.length ys) ' '
@@ -175,10 +121,9 @@ paragraphPrefix str = ('¶' :: ' ' :: str) ++ [' ', ' ']
 main : Signal Element
 main = scene <~ currentViewDimensions
               ~ appState
-              ~ debug
 
-scene : ViewDimensions -> AppState -> String -> Element
-scene viewDims appState debug =
+scene : ViewDimensions -> AppState -> Element
+scene viewDims appState =
     let renderTextView = toElement viewDims.textWidth viewDims.textHeight
         containerDivProps = style [ ("width", (toString viewDims.textWidth) ++ "px")
                                   , ("margin", "0 auto") ]
@@ -187,5 +132,4 @@ scene viewDims appState debug =
         fullContainer = container viewDims.fullContainerWidth
                                   viewDims.fullContainerHeight
                                   middle
-    in  layers [ fullContainer << renderTextView << textView <| [ appState.currentPage ]
-               , plainText debug ]
+    in  fullContainer << renderTextView << textView <| [ appState.currentPage ]
