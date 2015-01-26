@@ -4,7 +4,6 @@ import String
 import Html (..)
 import Html.Attributes (style, classList)
 import Graphics.Element (..)
-import Text (plainText)
 import Http
 import Signal as S
 import Signal ((<~), (~), Signal)
@@ -23,8 +22,8 @@ stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
     let nonEmptyLines : String -> List String
         nonEmptyLines = filter (not << String.isEmpty) << String.lines
-        charPerLine = floor <| toFloat viewDims.textWidth / 7.25
-        linesPerPage = floor <| toFloat viewDims.textHeight / 18
+        charPerLine = floor <| toFloat viewDims.textWidth / 8.5
+        linesPerPage = floor <| toFloat viewDims.textHeight / lineHeight
         txtLines : List Html
         txtLines = snd << foldr boustrophedon (True, [])
                        << L.map String.fromList << toParLines charPerLine
@@ -88,7 +87,7 @@ textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fil
 
 boustrophedon : String -> RenderState -> RenderState
 boustrophedon str (reverseState, elList) =
-    let classes =  classList [ ("fulljustify", True)
+    let classes =  classList [ ("maintext", True)
                              , ("reverse", reverseState)
                              ]
         nextEl = p [ classes ] [ text str ]
@@ -108,14 +107,10 @@ paragraphPrefix str = ('¶' :: ' ' :: str) ++ [' ', ' ']
 scene : ViewDimensions -> AppState -> Element
 scene viewDims appState =
     let renderTextView = toElement viewDims.textWidth viewDims.textHeight
-        containerDivProps = style [ ("width", (toString viewDims.textWidth) ++ "px")
-                                  , ("margin", "0 auto") ]
-        textView : List Html -> Html
-        textView = div [containerDivProps]
         fullContainer = container viewDims.fullContainerWidth
                                   viewDims.fullContainerHeight
                                   middle
-    in  fullContainer << renderTextView << textView <| [ appState.currentPage ]
+    in  fullContainer <| renderTextView appState.currentPage
 
 main : Signal Element
 main = scene <~ currentViewDimensions
