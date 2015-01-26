@@ -9,8 +9,6 @@ import Signal ((<~), (~), Signal)
 import Utils as U
 import Window
 
-type SwipeDir = Next | Prev | NoSwipe
-
 type alias ViewDimensions = { fullContainerWidth : Int
                             , fullContainerHeight : Int
                             , textWidth : Int
@@ -26,6 +24,13 @@ viewHelper (w, h) = { fullContainerWidth = w
 
 currentViewDimensions : Signal ViewDimensions
 currentViewDimensions = viewHelper <~ Window.dimensions
+
+
+type SwipeDir = Next | Prev | NoSwipe
+type UserInput = Swipe SwipeDir
+               | SetText String
+
+type alias InputData = (UserInput, ViewDimensions)
 
 touchDir : List Touch.Touch -> SwipeDir
 touchDir ts = let getxOrDefault = M.withDefault 0 << M.map .x

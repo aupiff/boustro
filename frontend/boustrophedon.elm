@@ -10,6 +10,7 @@ import Signal as S
 import Signal ((<~), (~), Signal)
 import Window
 import UI (..)
+import Model (..)
 
 type alias RenderState = (Bool, List Html)
 
@@ -17,22 +18,6 @@ serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
 fileName = S.constant "jaures.txt"
-
-type alias AppState = { fullText     : String
-                      , currentPage  : Html
-                      , priorPages   : List Html
-                      , futurePages  : List Html
-                      }
-
-type UserInput = Swipe SwipeDir
-               | SetText String
-
-userInput : Signal UserInput
-userInput = S.mergeMany [ S.map SetText textContent
-                        , S.map Swipe swipe
-                        ]
-
-type alias InputData = (UserInput, ViewDimensions)
 
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
@@ -86,8 +71,10 @@ emptyState = { fullText     = "empty"
 appState : Signal AppState
 appState = S.foldp nextState emptyState (S.map2 (,) userInput currentViewDimensions)
 
-debug : Signal String
-debug = S.map toString currentViewDimensions
+userInput : Signal UserInput
+userInput = S.mergeMany [ S.map SetText textContent
+                        , S.map Swipe swipe
+                        ]
 
 textContent : Signal String
 textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fileName
@@ -118,10 +105,6 @@ toParLines n xs =
 paragraphPrefix : List Char -> List Char
 paragraphPrefix str = ('¶' :: ' ' :: str) ++ [' ', ' ']
 
-main : Signal Element
-main = scene <~ currentViewDimensions
-              ~ appState
-
 scene : ViewDimensions -> AppState -> Element
 scene viewDims appState =
     let renderTextView = toElement viewDims.textWidth viewDims.textHeight
@@ -133,3 +116,7 @@ scene viewDims appState =
                                   viewDims.fullContainerHeight
                                   middle
     in  fullContainer << renderTextView << textView <| [ appState.currentPage ]
+
+main : Signal Element
+main = scene <~ currentViewDimensions
+              ~ appState
