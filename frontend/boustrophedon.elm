@@ -11,7 +11,8 @@ import Signal ((<~), (~), Signal)
 import Window
 import Touch
 import Maybe as M
-import Time (Time, every, millisecond, second, timestamp)
+import Time (Time, second, timestamp)
+import Utils as U
 
 type alias RenderState = (Bool, List Html)
 
@@ -89,14 +90,10 @@ emptyState = { fullText     = "empty"
 appState : Signal AppState
 appState = S.foldp nextState emptyState (S.map2 (,) userInput currentViewDimensions)
 
-listToMaybe : List a -> Maybe a
-listToMaybe xs = if | L.isEmpty xs -> Nothing
-                    | otherwise  -> Just <| L.head xs
-
 touchDir : List Touch.Touch -> SwipeDir
 touchDir ts = let getxOrDefault = M.withDefault 0 << M.map .x
-                  firstTouch = getxOrDefault << listToMaybe <| ts
-                  lastTouch  = getxOrDefault << listToMaybe << L.reverse <| ts
+                  firstTouch = getxOrDefault << U.listToMaybe <| ts
+                  lastTouch  = getxOrDefault << U.listToMaybe << L.reverse <| ts
                   touchDist : Int
                   touchDist = firstTouch - lastTouch
               in  if | touchDist > 20 -> Prev
@@ -105,24 +102,14 @@ touchDir ts = let getxOrDefault = M.withDefault 0 << M.map .x
 
 type alias Tap = { x : Int, y : Int }
 
-onFalseTrueTransition : Signal Bool -> Signal ()
-onFalseTrueTransition sig =
-  let storeLastTwo c (p1, p2) = (c, p1)
-      lastTwo : Signal (Bool, Bool)
-      lastTwo = S.foldp storeLastTwo (False, False) sig
-      isFalseTrueTrans : Signal Bool
-      isFalseTrueTrans = S.map (\(x, y) -> x && not y) lastTwo
-  in  S.map (\_ -> ()) <| S.dropWhen (S.map not isFalseTrueTrans) (False, False) lastTwo
-
 swipe : Signal SwipeDir
 swipe = let untappedValue : (Time, Tap, Bool)
             untappedValue = (0, { x = -1, y = -1 }, False)
-            doubleTap = S.foldp isDoubleTap untappedValue <| timestamp Touch.taps
-            thrd (x,y,z) = z
+            doubleTap = S.map (\(x,y,z) -> z) <| S.foldp isDoubleTap untappedValue <| timestamp Touch.taps
             toSwipeDir tap viewDims = if | tap.x < (floor <| (toFloat viewDims.fullContainerWidth / 2) - 10) -> Prev
                                          | tap.x > (floor <| (toFloat viewDims.fullContainerWidth / 2) + 10) -> Next
                                          | otherwise -> NoSwipe
-        in  S.sampleOn (onFalseTrueTransition <| S.map thrd doubleTap) <| S.map2 toSwipeDir Touch.taps currentViewDimensions
+        in  S.sampleOn (U.onFalseTrueTransition doubleTap) <| S.map2 toSwipeDir Touch.taps currentViewDimensions
 
 isDoubleTap : (Time, Tap) -> (Time, Tap, Bool) -> (Time, Tap, Bool)
 isDoubleTap (newTapTime, newTap) (oldTapTime, oldTap, wasDoubleTap) =
