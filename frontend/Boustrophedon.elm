@@ -4,6 +4,7 @@ import String
 import Html (..)
 import Html.Attributes (style, classList)
 import Graphics.Element (..)
+import Dict
 import Http
 import Signal as S
 import Signal ((<~), (~), Signal)
@@ -36,7 +37,7 @@ stringToState str viewDims =
                         _  -> take n xs :: (groupN n <| drop n xs)
         pages = L.map (div []) <| groupN linesPerPage txtLines
     in  { fullText    = str
-        , charWidths  = L.map Typography.getWidth <| Utils.uniq <| String.toList str
+        , charWidths  = Dict.fromList <| L.map Typography.getWidth <| Utils.uniq <| String.toList str
         , currentPage = L.head pages
         , priorPages  = []
         , futurePages = L.tail pages
@@ -67,7 +68,7 @@ nextState (userInput, viewDimensions) pState =
         Swipe NoSwipe -> pState
 
 emptyState = { fullText     = "empty"
-             , charWidths   = []
+             , charWidths   = Dict.empty
              , currentPage  = (text "empty")
              , priorPages   = []
              , futurePages  = []
