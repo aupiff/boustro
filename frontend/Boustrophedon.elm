@@ -11,6 +11,7 @@ import Window
 import UI (..)
 import Model (..)
 import Utils
+import Typography
 
 type alias RenderState = (Bool, List Html)
 
@@ -35,7 +36,7 @@ stringToState str viewDims =
                         _  -> take n xs :: (groupN n <| drop n xs)
         pages = L.map (div []) <| groupN linesPerPage txtLines
     in  { fullText    = str
-        , uniqChars   = Utils.uniq <| String.toList str
+        , charWidths  = L.map Typography.getWidth <| Utils.uniq <| String.toList str
         , currentPage = L.head pages
         , priorPages  = []
         , futurePages = L.tail pages
@@ -49,6 +50,7 @@ nextState (userInput, viewDimensions) pState =
             if | L.isEmpty pState.futurePages -> pState
                | otherwise ->
                      { fullText    = pState.fullText
+                     , charWidths  = pState.charWidths
                      , currentPage = L.head pState.futurePages
                      , priorPages  = pState.currentPage :: pState.priorPages
                      , futurePages = L.tail pState.futurePages
@@ -57,6 +59,7 @@ nextState (userInput, viewDimensions) pState =
             if | L.isEmpty pState.priorPages -> pState
                | otherwise ->
                      { fullText    = pState.fullText
+                     , charWidths  = pState.charWidths
                      , currentPage = L.head pState.priorPages
                      , priorPages  = L.tail pState.priorPages
                      , futurePages = pState.currentPage :: pState.futurePages
@@ -64,6 +67,7 @@ nextState (userInput, viewDimensions) pState =
         Swipe NoSwipe -> pState
 
 emptyState = { fullText     = "empty"
+             , charWidths   = []
              , currentPage  = (text "empty")
              , priorPages   = []
              , futurePages  = []
@@ -90,8 +94,7 @@ textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fil
 boustrophedon : String -> RenderState -> RenderState
 boustrophedon str (reverseState, elList) =
     let classes =  classList [ ("maintext", True)
-                             , ("reverse", reverseState)
-                             ]
+                             , ("reverse", reverseState) ]
         nextEl = p [ classes ] [ text str ]
         nextLineState = not reverseState
     in (nextLineState, nextEl :: elList)

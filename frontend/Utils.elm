@@ -1,6 +1,7 @@
 module Utils where
 
 import List as L
+import Set
 import Signal as S
 
 listToMaybe : List a -> Maybe a
@@ -16,8 +17,5 @@ onFalseTrueTransition sig =
       isFalseTrueTrans = S.map (\(x, y) -> x && not y) lastTwo
   in  S.map (\_ -> ()) <| S.dropWhen (S.map not isFalseTrueTrans) (False, False) lastTwo
 
-uniq : List a -> List a
-uniq xs = case xs of
-    []        -> []
-    (y :: ys) -> if | L.member y ys -> uniq ys
-                    | otherwise     -> y :: uniq ys
+uniq : List comparable -> List comparable
+uniq = Set.toList << Set.fromList
