@@ -8,7 +8,7 @@ import String
 import Typography
 
 russianAlphabet = "АБВДГЕабвгд"
-englishAlphabet = "ABCDEFabcdef"
+englishAlphabet = "ABCDEFabcdef "
 
 demoHtml : Html
 demoHtml =
