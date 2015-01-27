@@ -6,19 +6,3 @@
   filter: FlipH;
   -ms-filter: "FlipH";
 }
-
-.maintext {
-  font-family: "Courier New", Courier, monospace;
-  font-size: 14px;
-  width: 100%;
-  margin-bottom: 0px;
-  margin-top: 0px;
-}
-
-.test {
-    position: absolute;
-    visibility: hidden;
-    height: auto;
-    width: auto;
-    white-space: nowrap;
-}

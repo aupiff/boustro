@@ -3,14 +3,19 @@ import Html (..)
 import Graphics.Element (..)
 import Signal ((<~), (~), Signal)
 import Signal as S
+import List as L
+import String
+import Typography
 
 russianAlphabet = "АБВДГЕабвгд"
 englishAlphabet = "ABCDEFabcdef"
 
 demoHtml : Html
-demoHtml = 
-        let
-        in div [] [text russianAlphabet, text englishAlphabet]
+demoHtml =
+        let charsOfInterest = String.toList <| russianAlphabet ++ englishAlphabet
+            charWidthPairList = L.map Typography.getWidth charsOfInterest
+            htmlList = L.map (text << toString) charWidthPairList
+        in div [] htmlList
 
 scene : ViewDimensions -> Html -> Element
 scene viewDims htm =

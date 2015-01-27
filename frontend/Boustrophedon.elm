@@ -14,7 +14,7 @@ import Utils
 
 type alias RenderState = (Bool, List Html)
 
-serverUrl = "http://192.168.17.55:8000/"
+serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
 fileName = S.constant "dec.txt"
