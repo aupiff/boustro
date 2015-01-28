@@ -8,9 +8,10 @@
 }
 
 .maintext {
-  margin: 0px;
+  font-family: Georgia, serif
 }
 
 p {
   margin: 0px;
+  display: inline;
 }

@@ -34,7 +34,7 @@ stringToState str viewDims =
                          [] -> []
                          _  -> take n xs :: (groupN n <| drop n xs)
         pageWidth = viewDims.textWidth
-        toPage = div [] --<< fst << foldr boustro ([], False)
+        toPage = div [] << fst << foldr boustro ([], False)
         pages = L.map toPage <| groupN linesPerPage txtLines
     in  { currentPage = L.head pages
         , priorPages  = []
