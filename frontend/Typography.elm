@@ -1,7 +1,7 @@
 module Typography where
 
 import String
-import Html (Html, text, toElement, fromElement)
+import Html (Html, div, text, toElement, fromElement)
 import Graphics.Element (widthOf)
 import List as L
 import Text (plainText)
@@ -27,7 +27,7 @@ typesetLines lineWidth str =
         uniqChars  = Utils.uniq charText
         charWidths = Dict.fromList << L.map getWidth <| uniqChars
         itemList = charListToItems charText charWidths
-    in justifyItems itemList lineWidth
+    in fst <| L.foldr (justifyItems lineWidth) ([], []) itemList
 
 -- TODO plaintext here will have to be replaced ...
 -- how to do this nicely...we style html that needs to be converted to elements...
@@ -41,9 +41,26 @@ charListToItems chars charDict =
             charWidth c = (Maybe.withDefault 0 (Dict.get c charDict), text <| String.fromChar c)
             toBox (w, html) = Box w html
             isWhiteSpace c = L.member c <| String.toList" \n\t"
-            toItem c = if | isWhiteSpace c -> Spring 5 3 3
+            toItem c = if | isWhiteSpace c -> toBox <| charWidth c -- Spring 5 3 3
                           | otherwise      -> toBox <| charWidth c
         in L.map toItem chars
 
-justifyItems : List Item -> Int -> List Html
-justifyItems itemList lineWidth = [text "no yet implemented"]
+itemWidth : Item -> Int
+itemWidth i = case i of
+    Box w _   -> w
+    otherwise -> 0
+
+itemHtml : Item -> Html
+itemHtml i = case i of
+    Box _ h   -> h
+    otherwise -> div [] []
+
+itemListWidth : List Item -> Int
+itemListWidth = L.sum << L.map itemWidth
+
+justifyItems : Int -> Item -> (List Html, List Item) -> (List Html, List Item)
+justifyItems lineWidth item (hs, is) =
+    if | itemListWidth (item :: is) > lineWidth ->
+           let nextLine = div [] << L.map itemHtml <| is
+           in (nextLine :: hs, [item])
+       | otherwise -> (hs, item :: is)

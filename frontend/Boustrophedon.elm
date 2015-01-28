@@ -14,20 +14,20 @@ import Model (..)
 import Utils
 import Typography
 
-serverUrl = "http://192.168.17.55:8000/"
+serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
-fileName = S.constant "dec.txt"
+fileName = S.constant "jaures.txt"
 
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
     let linesPerPage = floor <| toFloat viewDims.textHeight / lineHeight
-        txtLines     = Typography.typesetLines viewDims.textWidth str
+        txtLines = Typography.typesetLines viewDims.textWidth str
         groupN n xs  = case xs of
                          [] -> []
                          _  -> take n xs :: (groupN n <| drop n xs)
-        pageWidth    = viewDims.textWidth
-        pages        = L.map (div []) <| groupN linesPerPage txtLines
+        pageWidth = viewDims.textWidth
+        pages = L.map (div []) <| groupN linesPerPage txtLines
     in  { currentPage = L.head pages
         , priorPages  = []
         , futurePages = L.tail pages
