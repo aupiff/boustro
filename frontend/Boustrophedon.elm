@@ -4,38 +4,39 @@ import String
 import Html (..)
 import Html.Attributes (style, classList)
 import Graphics.Element (..)
-import Text (plainText)
+import Dict
 import Http
 import Signal as S
 import Signal ((<~), (~), Signal)
 import Window
 import UI (..)
 import Model (..)
-
-type alias RenderState = (Bool, List Html)
+import Utils
+import Typography
 
 serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
 fileName = S.constant "jaures.txt"
 
+boustro : Html -> (List Html, Bool) -> (List Html, Bool)
+boustro h (hs, reverseState) =
+    let classes = classList [ ("reverse", reverseState) ]
+        nextH = div [ classes ] [h]
+        nextLineState = not reverseState
+    in (nextH :: hs, nextLineState)
+
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
-    let nonEmptyLines : String -> List String
-        nonEmptyLines = filter (not << String.isEmpty) << String.lines
-        charPerLine = floor <| toFloat viewDims.textWidth / 7.25
-        linesPerPage = floor <| toFloat viewDims.textHeight / 18
-        txtLines : List Html
-        txtLines = snd << foldr boustrophedon (True, [])
-                       << L.map String.fromList << toParLines charPerLine
-                       << L.concatMap (paragraphPrefix << String.toList)
-                       <| nonEmptyLines str
-        groupN n xs = case xs of
-                        [] -> []
-                        _  -> take n xs :: (groupN n <| drop n xs)
-        pages = L.map (div []) <| groupN linesPerPage txtLines
-    in  { fullText    = str
-        , currentPage = L.head pages
+    let linesPerPage = floor <| toFloat viewDims.textHeight / lineHeight
+        txtLines = Typography.typesetLines viewDims.textWidth str
+        groupN n xs  = case xs of
+                         [] -> []
+                         _  -> take n xs :: (groupN n <| drop n xs)
+        pageWidth = viewDims.textWidth
+        toPage = div [] << fst << foldr boustro ([], False)
+        pages = L.map toPage <| groupN linesPerPage txtLines
+    in  { currentPage = L.head pages
         , priorPages  = []
         , futurePages = L.tail pages
         }
@@ -47,23 +48,20 @@ nextState (userInput, viewDimensions) pState =
         Swipe Next  ->
             if | L.isEmpty pState.futurePages -> pState
                | otherwise ->
-                     { fullText    = pState.fullText
-                     , currentPage = L.head pState.futurePages
+                     { currentPage = L.head pState.futurePages
                      , priorPages  = pState.currentPage :: pState.priorPages
                      , futurePages = L.tail pState.futurePages
                      }
         Swipe Prev  ->
             if | L.isEmpty pState.priorPages -> pState
                | otherwise ->
-                     { fullText    = pState.fullText
-                     , currentPage = L.head pState.priorPages
+                     { currentPage = L.head pState.priorPages
                      , priorPages  = L.tail pState.priorPages
                      , futurePages = pState.currentPage :: pState.futurePages
                      }
         Swipe NoSwipe -> pState
 
-emptyState = { fullText     = "empty"
-             , currentPage  = (text "empty")
+emptyState = { currentPage  = (text "empty")
              , priorPages   = []
              , futurePages  = []
              }
@@ -86,36 +84,13 @@ textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fil
                       Http.Failure _ _ -> "http request failed."
               in S.map getContent response
 
-boustrophedon : String -> RenderState -> RenderState
-boustrophedon str (reverseState, elList) =
-    let classes =  classList [ ("fulljustify", True)
-                             , ("reverse", reverseState)
-                             ]
-        nextEl = p [ classes ] [ text str ]
-        nextLineState = not reverseState
-    in (nextLineState, nextEl :: elList)
-
-toParLines : Int -> List Char -> List (List Char)
-toParLines n xs =
-    let pad len ys = ys ++ L.repeat (len - L.length ys) ' '
-    in case xs of
-         [] -> []
-         xs -> pad n (take n xs) :: (toParLines n <| drop n xs)
-
-paragraphPrefix : List Char -> List Char
-paragraphPrefix str = ('¶' :: ' ' :: str) ++ [' ', ' ']
-
 scene : ViewDimensions -> AppState -> Element
 scene viewDims appState =
     let renderTextView = toElement viewDims.textWidth viewDims.textHeight
-        containerDivProps = style [ ("width", (toString viewDims.textWidth) ++ "px")
-                                  , ("margin", "0 auto") ]
-        textView : List Html -> Html
-        textView = div [containerDivProps]
         fullContainer = container viewDims.fullContainerWidth
                                   viewDims.fullContainerHeight
                                   middle
-    in  fullContainer << renderTextView << textView <| [ appState.currentPage ]
+    in  fullContainer <| renderTextView appState.currentPage
 
 main : Signal Element
 main = scene <~ currentViewDimensions

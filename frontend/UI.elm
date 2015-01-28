@@ -14,12 +14,13 @@ type alias ViewDimensions = { fullContainerWidth : Int
                             , textWidth : Int
                             , textHeight : Int
                             }
+lineHeight = 19
 
 viewHelper : (Int, Int) -> ViewDimensions
 viewHelper (w, h) = { fullContainerWidth = w
                     , fullContainerHeight = h
-                    , textWidth = min (w - 40) 660
-                    , textHeight = h - 10
+                    , textWidth = min (w - 40) 650
+                    , textHeight = ((floor <| toFloat h / toFloat lineHeight) - 6) * lineHeight
                     }
 
 currentViewDimensions : Signal ViewDimensions
