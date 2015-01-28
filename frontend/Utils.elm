@@ -19,3 +19,10 @@ onFalseTrueTransition sig =
 
 uniq : List comparable -> List comparable
 uniq = Set.toList << Set.fromList
+
+interleave : List a -> List a -> List a
+interleave xs' ys' = case xs' of
+                      [] -> ys'
+                      (x :: xs) -> case ys' of
+                                    [] -> xs'
+                                    (y :: ys) -> x :: y :: interleave xs ys

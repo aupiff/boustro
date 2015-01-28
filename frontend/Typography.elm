@@ -57,17 +57,19 @@ isSpring item = case item of
     Spring _ _ _ -> True
     otherwise    -> False
 
+toSpring : Int -> Item
+toSpring w = Spring w 0 0
+
 justifyLine : Int -> List Item -> Html
 justifyLine lineWidth is =
-    let cleanList = removeTrailingSpring is
+    let cleanList = L.filter (not << isSpring) is
         widthToAdd = lineWidth - itemListWidth cleanList
-    in p [] << L.map itemHtml <| cleanList
-
-removeTrailingSpring : List Item -> List Item
-removeTrailingSpring is = let reversedList = L.reverse is
-                              isTrailingSpring = isSpring <| L.head reversedList
-                          in if | isTrailingSpring -> L.reverse <| L.tail reversedList
-                                | otherwise -> is
+        numberSprings = L.length cleanList - 1
+        widthsToAdd = L.repeat numberSprings (widthToAdd // numberSprings)
+        springs = L.map toSpring widthsToAdd
+        items = Utils.interleave cleanList springs
+        a = log "items" items
+    in p [] << L.map itemHtml <| items
 
 --TODO still dropping last line somehow...
 justifyItems : Int -> Item -> (List Html, List Item) -> (List Html, List Item)
