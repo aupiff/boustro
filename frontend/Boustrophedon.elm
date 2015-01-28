@@ -30,8 +30,10 @@ stringToState str viewDims =
         groupN n x ys = let ns = x :: (M.withDefault [] <| Utils.listToMaybe ys)
                         in if | L.length ns == n -> [] :: ns :: L.drop 1 ys
                               | otherwise        -> ns :: L.drop 1 ys
+        removeEmptyHead xs = if | L.isEmpty (M.withDefault [] <| Utils.listToMaybe xs) -> L.drop 1 xs
+                                | otherwise -> xs
         pageWidth = viewDims.textWidth
-        groupedLines = L.foldr (groupN linesPerPage) [] txtLines
+        groupedLines = removeEmptyHead <| L.foldr (groupN linesPerPage) [] txtLines
         toPage = div [] << L.reverse << fst << L.foldl boustro ([], False)
         pages = L.map toPage groupedLines
         a = log "length of pages" <| L.map L.length groupedLines
