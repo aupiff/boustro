@@ -16,7 +16,7 @@ import Typography
 serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
-fileName = S.constant "boustro_intro.txt"
+fileName = S.constant "jaures.txt"
 
 boustro : Html -> (List Html, Bool) -> (List Html, Bool)
 boustro h (hs, reverseState) =
@@ -27,7 +27,7 @@ boustro h (hs, reverseState) =
 
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
-    let linesPerPage = floor <| toFloat viewDims.textHeight / lineHeight
+    let linesPerPage = viewDims.textHeight // lineHeight
         txtLines = Typography.typesetLines viewDims.textWidth str
         groupN n xs  = case xs of
                          [] -> []
