@@ -1,7 +1,8 @@
 module Typography where
 
 import String
-import Html (Html, div, text, toElement, fromElement)
+import Html (Html, Attribute, span, div, text, toElement, fromElement, p)
+import Html.Attributes (style)
 import Graphics.Element (widthOf)
 import List as L
 import Text (plainText)
@@ -9,58 +10,62 @@ import Maybe
 import Dict
 import Dict (Dict)
 import Utils
+import Debug (log)
 
 type Item = Box Int Html
           | Spring Int Int Int
           | Penalty Float Float Bool
 
-nonEmptyLines : String -> List String
-nonEmptyLines = L.filter (not << String.isEmpty) << String.lines
-
-paragraphPrefix : List Char -> List Char
-paragraphPrefix str = ('¶' :: ' ' :: str) ++ [' ']
-
 typesetLines : Int -> String -> List Html
 typesetLines lineWidth str =
-    let toCharParagraphs = paragraphPrefix << String.toList
-        charText = L.concatMap toCharParagraphs <| nonEmptyLines str
-        uniqChars  = Utils.uniq charText
-        charWidths = Dict.fromList << L.map getWidth <| uniqChars
-        itemList = charListToItems charText charWidths
-    in fst <| L.foldr (justifyItems lineWidth) ([], []) itemList
+    let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
+        paragraphPrefix str = "¶ " ++ str
+        singleParText = String.join " " << L.map paragraphPrefix <| txtLines
+        itemList = wordListToItems << String.words <| singleParText
+    in fst <| L.foldl (justifyItems lineWidth) ([], []) itemList
 
 -- TODO plaintext here will have to be replaced ...
--- how to do this nicely...we style html that needs to be converted to elements...
-getWidth : Char -> (Char, Int)
-getWidth c = let width = widthOf <| plainText <| String.fromChar c
-             in (c, width)
+strWidth : String -> Int
+strWidth str = widthOf <| plainText str
 
-charListToItems : List Char -> Dict Char Int -> List Item
-charListToItems chars charDict =
-        let charWidth : Char -> (Int, Html)
-            charWidth c = (Maybe.withDefault 0 (Dict.get c charDict), text <| String.fromChar c)
-            toBox (w, html) = Box w html
-            isWhiteSpace c = L.member c <| String.toList" \n\t"
-            toItem c = if | isWhiteSpace c -> toBox <| charWidth c -- Spring 5 3 3
-                          | otherwise      -> toBox <| charWidth c
-        in L.map toItem chars
+wordListToItems : List String -> List Item
+wordListToItems words =
+        let toItem word = Box (strWidth word) (text word)
+        in L.intersperse (Spring 5 2 2) <| L.map toItem words
 
 itemWidth : Item -> Int
 itemWidth i = case i of
-    Box w _   -> w
-    otherwise -> 0
+    Box w _      -> w
+    Spring w _ _ -> w
+    otherwise    -> 0
 
 itemHtml : Item -> Html
 itemHtml i = case i of
     Box _ h   -> h
+    Spring _ _ _ ->
+        let spanStyle : Attribute
+            spanStyle = style [("width", "5px")
+                              , ("display", "inline-block")]
+        in span [spanStyle] []
     otherwise -> div [] []
 
 itemListWidth : List Item -> Int
 itemListWidth = L.sum << L.map itemWidth
 
+isSpring : Item -> Bool
+isSpring item = case item of
+    Spring _ _ _ -> True
+    otherwise    -> False
+
+justifyLine : List Item -> Html
+justifyLine = p [] << L.map itemHtml
+
 justifyItems : Int -> Item -> (List Html, List Item) -> (List Html, List Item)
 justifyItems lineWidth item (hs, is) =
-    if | itemListWidth (item :: is) > lineWidth ->
-           let nextLine = div [] << L.map itemHtml <| is
-           in (nextLine :: hs, [item])
-       | otherwise -> (hs, item :: is)
+    let currentWidth = itemListWidth (is ++ [item])
+    in if | currentWidth > lineWidth ->
+                let nextLine = justifyLine is
+                    nextIs = if | isSpring item -> []
+                                | otherwise -> [item]
+                in (hs ++ [nextLine], nextIs)
+          | otherwise -> (hs, is ++ [item])

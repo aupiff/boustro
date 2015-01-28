@@ -19,6 +19,13 @@ serverUrl = "http://192.168.1.212:8000/"
 fileName : Signal String
 fileName = S.constant "jaures.txt"
 
+boustro : Html -> (List Html, Bool) -> (List Html, Bool)
+boustro h (hs, reverseState) =
+    let classes = classList [ ("reverse", reverseState) ]
+        nextH = div [ classes ] [h]
+        nextLineState = not reverseState
+    in (nextH :: hs, nextLineState)
+
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
     let linesPerPage = floor <| toFloat viewDims.textHeight / lineHeight
@@ -27,7 +34,8 @@ stringToState str viewDims =
                          [] -> []
                          _  -> take n xs :: (groupN n <| drop n xs)
         pageWidth = viewDims.textWidth
-        pages = L.map (div []) <| groupN linesPerPage txtLines
+        toPage = div [] --<< fst << foldr boustro ([], False)
+        pages = L.map toPage <| groupN linesPerPage txtLines
     in  { currentPage = L.head pages
         , priorPages  = []
         , futurePages = L.tail pages
