@@ -42,9 +42,9 @@ itemWidth i = case i of
 itemHtml : Item -> Html
 itemHtml i = case i of
     Box _ h   -> h
-    Spring _ _ _ ->
+    Spring w _ _ ->
         let spanStyle : Attribute
-            spanStyle = style [("width", "5px")
+            spanStyle = style [("width", toString w ++ "px")
                               , ("display", "inline-block")]
         in span [spanStyle] []
     otherwise -> div [] []
@@ -57,14 +57,24 @@ isSpring item = case item of
     Spring _ _ _ -> True
     otherwise    -> False
 
-justifyLine : List Item -> Html
-justifyLine = p [] << L.map itemHtml
+justifyLine : Int -> List Item -> Html
+justifyLine lineWidth is =
+    let cleanList = removeTrailingSpring is
+        widthToAdd = lineWidth - itemListWidth cleanList
+    in p [] << L.map itemHtml <| cleanList
 
+removeTrailingSpring : List Item -> List Item
+removeTrailingSpring is = let reversedList = L.reverse is
+                              isTrailingSpring = isSpring <| L.head reversedList
+                          in if | isTrailingSpring -> L.reverse <| L.tail reversedList
+                                | otherwise -> is
+
+--TODO still dropping last line somehow...
 justifyItems : Int -> Item -> (List Html, List Item) -> (List Html, List Item)
 justifyItems lineWidth item (hs, is) =
     let currentWidth = itemListWidth (is ++ [item])
     in if | currentWidth > lineWidth ->
-                let nextLine = justifyLine is
+                let nextLine = justifyLine lineWidth is
                     nextIs = if | isSpring item -> []
                                 | otherwise -> [item]
                 in (hs ++ [nextLine], nextIs)
