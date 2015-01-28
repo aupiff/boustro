@@ -50,14 +50,14 @@ itemWidth i = case i of
     otherwise    -> 0
 
 itemHtml : Item -> Html
-itemHtml i = case i of
-    Box _ h   -> h
-    Spring w _ _ ->
-        let spanStyle : Attribute
-            spanStyle = style [("width", toString w ++ "px")
-                              , ("display", "inline-block")]
-        in span [spanStyle] []
-    otherwise -> div [] []
+itemHtml item =
+    let spanStyle : Int -> Attribute
+        spanStyle w = style [ ("width", toString w ++ "px")
+                            , ("display", "inline-block") ]
+    in case item of
+            Box w h   -> span [spanStyle w] [h]
+            Spring w _ _ -> span [spanStyle w] []
+            otherwise -> div [] []
 
 itemListWidth : List Item -> Int
 itemListWidth = L.sum << L.map itemWidth
@@ -80,7 +80,6 @@ justifyLine lineWidth is =
         widthsToAdd = L.repeat remainingWidth (baseSpringWidth + 1) ++ L.repeat (numberSprings - remainingWidth) baseSpringWidth
         springs = L.map toSpring widthsToAdd
         items = Utils.interleave cleanList springs
-        a = log "items" items
     in p [] << L.map itemHtml <| items
 
 -- TODO still dropping last line somehow...

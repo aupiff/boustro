@@ -14,7 +14,7 @@ type alias ViewDimensions = { fullContainerWidth : Int
                             , textWidth : Int
                             , textHeight : Int
                             }
-lineHeight = 16
+lineHeight = 19
 
 viewHelper : (Int, Int) -> ViewDimensions
 viewHelper (w, h) = { fullContainerWidth = w
