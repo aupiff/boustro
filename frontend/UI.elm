@@ -20,7 +20,7 @@ viewHelper : (Int, Int) -> ViewDimensions
 viewHelper (w, h) = { fullContainerWidth = w
                     , fullContainerHeight = h
                     , textWidth = min (w - 40) 650
-                    , textHeight = ((floor <| toFloat h / toFloat lineHeight) - 6) * lineHeight
+                    , textHeight = (h // lineHeight - 6) * lineHeight
                     }
 
 currentViewDimensions : Signal ViewDimensions
@@ -49,8 +49,8 @@ swipe : Signal SwipeDir
 swipe = let untappedValue : (Time, Tap, Bool)
             untappedValue = (0, { x = -1, y = -1 }, False)
             doubleTap = S.map (\(x,y,z) -> z) <| S.foldp isDoubleTap untappedValue <| timestamp Touch.taps
-            toSwipeDir tap viewDims = if | tap.x < (floor <| (toFloat viewDims.fullContainerWidth / 2) - 10) -> Prev
-                                         | tap.x > (floor <| (toFloat viewDims.fullContainerWidth / 2) + 10) -> Next
+            toSwipeDir tap viewDims = if | tap.x < (viewDims.fullContainerWidth // 2 - 10) -> Prev
+                                         | tap.x > (viewDims.fullContainerWidth // 2 + 10) -> Next
                                          | otherwise -> NoSwipe
         in  S.sampleOn (U.onFalseTrueTransition doubleTap) <| S.map2 toSwipeDir Touch.taps currentViewDimensions
 

@@ -1,4 +1,3 @@
-import List (foldr, filter, (::), take, drop)
 import List as L
 import String
 import Html (..)
@@ -17,24 +16,25 @@ import Typography
 serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
-fileName = S.constant "jaures.txt"
+fileName = S.constant "boustro_intro.txt"
 
 boustro : Html -> (List Html, Bool) -> (List Html, Bool)
 boustro h (hs, reverseState) =
     let classes = classList [ ("reverse", reverseState) ]
-        nextH = div [ classes ] [h]
+        nextH = div [ classes ] [ h ]
         nextLineState = not reverseState
     in (nextH :: hs, nextLineState)
 
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
-    let linesPerPage = floor <| toFloat viewDims.textHeight / lineHeight
+    let linesPerPage = viewDims.textHeight // lineHeight
         txtLines = Typography.typesetLines viewDims.textWidth str
+        groupN : Int -> List a -> List (List a)
         groupN n xs  = case xs of
                          [] -> []
-                         _  -> take n xs :: (groupN n <| drop n xs)
+                         _  -> L.take n xs :: (groupN n <| L.drop n xs)
         pageWidth = viewDims.textWidth
-        toPage = div [] << fst << foldr boustro ([], False)
+        toPage = div [] << L.reverse << fst << L.foldl boustro ([], False)
         pages = L.map toPage <| groupN linesPerPage txtLines
     in  { currentPage = L.head pages
         , priorPages  = []
