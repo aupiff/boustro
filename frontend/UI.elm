@@ -8,6 +8,9 @@ import Signal as S
 import Signal ((<~), (~), Signal)
 import Utils as U
 import Window
+import Server
+import Debug (log)
+import Utils
 
 type alias ViewDimensions = { fullContainerWidth : Int
                             , fullContainerHeight : Int
@@ -17,21 +20,24 @@ type alias ViewDimensions = { fullContainerWidth : Int
 lineHeight = 19
 
 viewHelper : (Int, Int) -> ViewDimensions
-viewHelper (w, h) = { fullContainerWidth = w
+viewHelper (w, h) = let a = log "width" w
+                    in { fullContainerWidth = w
                     , fullContainerHeight = h
                     , textWidth = min (w - 40) 650
                     , textHeight = (h // lineHeight - 6) * lineHeight
                     }
 
 currentViewDimensions : Signal ViewDimensions
-currentViewDimensions = viewHelper <~ Window.dimensions
-
+currentViewDimensions = let cues = S.mergeMany [ S.map Utils.toUnit Server.textContent
+                                               , S.map Utils.toUnit Window.dimensions ]
+                        in S.sampleOn cues <| viewHelper <~ Window.dimensions
 
 type SwipeDir = Next | Prev | NoSwipe
 type UserInput = Swipe SwipeDir
                | SetText String
+               | ViewUpdate ViewDimensions
 
-type alias InputData = (UserInput, ViewDimensions)
+type alias InputData = UserInput
 
 touchDir : List Touch.Touch -> SwipeDir
 touchDir ts = let getxOrDefault = M.withDefault 0 << M.map .x
@@ -57,7 +63,7 @@ swipe = let untappedValue : (Time, Tap, Bool)
 isDoubleTap : (Time, Tap) -> (Time, Tap, Bool) -> (Time, Tap, Bool)
 isDoubleTap (newTapTime, newTap) (oldTapTime, oldTap, wasDoubleTap) =
     let doubleTapMargin : Int
-        doubleTapMargin = 40
+        doubleTapMargin = 80
         maxDoubleTapInteval : Time
         maxDoubleTapInteval = 0.5 * second
     in if | wasDoubleTap -> (newTapTime, newTap, False)

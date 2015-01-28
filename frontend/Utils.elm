@@ -7,6 +7,8 @@ import Signal as S
 listToMaybe : List a -> Maybe a
 listToMaybe xs = if | L.isEmpty xs -> Nothing
                     | otherwise  -> Just <| L.head xs
+toUnit : a -> ()
+toUnit _ = ()
 
 onFalseTrueTransition : Signal Bool -> Signal ()
 onFalseTrueTransition sig =
@@ -15,7 +17,7 @@ onFalseTrueTransition sig =
       lastTwo = S.foldp storeLastTwo (False, False) sig
       isFalseTrueTrans : Signal Bool
       isFalseTrueTrans = S.map (\(x, y) -> x && not y) lastTwo
-  in  S.map (\_ -> ()) <| S.dropWhen (S.map not isFalseTrueTrans) (False, False) lastTwo
+  in  S.map toUnit <| S.dropWhen (S.map not isFalseTrueTrans) (False, False) lastTwo
 
 uniq : List comparable -> List comparable
 uniq = Set.toList << Set.fromList
