@@ -1,6 +1,6 @@
 module UI where
 
-import Time (Time, second, timestamp)
+import Time (Time, every, second, millisecond, timestamp)
 import Maybe as M
 import List as L
 import Touch
@@ -27,9 +27,12 @@ viewHelper (w, h) = let a = log "width" w
                     , textHeight = (h // lineHeight - 6) * lineHeight
                     }
 
+initialSetupSignal : Signal ()
+initialSetupSignal = S.map Utils.toUnit << S.dropRepeats << S.foldp (\x p -> 1) 0 << every <| 10 * millisecond
+
 currentViewDimensions : Signal ViewDimensions
-currentViewDimensions = let cues = S.mergeMany [ S.map Utils.toUnit Server.textContent
-                                               , S.map Utils.toUnit Window.dimensions ]
+currentViewDimensions = let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions
+                                               , S.map Utils.toUnit initialSetupSignal]
                         in S.sampleOn cues <| viewHelper <~ Window.dimensions
 
 type SwipeDir = Next | Prev | NoSwipe
