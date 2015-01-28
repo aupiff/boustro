@@ -12,6 +12,7 @@ import UI (..)
 import Model (..)
 import Utils
 import Typography
+import Debug (log)
 
 serverUrl = "http://192.168.1.212:8000/"
 
@@ -29,12 +30,15 @@ stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
     let linesPerPage = viewDims.textHeight // lineHeight
         txtLines = Typography.typesetLines viewDims.textWidth str
+        a = log "number of txtLines" <| L.length txtLines
+        groupN : Int -> List a -> List (List a)
         groupN n xs  = case xs of
                          [] -> []
                          _  -> L.take n xs :: (groupN n <| L.drop n xs)
         pageWidth = viewDims.textWidth
         toPage = div [] << L.reverse << fst << L.foldl boustro ([], False)
         pages = L.map toPage <| groupN linesPerPage txtLines
+        b = log "number of lines per page" <| L.map (L.length) <| groupN linesPerPage txtLines
     in  { currentPage = L.head pages
         , priorPages  = []
         , futurePages = L.tail pages

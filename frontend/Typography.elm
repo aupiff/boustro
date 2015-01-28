@@ -11,7 +11,6 @@ import Maybe
 import Dict
 import Dict (Dict)
 import Utils
-import Debug (log)
 
 type Item = Box Int Html
           | Spring Int Int Int
@@ -30,8 +29,9 @@ typesetLines lineWidth str =
     let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
         paragraphPrefix str = "¶ " ++ str
         singleParText = String.join " " << L.map paragraphPrefix <| txtLines
-        itemList = wordListToItems << String.words <| singleParText
-    in fst <| L.foldl (justifyItems lineWidth) ([], []) itemList
+        itemList = wordListToItems <| String.words singleParText
+        (hs, lastLineItems) = L.foldl (justifyItems lineWidth) ([], []) itemList
+    in hs ++ [unjustifyLine lastLineItems]
 
 strWidth : String -> Int
 strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
@@ -83,9 +83,10 @@ justifyLine lineWidth is =
         items = Utils.interleave cleanList springs
     in p [] << L.map itemHtml <| items
 
--- TODO still dropping last line somehow...
--- TODO make this more efficient by having everything be an append, already had
--- this bit working but same drop last issue...
+unjustifyLine : List Item -> Html
+unjustifyLine = p [] << L.map itemHtml
+
+-- TODO make this more efficient by having everything be an append
 justifyItems : Int -> Item -> (List Html, List Item) -> (List Html, List Item)
 justifyItems lineWidth item (hs, is) =
     let currentWidth = itemListWidth (is ++ [item])
