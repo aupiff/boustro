@@ -16,7 +16,7 @@ import Typography
 serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
-fileName = S.constant "jaures.txt"
+fileName = S.constant "boustro_intro.txt"
 
 boustro : Html -> (List Html, Bool) -> (List Html, Bool)
 boustro h (hs, reverseState) =

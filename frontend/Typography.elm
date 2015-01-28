@@ -33,9 +33,10 @@ typesetLines lineWidth str =
         itemList = wordListToItems << String.words <| singleParText
     in fst <| L.foldl (justifyItems lineWidth) ([], []) itemList
 
--- TODO plaintext here will have to be replaced ...
 strWidth : String -> Int
-strWidth str = widthOf << Text.rightAligned << Text.style textStyle <| Text.fromString str
+strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
+                                                  <| Text.fromString str
+               in widthOf txtElement
 
 wordListToItems : List String -> List Item
 wordListToItems words =
