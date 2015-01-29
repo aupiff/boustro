@@ -31,7 +31,7 @@ typesetLines lineWidth str =
         singleParText = String.join " " << L.map paragraphPrefix <| txtLines
         itemList = wordListToItems <| String.words singleParText
         (hs, lastLineItems) = L.foldl (justifyItems lineWidth) ([], []) itemList
-    in hs ++ [unjustifyLine lastLineItems]
+    in  L.reverse <| unjustifyLine lastLineItems :: hs
 
 strWidth : String -> Int
 strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
@@ -84,15 +84,15 @@ justifyLine lineWidth is =
     in p [] << L.map itemHtml <| items
 
 unjustifyLine : List Item -> Html
-unjustifyLine = p [] << L.map itemHtml
+unjustifyLine = p [] << L.map itemHtml << L.reverse
 
 -- TODO make this more efficient by having everything be an append
 justifyItems : Int -> Item -> (List Html, List Item) -> (List Html, List Item)
 justifyItems lineWidth item (hs, is) =
-    let currentWidth = itemListWidth (is ++ [item])
+    let currentWidth = itemListWidth (item :: is)
     in if | currentWidth > lineWidth ->
-                let nextLine = justifyLine lineWidth is
+                let nextLine = justifyLine lineWidth <| L.reverse is
                     nextIs = if | isSpring item -> []
                                 | otherwise -> [item]
-                in (hs ++ [nextLine], nextIs)
-          | otherwise -> (hs, is ++ [item])
+                in (nextLine :: hs, nextIs)
+          | otherwise -> (hs, item :: is)
