@@ -62,21 +62,17 @@ typesetPage state viewDims =
         wc = wordCount hs lastLineItems
     in (page, wc)
 
---typesetPrevPage : ModelState -> (Html, Int)
---typesetPrevPage state =
---    let lineWidth = state.viewDims.textWidth
---        numLines = state.viewDims.linesPerPage
---        wordArray = state.fullText
---        wordIndex = state.pageEndIndex
---        maxWords = max 0 <| wordIndex - numLines * lineWidth // 35
---        wordList = L.reverse << Array.toList <| Array.slice maxWords wordIndex wordArray
---        itemList = wordListToItems wordList
---        (hs, lastLineItems) = L.foldl (justifyItems numLines lineWidth) ([], []) itemList
---        nhs = L.map L.reverse hs
---        nlli = L.reverse lastLineItems
---        page = toPage << L.reverse <| L.take numLines << L.reverse <| unjustifyLine nlli :: L.map (justifyLine lineWidth) nhs
---        wc = wordCount hs lastLineItems
---    in (page, wc)
+typesetPrevPage : ModelState -> ViewDimensions -> (Html, Int)
+typesetPrevPage state viewDims =
+    let maxWords = max 0 <| state.wordIndex - viewDims.linesPerPage * viewDims.textWidth // 35
+        wordList = L.reverse << Array.toList <| Array.slice maxWords state.wordIndex state.fullText
+        itemList = wordListToItems wordList
+        (hs, lastLineItems) = L.foldl (justifyItems viewDims.linesPerPage viewDims.textWidth) ([], []) itemList
+        nhs = L.map L.reverse hs
+        nlli = L.reverse lastLineItems
+        page = toPage << L.reverse <| L.take viewDims.linesPerPage << L.reverse <| unjustifyLine nlli :: L.map (justifyLine viewDims.textWidth) nhs
+        wc = wordCount hs lastLineItems
+    in (page, wc)
 
 strWidth : String -> Int
 strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
