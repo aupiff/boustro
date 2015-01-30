@@ -49,7 +49,7 @@ typesetPage lineWidth numLines wordIndex wordArray =
         itemList = wordListToItems wordList
         (hs, lastLineItems) = L.foldl (justifyItems numLines lineWidth) ([], []) itemList
         page = toPage << L.take numLines << L.reverse <| unjustifyLine lastLineItems :: L.map (justifyLine lineWidth) hs
-        wordCount = (L.sum <| L.map L.length hs) + L.length lastLineItems
+        wordCount = (L.sum <| L.map (L.length << L.filter (not << isSpring)) hs) + L.length lastLineItems
     in (page, wordCount)
 
 typesetPrevPage : Int -> Int -> Int -> Array String -> (Html, Int)
