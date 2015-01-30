@@ -1,12 +1,7 @@
 module Model where
 
-import Html (Html)
-import Dict (Dict)
-import UI (ViewDimensions)
+import Array (Array)
 
-type alias AppState = { fullText     : String
-                      , viewDims     : ViewDimensions
-                      , currentPage  : Html
-                      , priorPages   : List Html
-                      , futurePages  : List Html
-                      }
+type alias ModelState = { fullText  : Array String
+                        , wordIndex : Int
+                        }

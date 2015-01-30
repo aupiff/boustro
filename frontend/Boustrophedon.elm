@@ -1,91 +1,67 @@
 import List as L
-import String
-import Html (..)
-import Html.Attributes (style, classList)
-import Graphics.Element (..)
-import Dict
 import Signal as S
 import Signal ((<~), (~), Signal)
-import Window
+import Graphics.Element (Element, empty)
 import UI (..)
 import Server
 import Model (..)
 import Utils
-import Typography
-import Maybe as M
 import Debug (log)
+import Typography
 
-boustro : Html -> (List Html, Bool) -> (List Html, Bool)
-boustro h (hs, reverseState) =
-    let classes = classList [ ("reverse", reverseState) ]
-        nextH = div [ classes ] [ h ]
-        nextLineState = not reverseState
-    in (nextH :: hs, nextLineState)
+stringToState : String -> ModelState
+stringToState str = { fullText  = Typography.strToWordArray str
+                    , wordIndex = 0
+                    }
 
-stringToState : String -> ViewDimensions -> AppState
-stringToState str viewDims =
-    let linesPerPage = viewDims.textHeight // lineHeight
-        txtLines = Typography.typesetLines viewDims.textWidth str
-        groupN : Int -> a -> List (List a) -> List (List a)
-        groupN n x ys = let ns = x :: (M.withDefault [] <| Utils.listToMaybe ys)
-                        in if | L.length ns == n -> [] :: ns :: L.drop 1 ys
-                              | otherwise        -> ns :: L.drop 1 ys
-        groupedLines = L.reverse <| L.foldl (groupN linesPerPage) [] txtLines
-        toPage = div [] << L.reverse << fst << L.foldr boustro ([], False)
-        pages = L.map toPage groupedLines
-        a = log "length of pages" <| L.map L.length groupedLines
-        b = log "viewdims" viewDims
-    in  { fullText    = str
-        , viewDims    = viewDims
-        , currentPage = L.head pages
-        , priorPages  = []
-        , futurePages = L.tail pages
-        }
+viewFromModelAndDims : ModelState -> ViewDimensions -> ViewState
+viewFromModelAndDims modelState viewDimensions =
+    let (page, wc) = Typography.typesetPage modelState viewDimensions
+        view = scene page viewDimensions
+    in { pageWordCount = wc
+       , view = view
+       , viewDimensions = viewDimensions }
 
-nextState : InputData -> AppState -> AppState
-nextState userInput pState =
-    case userInput of
-        SetText str -> stringToState str pState.viewDims
-        ViewUpdate dims -> stringToState pState.fullText dims
-        Swipe Next  ->
-            if | L.isEmpty pState.futurePages -> pState
-               | otherwise ->
-                     { fullText    = pState.fullText
-                     , viewDims    = pState.viewDims
-                     , currentPage = L.head pState.futurePages
-                     , priorPages  = pState.currentPage :: pState.priorPages
-                     , futurePages = L.tail pState.futurePages
-                     }
-        Swipe Prev  ->
-            if | L.isEmpty pState.priorPages -> pState
-               | otherwise ->
-                     { fullText    = pState.fullText
-                     , viewDims    = pState.viewDims
-                     , currentPage = L.head pState.priorPages
-                     , priorPages  = L.tail pState.priorPages
-                     , futurePages = pState.currentPage :: pState.futurePages
-                     }
-        Swipe NoSwipe -> pState
+update : (UserInput, WindowDimensions) -> (ModelState, ViewState) -> (ModelState, ViewState)
+update (userInput, (w, h)) (modelState, viewState) =
+    if | ((viewState.viewDimensions.fullWidth, viewState.viewDimensions.fullHeight) /= (w, h)) ->
+            let newViewDimensions = viewHelper (w, h)
+                a = log "dims" (w, h)
+                newViewState = viewFromModelAndDims modelState newViewDimensions
+            in  (modelState, newViewState)
+       | otherwise -> case userInput of
+            SetText str ->
+                let newModelState = stringToState str
+                    newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+                in (newModelState, newViewState)
+            Swipe Next ->
+                let idx = modelState.wordIndex + viewState.pageWordCount
+                    newModelState = { modelState | wordIndex <- idx }
+                    newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+                in (newModelState, newViewState)
+            Swipe Prev ->
+                let (page, wc) = Typography.typesetPrevPage modelState viewState.viewDimensions
+                    newModelState = { modelState | wordIndex <- modelState.wordIndex - wc }
+                    view = scene page viewState.viewDimensions
+                    newViewState = { viewState | pageWordCount <- wc
+                                               , view <- view }
+                in (newModelState, newViewState)
+            Swipe NoSwipe -> (modelState, viewState)
 
-emptyState = stringToState Server.default_text <| viewHelper (600, 300)
+emptyState = ( stringToState Server.defaultText
+             , { pageWordCount = 0
+               , view = empty
+               , viewDimensions = viewHelper (300, 300)
+               }
+             )
 
-appState : Signal AppState
-appState = S.foldp nextState emptyState userInput
+appState : Signal (ModelState, ViewState)
+appState = S.foldp update emptyState <| S.map2 (,) userInput currentWindowDimensions
 
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText Server.textContent
                         , S.map Swipe swipe
-                        , S.map ViewUpdate currentViewDimensions
                         ]
 
-scene : AppState -> Element
-scene appState =
-    let viewDims = appState.viewDims
-        renderTextView = toElement viewDims.textWidth viewDims.textHeight
-        fullContainer = container viewDims.fullContainerWidth
-                                  viewDims.fullContainerHeight
-                                  middle
-    in  fullContainer <| renderTextView appState.currentPage
-
 main : Signal Element
-main = scene <~ appState
+main = S.map (.view << snd) appState

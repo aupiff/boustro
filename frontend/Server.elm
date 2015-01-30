@@ -6,8 +6,7 @@ import Http
 serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
---fileName = S.constant "boustro_intro.txt"
-fileName = S.constant "tolstoy_short.txt"
+fileName = S.constant "main_street.txt"
 
 textContent : Signal String
 textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fileName
@@ -15,8 +14,8 @@ textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fil
                   getContent : Http.Response String -> String
                   getContent response = case response of
                       Http.Success str -> str
-                      Http.Waiting     -> default_text
-                      Http.Failure _ _ -> default_text
+                      Http.Waiting     -> defaultText
+                      Http.Failure _ _ -> defaultText
               in S.map getContent response
 
-default_text =""" waiting for text to justify """
+defaultText ="waiting for text to justify"

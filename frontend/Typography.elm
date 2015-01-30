@@ -5,12 +5,16 @@ import Html (Html, Attribute, span, div, text, toElement, fromElement, p)
 import Html.Attributes (style, classList)
 import Graphics.Element (widthOf)
 import List as L
+import Array
+import Array (Array)
 import Text
 import Color
 import Maybe
 import Dict
 import Dict (Dict)
+import Model (ModelState)
 import Utils
+import UI (ViewDimensions)
 
 type Item = Box Int Html
           | Spring Int Int Int
@@ -24,14 +28,51 @@ textStyle = { typeface = [ "Georgia", "serif" ]
             , line     = Nothing
             }
 
-typesetLines : Int -> String -> List Html
-typesetLines lineWidth str =
-    let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
-        paragraphPrefix str = "¶ " ++ str
-        singleParText = String.join " " << L.map paragraphPrefix <| txtLines
-        itemList = wordListToItems <| String.words singleParText
-        (hs, lastLineItems) = L.foldl (justifyItems lineWidth) ([], []) itemList
-    in  L.reverse <| unjustifyLine lastLineItems :: hs
+strToWordArray : String -> Array String
+strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
+                         paragraphPrefix str = "¶ " ++ str
+                         singleParText = String.join " " << L.map paragraphPrefix <| txtLines
+                     in  Array.fromList <| String.words singleParText
+
+boustro : Html -> (List Html, Bool) -> (List Html, Bool)
+boustro h (hs, reverseState) =
+    let classes = classList [ ("reverse", reverseState) ]
+        nextH = div [ classes ] [ h ]
+        nextLineState = not reverseState
+    in (nextH :: hs, nextLineState)
+
+toPage : List Html -> Html
+toPage = div [] << L.reverse << fst << L.foldl boustro ([], False)
+
+wordsPerLine : List Item -> Int
+wordsPerLine = L.length << L.filter (not << isSpring)
+
+wordCount : List (List Item) -> List Item -> Int
+wordCount hs is = (L.sum <| L.map wordsPerLine hs) + L.length is
+
+typesetPage : ModelState -> ViewDimensions -> (Html, Int)
+typesetPage state viewDims =
+    let maxWords = viewDims.linesPerPage * viewDims.textWidth // 35 + state.wordIndex
+        wordList = Array.toList <| Array.slice state.wordIndex maxWords state.fullText
+        itemList = wordListToItems wordList
+        justifyForView = justifyItems viewDims.linesPerPage viewDims.textWidth
+        (hs, lastLineItems) = L.foldl justifyForView ([], []) itemList
+        htmlList = unjustifyLine lastLineItems :: L.map (justifyLine viewDims.textWidth) hs
+        page = toPage << L.take viewDims.linesPerPage << L.reverse <| htmlList
+        wc = wordCount hs lastLineItems
+    in (page, wc)
+
+typesetPrevPage : ModelState -> ViewDimensions -> (Html, Int)
+typesetPrevPage state viewDims =
+    let maxWords = max 0 <| state.wordIndex - viewDims.linesPerPage * viewDims.textWidth // 35
+        wordList = L.reverse << Array.toList <| Array.slice maxWords state.wordIndex state.fullText
+        itemList = wordListToItems wordList
+        (hs, lastLineItems) = L.foldl (justifyItems viewDims.linesPerPage viewDims.textWidth) ([], []) itemList
+        nhs = L.map L.reverse hs
+        nlli = L.reverse lastLineItems
+        page = toPage << L.reverse <| L.take viewDims.linesPerPage << L.reverse <| unjustifyLine nlli :: L.map (justifyLine viewDims.textWidth) nhs
+        wc = wordCount hs lastLineItems
+    in (page, wc)
 
 strWidth : String -> Int
 strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
@@ -86,13 +127,13 @@ justifyLine lineWidth is =
 unjustifyLine : List Item -> Html
 unjustifyLine = p [] << L.map itemHtml << L.reverse
 
--- TODO make this more efficient by having everything be an append
-justifyItems : Int -> Item -> (List Html, List Item) -> (List Html, List Item)
-justifyItems lineWidth item (hs, is) =
-    let currentWidth = itemListWidth (item :: is)
-    in if | currentWidth > lineWidth ->
-                let nextLine = justifyLine lineWidth <| L.reverse is
-                    nextIs = if | isSpring item -> []
-                                | otherwise -> [item]
-                in (nextLine :: hs, nextIs)
-          | otherwise -> (hs, item :: is)
+justifyItems : Int -> Int -> Item -> (List (List Item), List Item) -> (List (List Item), List Item)
+justifyItems numLines lineWidth item (hs, is) =
+    if | L.length hs == numLines -> (hs, [])
+       | otherwise -> let currentWidth = itemListWidth (item :: is)
+                      in if | currentWidth > lineWidth ->
+                               let nextLine = L.reverse is
+                                   nextIs = if | isSpring item -> []
+                                               | otherwise -> [item]
+                               in (nextLine :: hs, nextIs)
+                         | otherwise -> (hs, item :: is)
