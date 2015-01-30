@@ -25,47 +25,45 @@ boustro h (hs, reverseState) =
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
     let linesPerPage = viewDims.textHeight // lineHeight
-        txtLines = Typography.typesetLines viewDims.textWidth str
-        groupN : Int -> a -> List (List a) -> List (List a)
-        groupN n x ys = let ns = x :: (M.withDefault [] <| Utils.listToMaybe ys)
-                        in if | L.length ns == n -> [] :: ns :: L.drop 1 ys
-                              | otherwise        -> ns :: L.drop 1 ys
-        groupedLines = L.reverse <| L.foldl (groupN linesPerPage) [] txtLines
-        toPage = div [] << L.reverse << fst << L.foldr boustro ([], False)
-        pages = L.map toPage groupedLines
-        a = log "length of pages" <| L.map L.length groupedLines
-        b = log "viewdims" viewDims
-    in  { fullText    = str
-        , viewDims    = viewDims
-        , currentPage = L.head pages
-        , priorPages  = []
-        , futurePages = L.tail pages
+        wordArray = Typography.strToWordArray str
+        wordIndex = 0
+        pageLines = Typography.typesetPage viewDims.textWidth
+                                           linesPerPage
+                                           wordIndex
+                                           wordArray
+        toPage = div [] << fst << L.foldr boustro ([], False)
+        page = toPage pageLines
+    in  { fullText         = wordArray
+        , viewDims         = viewDims
+        , currentPage      = page
+        , currentWordIndex = wordIndex
         }
 
 nextState : InputData -> AppState -> AppState
 nextState userInput pState =
     case userInput of
         SetText str -> stringToState str pState.viewDims
-        ViewUpdate dims -> stringToState pState.fullText dims
-        Swipe Next  ->
-            if | L.isEmpty pState.futurePages -> pState
-               | otherwise ->
-                     { fullText    = pState.fullText
-                     , viewDims    = pState.viewDims
-                     , currentPage = L.head pState.futurePages
-                     , priorPages  = pState.currentPage :: pState.priorPages
-                     , futurePages = L.tail pState.futurePages
-                     }
-        Swipe Prev  ->
-            if | L.isEmpty pState.priorPages -> pState
-               | otherwise ->
-                     { fullText    = pState.fullText
-                     , viewDims    = pState.viewDims
-                     , currentPage = L.head pState.priorPages
-                     , priorPages  = L.tail pState.priorPages
-                     , futurePages = pState.currentPage :: pState.futurePages
-                     }
-        Swipe NoSwipe -> pState
+        otherwise   -> pState
+        --ViewUpdate dims -> stringToState pState.fullText dims
+        --Swipe Next  ->
+        --    if | L.isEmpty pState.futurePages -> pState
+        --       | otherwise ->
+        --             { fullText    = pState.fullText
+        --             , viewDims    = pState.viewDims
+        --             , currentPage = L.head pState.futurePages
+        --             , priorPages  = pState.currentPage :: pState.priorPages
+        --             , futurePages = L.tail pState.futurePages
+        --             }
+        --Swipe Prev  ->
+        --    if | L.isEmpty pState.priorPages -> pState
+        --       | otherwise ->
+        --             { fullText    = pState.fullText
+        --             , viewDims    = pState.viewDims
+        --             , currentPage = L.head pState.priorPages
+        --             , priorPages  = L.tail pState.priorPages
+        --             , futurePages = pState.currentPage :: pState.futurePages
+        --             }
+        --Swipe NoSwipe -> pState
 
 emptyState = stringToState Server.default_text <| viewHelper (600, 300)
 

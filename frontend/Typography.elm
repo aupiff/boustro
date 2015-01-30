@@ -5,6 +5,8 @@ import Html (Html, Attribute, span, div, text, toElement, fromElement, p)
 import Html.Attributes (style, classList)
 import Graphics.Element (widthOf)
 import List as L
+import Array
+import Array (Array)
 import Text
 import Color
 import Maybe
@@ -24,14 +26,21 @@ textStyle = { typeface = [ "Georgia", "serif" ]
             , line     = Nothing
             }
 
-typesetLines : Int -> String -> List Html
-typesetLines lineWidth str =
-    let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
-        paragraphPrefix str = "¶ " ++ str
-        singleParText = String.join " " << L.map paragraphPrefix <| txtLines
-        itemList = wordListToItems <| String.words singleParText
+strToWordArray : String -> Array String
+strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
+                         paragraphPrefix str = "¶ " ++ str
+                         singleParText = String.join " " << L.map paragraphPrefix <| txtLines
+                     in  Array.fromList <| String.words singleParText
+
+typesetPage : Int -> Int -> Int -> Array String -> List Html
+typesetPage lineWidth numLines wordIndex wordArray =
+    let maxWords = 200 + wordIndex -- TODO switch out the constant 200 with
+                                   -- somethinng that makes sense like (numLines * lineWidth / 2) ...
+                                   -- max possible
+        wordList = Array.toList <| Array.slice wordIndex maxWords wordArray
+        itemList = wordListToItems wordList
         (hs, lastLineItems) = L.foldl (justifyItems lineWidth) ([], []) itemList
-    in  L.reverse <| unjustifyLine lastLineItems :: hs
+    in  L.take numLines <| L.reverse <| unjustifyLine lastLineItems :: hs
 
 strWidth : String -> Int
 strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
