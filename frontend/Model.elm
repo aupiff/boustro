@@ -9,4 +9,5 @@ type alias AppState = { fullText         : Array String
                       , viewDims         : ViewDimensions
                       , currentPage      : Html
                       , wordIndex        : Int
+                      , pageWordCount    : Int
                       }

@@ -32,16 +32,25 @@ strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.l
                          singleParText = String.join " " << L.map paragraphPrefix <| txtLines
                      in  Array.fromList <| String.words singleParText
 
-typesetPage : Int -> Int -> Int -> Array String -> List Html
+boustro : Html -> (List Html, Bool) -> (List Html, Bool)
+boustro h (hs, reverseState) =
+    let classes = classList [ ("reverse", reverseState) ]
+        nextH = div [ classes ] [ h ]
+        nextLineState = not reverseState
+    in (nextH :: hs, nextLineState)
+
+toPage : List Html -> Html
+toPage = div [] << L.reverse << fst << L.foldl boustro ([], False)
+
+typesetPage : Int -> Int -> Int -> Array String -> (Html, Int)
 typesetPage lineWidth numLines wordIndex wordArray =
-    let maxWords = 400 + wordIndex -- TODO switch out the constant 400 with
-                                   -- somethinng that makes sense like (numLines * lineWidth / 2) ...
-                                   -- max possible
-        -- TODO what happens when slice goes beyond array bounds?
+    let maxWords = numLines * lineWidth // 35 + wordIndex
         wordList = Array.toList <| Array.slice wordIndex maxWords wordArray
         itemList = wordListToItems wordList
-        (hs, lastLineItems) = L.foldl (justifyItems lineWidth) ([], []) itemList
-    in  L.take numLines <| L.reverse <| unjustifyLine lastLineItems :: hs
+        (hs, lastLineItems) = L.foldl (justifyItems numLines lineWidth) ([], []) itemList
+        page = toPage << L.take numLines << L.reverse <| unjustifyLine lastLineItems :: L.map (justifyLine lineWidth) hs
+        wordCount = (L.sum <| L.map L.length hs) + L.length lastLineItems
+    in (page, wordCount)
 
 strWidth : String -> Int
 strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
@@ -96,13 +105,13 @@ justifyLine lineWidth is =
 unjustifyLine : List Item -> Html
 unjustifyLine = p [] << L.map itemHtml << L.reverse
 
--- TODO make this more efficient by having everything be an append
-justifyItems : Int -> Item -> (List Html, List Item) -> (List Html, List Item)
-justifyItems lineWidth item (hs, is) =
-    let currentWidth = itemListWidth (item :: is)
-    in if | currentWidth > lineWidth ->
-                let nextLine = justifyLine lineWidth <| L.reverse is
-                    nextIs = if | isSpring item -> []
-                                | otherwise -> [item]
-                in (nextLine :: hs, nextIs)
-          | otherwise -> (hs, item :: is)
+justifyItems : Int -> Int -> Item -> (List (List Item), List Item) -> (List (List Item), List Item)
+justifyItems numLines lineWidth item (hs, is) =
+    if | L.length hs == numLines -> (hs, [])
+       | otherwise -> let currentWidth = itemListWidth (item :: is)
+                      in if | currentWidth > lineWidth ->
+                               let nextLine = L.reverse is
+                                   nextIs = if | isSpring item -> []
+                                               | otherwise -> [item]
+                               in (nextLine :: hs, nextIs)
+                         | otherwise -> (hs, item :: is)

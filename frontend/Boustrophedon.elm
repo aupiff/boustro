@@ -1,7 +1,6 @@
 import List as L
 import String
 import Html (..)
-import Html.Attributes (style, classList)
 import Graphics.Element (..)
 import Dict
 import Signal as S
@@ -13,32 +12,21 @@ import Model (..)
 import Utils
 import Typography
 import Maybe as M
-import Debug (log)
-
-boustro : Html -> (List Html, Bool) -> (List Html, Bool)
-boustro h (hs, reverseState) =
-    let classes = classList [ ("reverse", reverseState) ]
-        nextH = div [ classes ] [ h ]
-        nextLineState = not reverseState
-    in (nextH :: hs, nextLineState)
-
-toPage : List Html -> Html
-toPage = div [] << fst << L.foldr boustro ([], False)
 
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
     let linesPerPage = viewDims.textHeight // lineHeight
         wordArray = Typography.strToWordArray str
         wordIndex = 0
-        pageLines = Typography.typesetPage viewDims.textWidth
-                                           linesPerPage
-                                           wordIndex
-                                           wordArray
-        page = toPage pageLines
+        (page, wc) = Typography.typesetPage viewDims.textWidth
+                                            linesPerPage
+                                            wordIndex
+                                            wordArray
     in  { fullText         = wordArray
         , viewDims         = viewDims
         , currentPage      = page
         , wordIndex        = wordIndex
+        , pageWordCount    = wc
         }
 
 nextState : InputData -> AppState -> AppState
@@ -47,26 +35,31 @@ nextState userInput pState =
         SetText str     -> stringToState str pState.viewDims
         ViewUpdate dims ->
             let linesPerPage = dims.textHeight // lineHeight
-                pageLines = Typography.typesetPage dims.textWidth
-                                                   linesPerPage
-                                                   pState.wordIndex
-                                                   pState.fullText
-                page = toPage pageLines
+                (page, wc) = Typography.typesetPage dims.textWidth
+                                                    linesPerPage
+                                                    pState.wordIndex
+                                                    pState.fullText
             in { fullText         = pState.fullText
                , viewDims         = dims
                , currentPage      = page
-               , wordIndex = pState.wordIndex
+               , wordIndex        = pState.wordIndex
+               , pageWordCount    = wc
                }
+        Swipe Next  ->
+            let linesPerPage = pState.viewDims.textHeight // lineHeight
+                wordIndex = pState.wordIndex + pState.pageWordCount
+                (page, wc) = Typography.typesetPage pState.viewDims.textWidth
+                                                    linesPerPage
+                                                    wordIndex
+                                                    pState.fullText
+            in { fullText         = pState.fullText
+               , viewDims         = pState.viewDims
+               , currentPage      = page
+               , wordIndex        = wordIndex
+               , pageWordCount    = wc
+               }
+        Swipe NoSwipe -> pState
         otherwise       -> pState
-        --Swipe Next  ->
-        --    if | L.isEmpty pState.futurePages -> pState
-        --       | otherwise ->
-        --             { fullText    = pState.fullText
-        --             , viewDims    = pState.viewDims
-        --             , currentPage = L.head pState.futurePages
-        --             , priorPages  = pState.currentPage :: pState.priorPages
-        --             , futurePages = L.tail pState.futurePages
-        --             }
         --Swipe Prev  ->
         --    if | L.isEmpty pState.priorPages -> pState
         --       | otherwise ->
@@ -76,7 +69,6 @@ nextState userInput pState =
         --             , priorPages  = L.tail pState.priorPages
         --             , futurePages = pState.currentPage :: pState.futurePages
         --             }
-        --Swipe NoSwipe -> pState
 
 emptyState = stringToState Server.default_text <| viewHelper (600, 300)
 
