@@ -18,32 +18,43 @@ viewFromModelAndDims : ModelState -> ViewDimensions -> ViewState
 viewFromModelAndDims modelState viewDimensions =
     let (page, wc) = Typography.typesetPage modelState viewDimensions
         view = scene page viewDimensions
-    in { pageWordCount = wc, view = view }
+    in { pageWordCount = wc
+       , view = view
+       , viewDimensions = viewDimensions }
 
-update : (UserInput, ViewDimensions) -> (ModelState, ViewState) -> (ModelState, ViewState)
-update (userInput, viewDimensions) (modelState, viewState) =
-    case userInput of
-        SetText str ->
-            let newModelState = stringToState str
-                newViewState = viewFromModelAndDims newModelState viewDimensions
-            in (newModelState, newViewState)
-        Swipe Next ->
-            let idx = modelState.wordIndex + viewState.pageWordCount
-                newModelState = { modelState | wordIndex <- idx }
-                newViewState = viewFromModelAndDims newModelState viewDimensions
-            in (newModelState, newViewState)
-        Swipe Prev ->
-            let newModelState = { modelState | wordIndex <- 0 }
-                newViewState = viewFromModelAndDims newModelState viewDimensions
-            in (newModelState, newViewState)
-        Swipe NoSwipe -> (modelState, viewState)
+update : (UserInput, WindowDimensions) -> (ModelState, ViewState) -> (ModelState, ViewState)
+update (userInput, (w, h)) (modelState, viewState) =
+    if | (viewState.viewDimensions.fullWidth, viewState.viewDimensions.fullHeight) /= (w, h) ->
+            let newViewDimensions = viewHelper (w, h)
+                a = log "dims" (w, h)
+                newViewState = viewFromModelAndDims modelState newViewDimensions
+            in  (modelState, newViewState)
+       | otherwise ->
+            case userInput of
+                SetText str ->
+                    let newModelState = stringToState str
+                        newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+                    in (newModelState, newViewState)
+                Swipe Next ->
+                    let idx = modelState.wordIndex + viewState.pageWordCount
+                        newModelState = { modelState | wordIndex <- idx }
+                        newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+                    in (newModelState, newViewState)
+                Swipe Prev ->
+                    let newModelState = { modelState | wordIndex <- 0 }
+                        newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+                    in (newModelState, newViewState)
+                Swipe NoSwipe -> (modelState, viewState)
 
 emptyState = ( stringToState Server.defaultText
-             , { pageWordCount = 0, view = empty }
+             , { pageWordCount = 0
+               , view = empty
+               , viewDimensions = viewHelper (300, 300)
+               }
              )
 
 appState : Signal (ModelState, ViewState)
-appState = S.foldp update emptyState <| S.map2 (,) userInput currentViewDimensions
+appState = S.foldp update emptyState <| S.map2 (,) userInput currentWindowDimensions
 
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText Server.textContent

@@ -11,33 +11,36 @@ import Signal ((<~), (~), Signal)
 import Window
 import Utils
 
-type alias ViewDimensions = { fullContainerWidth  : Int
-                            , fullContainerHeight : Int
-                            , textWidth           : Int
-                            , textHeight          : Int
-                            , linesPerPage        : Int
+type alias WindowDimensions = (Int, Int)
+
+type alias ViewDimensions = { fullWidth    : Int
+                            , fullHeight   : Int
+                            , textWidth    : Int
+                            , textHeight   : Int
+                            , linesPerPage : Int
                             }
 
 type alias ViewState = { pageWordCount  : Int
                        , view           : Element
+                       , viewDimensions : ViewDimensions
                        }
 
 scene : Html -> ViewDimensions -> Element
 scene page viewDimensions =
     let renderTextView = toElement viewDimensions.textWidth
                                    viewDimensions.textHeight
-        fullContainer = container viewDimensions.fullContainerWidth
-                                  viewDimensions.fullContainerHeight
+        fullContainer = container viewDimensions.fullWidth
+                                  viewDimensions.fullHeight
                                   middle
     in  fullContainer <| renderTextView page
 
 
 lineHeight = 19 -- TODO this should depend on the styles in Typography
 
-viewHelper : (Int, Int) -> ViewDimensions
+viewHelper : WindowDimensions -> ViewDimensions
 viewHelper (w, h) = let textHeight = (h // lineHeight - 6) * lineHeight
-                    in { fullContainerWidth = w
-                       , fullContainerHeight = h
+                    in { fullWidth = w
+                       , fullHeight = h
                        , textWidth = min (w - 40) 650
                        , textHeight = textHeight
                        , linesPerPage = textHeight // lineHeight
@@ -48,12 +51,15 @@ initialSetupSignal = S.map Utils.toUnit << S.dropRepeats
                                         << S.foldp (\x p -> 1) 0
                                         <| every (10 * millisecond)
 
-currentViewDimensions : Signal ViewDimensions
-currentViewDimensions =
+currentWindowDimensions : Signal WindowDimensions
+currentWindowDimensions =
     let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions
                            , S.map Utils.toUnit initialSetupSignal
                            ]
-    in S.sampleOn cues <| viewHelper <~ Window.dimensions
+    in S.sampleOn cues <| Window.dimensions
+
+currentViewDimensions : Signal ViewDimensions
+currentViewDimensions = S.map viewHelper currentWindowDimensions
 
 type SwipeDir = Next | Prev | NoSwipe
 type UserInput = Swipe SwipeDir
@@ -67,8 +73,8 @@ swipe = let untappedValue : (Time, Tap, Bool)
             doubleTap = S.map (\(x,y,z) -> z) <| S.foldp isDoubleTap untappedValue
                                               <| timestamp Touch.taps
             toSwipeDir tap viewDims =
-                if | tap.x < (viewDims.fullContainerWidth // 2 - 10) -> Prev
-                   | tap.x > (viewDims.fullContainerWidth // 2 + 10) -> Next
+                if | tap.x < (viewDims.fullWidth // 2 - 10) -> Prev
+                   | tap.x > (viewDims.fullWidth // 2 + 10) -> Next
                    | otherwise -> NoSwipe
             currentSwipeDir = S.map2 toSwipeDir Touch.taps currentViewDimensions
         in  S.sampleOn (Utils.onFalseTrueTransition doubleTap) currentSwipeDir
