@@ -42,6 +42,12 @@ boustro h (hs, reverseState) =
 toPage : List Html -> Html
 toPage = div [] << L.reverse << fst << L.foldl boustro ([], False)
 
+wordsPerLine : List Item -> Int
+wordsPerLine = L.length << L.filter (not << isSpring)
+
+wordCount : List (List Item) -> List Item -> Int
+wordCount hs is = (L.sum <| L.map wordsPerLine hs) + L.length is
+
 typesetPage : Int -> Int -> Int -> Array String -> (Html, Int)
 typesetPage lineWidth numLines wordIndex wordArray =
     let maxWords = numLines * lineWidth // 35 + wordIndex
@@ -49,8 +55,8 @@ typesetPage lineWidth numLines wordIndex wordArray =
         itemList = wordListToItems wordList
         (hs, lastLineItems) = L.foldl (justifyItems numLines lineWidth) ([], []) itemList
         page = toPage << L.take numLines << L.reverse <| unjustifyLine lastLineItems :: L.map (justifyLine lineWidth) hs
-        wordCount = (L.sum <| L.map (L.length << L.filter (not << isSpring)) hs) + L.length lastLineItems
-    in (page, wordCount)
+        wc = wordCount hs lastLineItems
+    in (page, wc)
 
 typesetPrevPage : Int -> Int -> Int -> Array String -> (Html, Int)
 typesetPrevPage lineWidth numLines wordIndex wordArray =
@@ -59,8 +65,8 @@ typesetPrevPage lineWidth numLines wordIndex wordArray =
         itemList = wordListToItems wordList
         (hs, lastLineItems) = L.foldl (justifyItems numLines lineWidth) ([], []) itemList
         page = toPage << L.take numLines << L.reverse <| unjustifyLine lastLineItems :: L.map (justifyLine lineWidth) hs
-        wordCount = (L.sum <| L.map L.length hs) + L.length lastLineItems
-    in (page, wordCount)
+        wc = wordCount hs lastLineItems
+    in (page, wc)
 
 strWidth : String -> Int
 strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
