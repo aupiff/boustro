@@ -1,8 +1,7 @@
 import List as L
-import Html (toElement)
-import Graphics.Element (Element, container, middle)
 import Signal as S
 import Signal ((<~), (~), Signal)
+import Graphics.Element (Element, empty)
 import UI (..)
 import Server
 import Model (..)
@@ -10,39 +9,46 @@ import Utils
 import Debug (log)
 import Typography
 
-stringToState : String -> AppState
+stringToState : String -> ModelState
 stringToState str = { fullText  = Typography.strToWordArray str
                     , wordIndex = 0
                     }
 
-nextState : UserInput -> AppState -> AppState
-nextState userInput pState =
+viewFromModelAndDims : ModelState -> ViewDimensions -> ViewState
+viewFromModelAndDims modelState viewDimensions =
+    let (page, wc) = Typography.typesetPage modelState viewDimensions
+        view = scene page viewDimensions
+    in { pageWordCount = wc, view = view }
+
+update : (UserInput, ViewDimensions) -> (ModelState, ViewState) -> (ModelState, ViewState)
+update (userInput, viewDimensions) (modelState, viewState) =
     case userInput of
-        SetText str     -> stringToState str
-        Swipe Next      -> { pState | wordIndex <- 0 }
-        Swipe Prev      -> { pState | wordIndex <- 0 }
-        Swipe NoSwipe   -> pState
+        SetText str ->
+            let newModelState = stringToState str
+                newViewState = viewFromModelAndDims newModelState viewDimensions
+            in (newModelState, newViewState)
+        Swipe Next ->
+            let idx = modelState.wordIndex + viewState.pageWordCount
+                newModelState = { modelState | wordIndex <- idx }
+                newViewState = viewFromModelAndDims newModelState viewDimensions
+            in (newModelState, newViewState)
+        Swipe Prev ->
+            let newModelState = { modelState | wordIndex <- 0 }
+                newViewState = viewFromModelAndDims newModelState viewDimensions
+            in (newModelState, newViewState)
+        Swipe NoSwipe -> (modelState, viewState)
 
-emptyState = stringToState Server.defaultText
+emptyState = ( stringToState Server.defaultText
+             , { pageWordCount = 0, view = empty }
+             )
 
-appState : Signal AppState
-appState = S.foldp nextState emptyState userInput
+appState : Signal (ModelState, ViewState)
+appState = S.foldp update emptyState <| S.map2 (,) userInput currentViewDimensions
 
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText Server.textContent
                         , S.map Swipe swipe
                         ]
 
-scene : AppState -> ViewDimensions -> Element
-scene state viewDimensions =
-    let renderTextView = toElement viewDimensions.textWidth
-                                   viewDimensions.textHeight
-        fullContainer = container viewDimensions.fullContainerWidth
-                                  viewDimensions.fullContainerHeight
-                                  middle
-        (page, _) = Typography.typesetPage state viewDimensions
-    in  fullContainer <| renderTextView page
-
 main : Signal Element
-main = scene <~ appState
-              ~ currentViewDimensions
+main = S.map (.view << snd) appState

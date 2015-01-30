@@ -2,6 +2,6 @@ module Model where
 
 import Array (Array)
 
-type alias AppState = { fullText  : Array String
-                      , wordIndex : Int
-                      }
+type alias ModelState = { fullText  : Array String
+                        , wordIndex : Int
+                        }

@@ -2,6 +2,8 @@ module UI where
 
 import Time (Time, every, second, millisecond, timestamp)
 import Maybe as M
+import Html (Html, toElement)
+import Graphics.Element (Element, container, middle)
 import List as L
 import Touch
 import Signal as S
@@ -9,12 +11,27 @@ import Signal ((<~), (~), Signal)
 import Window
 import Utils
 
-type alias ViewDimensions = { fullContainerWidth : Int
+type alias ViewDimensions = { fullContainerWidth  : Int
                             , fullContainerHeight : Int
-                            , textWidth : Int
-                            , textHeight : Int
-                            , linesPerPage : Int
+                            , textWidth           : Int
+                            , textHeight          : Int
+                            , linesPerPage        : Int
                             }
+
+type alias ViewState = { pageWordCount  : Int
+                       , view           : Element
+                       }
+
+scene : Html -> ViewDimensions -> Element
+scene page viewDimensions =
+    let renderTextView = toElement viewDimensions.textWidth
+                                   viewDimensions.textHeight
+        fullContainer = container viewDimensions.fullContainerWidth
+                                  viewDimensions.fullContainerHeight
+                                  middle
+    in  fullContainer <| renderTextView page
+
+
 lineHeight = 19 -- TODO this should depend on the styles in Typography
 
 viewHelper : (Int, Int) -> ViewDimensions

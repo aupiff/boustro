@@ -12,7 +12,7 @@ import Color
 import Maybe
 import Dict
 import Dict (Dict)
-import Model (AppState)
+import Model (ModelState)
 import Utils
 import UI (ViewDimensions)
 
@@ -50,7 +50,7 @@ wordsPerLine = L.length << L.filter (not << isSpring)
 wordCount : List (List Item) -> List Item -> Int
 wordCount hs is = (L.sum <| L.map wordsPerLine hs) + L.length is
 
-typesetPage : AppState -> ViewDimensions -> (Html, Int)
+typesetPage : ModelState -> ViewDimensions -> (Html, Int)
 typesetPage state viewDims =
     let maxWords = viewDims.linesPerPage * viewDims.textWidth // 35 + state.wordIndex
         wordList = Array.toList <| Array.slice state.wordIndex maxWords state.fullText
@@ -62,7 +62,7 @@ typesetPage state viewDims =
         wc = wordCount hs lastLineItems
     in (page, wc)
 
---typesetPrevPage : AppState -> (Html, Int)
+--typesetPrevPage : ModelState -> (Html, Int)
 --typesetPrevPage state =
 --    let lineWidth = state.viewDims.textWidth
 --        numLines = state.viewDims.linesPerPage
