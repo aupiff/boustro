@@ -22,6 +22,9 @@ boustro h (hs, reverseState) =
         nextLineState = not reverseState
     in (nextH :: hs, nextLineState)
 
+toPage : List Html -> Html
+toPage = div [] << fst << L.foldr boustro ([], False)
+
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
     let linesPerPage = viewDims.textHeight // lineHeight
@@ -31,20 +34,30 @@ stringToState str viewDims =
                                            linesPerPage
                                            wordIndex
                                            wordArray
-        toPage = div [] << fst << L.foldr boustro ([], False)
         page = toPage pageLines
     in  { fullText         = wordArray
         , viewDims         = viewDims
         , currentPage      = page
-        , currentWordIndex = wordIndex
+        , wordIndex        = wordIndex
         }
 
 nextState : InputData -> AppState -> AppState
 nextState userInput pState =
     case userInput of
-        SetText str -> stringToState str pState.viewDims
-        otherwise   -> pState
-        --ViewUpdate dims -> stringToState pState.fullText dims
+        SetText str     -> stringToState str pState.viewDims
+        ViewUpdate dims ->
+            let linesPerPage = dims.textHeight // lineHeight
+                pageLines = Typography.typesetPage dims.textWidth
+                                                   linesPerPage
+                                                   pState.wordIndex
+                                                   pState.fullText
+                page = toPage pageLines
+            in { fullText         = pState.fullText
+               , viewDims         = dims
+               , currentPage      = page
+               , wordIndex = pState.wordIndex
+               }
+        otherwise       -> pState
         --Swipe Next  ->
         --    if | L.isEmpty pState.futurePages -> pState
         --       | otherwise ->

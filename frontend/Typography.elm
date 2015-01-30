@@ -34,9 +34,10 @@ strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.l
 
 typesetPage : Int -> Int -> Int -> Array String -> List Html
 typesetPage lineWidth numLines wordIndex wordArray =
-    let maxWords = 200 + wordIndex -- TODO switch out the constant 200 with
+    let maxWords = 400 + wordIndex -- TODO switch out the constant 400 with
                                    -- somethinng that makes sense like (numLines * lineWidth / 2) ...
                                    -- max possible
+        -- TODO what happens when slice goes beyond array bounds?
         wordList = Array.toList <| Array.slice wordIndex maxWords wordArray
         itemList = wordListToItems wordList
         (hs, lastLineItems) = L.foldl (justifyItems lineWidth) ([], []) itemList
