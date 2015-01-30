@@ -16,61 +16,41 @@ import Typography
 
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
-    let wordArray = Typography.strToWordArray str
-        wordIndex = 0
-        (page, wc) = Typography.typesetPage viewDims.textWidth
-                                            viewDims.linesPerPage
-                                            wordIndex
-                                            wordArray
-    in  { fullText         = wordArray
-        , viewDims         = viewDims
-        , currentPage      = page
-        , wordIndex        = wordIndex
-        , pageWordCount    = wc
-        }
+    let tempState : AppState
+        tempState = { fullText         = Typography.strToWordArray str
+                    , viewDims         = viewDims
+                    , currentPage      = text ""
+                    , wordIndex        = 0
+                    , pageWordCount    = 0
+                    }
+        (page, wc) = Typography.typesetPage tempState.wordIndex tempState
+    in { tempState | currentPage <- page
+                   , pageWordCount <- wc }
 
 nextState : InputData -> AppState -> AppState
 nextState userInput pState =
     case userInput of
-        SetText str     -> stringToState str pState.viewDims
+        SetText str -> stringToState str pState.viewDims
         ViewUpdate dims ->
-            let (page, wc) = Typography.typesetPage dims.textWidth
-                                                    dims.linesPerPage
-                                                    pState.wordIndex
-                                                    pState.fullText
+            let tempState = { pState | viewDims <- dims }
+                (page, wc) = Typography.typesetPage pState.wordIndex tempState
                 a = log "word index" pState.wordIndex
-            in { fullText         = pState.fullText
-               , viewDims         = dims
-               , currentPage      = page
-               , wordIndex        = pState.wordIndex
-               , pageWordCount    = wc
-               }
-        Swipe Next  ->
+            in { tempState | currentPage <- page
+                           , pageWordCount <- wc }
+        Swipe Next ->
             let wordIndex = pState.wordIndex + pState.pageWordCount
-                (page, wc) = Typography.typesetPage pState.viewDims.textWidth
-                                                    pState.viewDims.linesPerPage
-                                                    wordIndex
-                                                    pState.fullText
+                (page, wc) = Typography.typesetPage wordIndex pState
                 a = log "word index" wordIndex
-            in { fullText         = pState.fullText
-               , viewDims         = pState.viewDims
-               , currentPage      = page
-               , wordIndex        = wordIndex
-               , pageWordCount    = wc
-               }
-        Swipe Prev  ->
-            let (page, wc) = Typography.typesetPrevPage pState.viewDims.textWidth
-                                                        pState.viewDims.linesPerPage
-                                                        pState.wordIndex
-                                                        pState.fullText
+            in { pState | currentPage <- page
+                        , wordIndex <- wordIndex
+                        , pageWordCount <- wc }
+        Swipe Prev ->
+            let (page, wc) = Typography.typesetPrevPage pState.wordIndex pState
                 wordIndex = pState.wordIndex - wc
                 a = log "word index" wordIndex
-            in { fullText         = pState.fullText
-               , viewDims         = pState.viewDims
-               , currentPage      = page
-               , wordIndex        = wordIndex
-               , pageWordCount    = wc
-               }
+            in { pState | wordIndex <- pState.wordIndex - wc
+                        , currentPage <- page
+                        , pageWordCount <- wc }
         Swipe NoSwipe -> pState
 
 emptyState = stringToState Server.defaultText <| viewHelper (600, 300)

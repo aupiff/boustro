@@ -6,7 +6,7 @@ import Http
 serverUrl = "http://192.168.1.212:8000/"
 
 fileName : Signal String
-fileName = S.constant "jaures.txt"
+fileName = S.constant "main_street.txt"
 
 textContent : Signal String
 textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fileName
