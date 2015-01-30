@@ -58,17 +58,20 @@ nextState userInput pState =
                , wordIndex        = wordIndex
                , pageWordCount    = wc
                }
+        Swipe Prev  ->
+            let linesPerPage = pState.viewDims.textHeight // lineHeight
+                wordIndex = pState.wordIndex + pState.pageWordCount
+                (page, wc) = Typography.typesetPage pState.viewDims.textWidth
+                                                    linesPerPage
+                                                    wordIndex
+                                                    pState.fullText
+            in { fullText         = pState.fullText
+               , viewDims         = pState.viewDims
+               , currentPage      = page
+               , wordIndex        = wordIndex
+               , pageWordCount    = wc
+               }
         Swipe NoSwipe -> pState
-        otherwise       -> pState
-        --Swipe Prev  ->
-        --    if | L.isEmpty pState.priorPages -> pState
-        --       | otherwise ->
-        --             { fullText    = pState.fullText
-        --             , viewDims    = pState.viewDims
-        --             , currentPage = L.head pState.priorPages
-        --             , priorPages  = L.tail pState.priorPages
-        --             , futurePages = pState.currentPage :: pState.futurePages
-        --             }
 
 emptyState = stringToState Server.default_text <| viewHelper (600, 300)
 
