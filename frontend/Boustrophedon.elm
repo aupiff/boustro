@@ -14,46 +14,20 @@ import Maybe as M
 import Debug (log)
 import Typography
 
-stringToState : String -> ViewDimensions -> AppState
-stringToState str viewDims =
-    let tempState : AppState
-        tempState = { fullText         = Typography.strToWordArray str
-                    , viewDims         = viewDims
-                    , currentPage      = text ""
-                    , wordIndex        = 0
-                    , pageWordCount    = 0
+stringToState : String -> AppState
+stringToState str = { fullText  = Typography.strToWordArray str
+                    , wordIndex = 0
                     }
-        (page, wc) = Typography.typesetPage tempState.wordIndex tempState
-    in { tempState | currentPage <- page
-                   , pageWordCount <- wc }
 
 nextState : InputData -> AppState -> AppState
 nextState userInput pState =
     case userInput of
-        SetText str -> stringToState str pState.viewDims
-        ViewUpdate dims ->
-            let tempState = { pState | viewDims <- dims }
-                (page, wc) = Typography.typesetPage pState.wordIndex tempState
-                a = log "word index" pState.wordIndex
-            in { tempState | currentPage <- page
-                           , pageWordCount <- wc }
-        Swipe Next ->
-            let wordIndex = pState.wordIndex + pState.pageWordCount
-                (page, wc) = Typography.typesetPage wordIndex pState
-                a = log "word index" wordIndex
-            in { pState | currentPage <- page
-                        , wordIndex <- wordIndex
-                        , pageWordCount <- wc }
-        Swipe Prev ->
-            let (page, wc) = Typography.typesetPrevPage pState.wordIndex pState
-                wordIndex = pState.wordIndex - wc
-                a = log "word index" wordIndex
-            in { pState | wordIndex <- pState.wordIndex - wc
-                        , currentPage <- page
-                        , pageWordCount <- wc }
-        Swipe NoSwipe -> pState
+        SetText str     -> stringToState str
+        Swipe Next      -> { pState | wordIndex <- 0 }
+        Swipe Prev      -> { pState | wordIndex <- 0 }
+        Swipe NoSwipe   -> pState
 
-emptyState = stringToState Server.defaultText <| viewHelper (600, 300)
+emptyState = stringToState Server.defaultText
 
 appState : Signal AppState
 appState = S.foldp nextState emptyState userInput
@@ -61,17 +35,18 @@ appState = S.foldp nextState emptyState userInput
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText Server.textContent
                         , S.map Swipe swipe
-                        , S.map ViewUpdate currentViewDimensions
                         ]
 
-scene : AppState -> Element
-scene appState =
-    let viewDims = appState.viewDims
-        renderTextView = toElement viewDims.textWidth viewDims.textHeight
-        fullContainer = container viewDims.fullContainerWidth
-                                  viewDims.fullContainerHeight
+scene : AppState -> ViewDimensions -> Element
+scene state viewDimensions =
+    let renderTextView = toElement viewDimensions.textWidth
+                                   viewDimensions.textHeight
+        fullContainer = container viewDimensions.fullContainerWidth
+                                  viewDimensions.fullContainerHeight
                                   middle
-    in  fullContainer <| renderTextView appState.currentPage
+        (page, _) = Typography.typesetPage state viewDimensions
+    in  fullContainer <| renderTextView page
 
 main : Signal Element
 main = scene <~ appState
+              ~ currentViewDimensions
