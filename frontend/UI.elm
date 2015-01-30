@@ -16,16 +16,19 @@ type alias ViewDimensions = { fullContainerWidth : Int
                             , fullContainerHeight : Int
                             , textWidth : Int
                             , textHeight : Int
+                            , linesPerPage : Int
                             }
 lineHeight = 19
 
 viewHelper : (Int, Int) -> ViewDimensions
 viewHelper (w, h) = let a = log "width" w
+                        textHeight = (h // lineHeight - 6) * lineHeight
                     in { fullContainerWidth = w
-                    , fullContainerHeight = h
-                    , textWidth = min (w - 40) 650
-                    , textHeight = (h // lineHeight - 6) * lineHeight
-                    }
+                       , fullContainerHeight = h
+                       , textWidth = min (w - 40) 650
+                       , textHeight = textHeight
+                       , linesPerPage = textHeight // lineHeight
+                       }
 
 initialSetupSignal : Signal ()
 initialSetupSignal = S.map Utils.toUnit << S.dropRepeats << S.foldp (\x p -> 1) 0 << every <| 10 * millisecond

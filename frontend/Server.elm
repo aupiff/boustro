@@ -14,8 +14,8 @@ textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fil
                   getContent : Http.Response String -> String
                   getContent response = case response of
                       Http.Success str -> str
-                      Http.Waiting     -> default_text
-                      Http.Failure _ _ -> default_text
+                      Http.Waiting     -> defaultText
+                      Http.Failure _ _ -> defaultText
               in S.map getContent response
 
-default_text =""" waiting for text to justify """
+defaultText ="waiting for text to justify"

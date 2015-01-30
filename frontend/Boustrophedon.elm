@@ -10,16 +10,16 @@ import UI (..)
 import Server
 import Model (..)
 import Utils
-import Typography
 import Maybe as M
+import Debug (log)
+import Typography
 
 stringToState : String -> ViewDimensions -> AppState
 stringToState str viewDims =
-    let linesPerPage = viewDims.textHeight // lineHeight
-        wordArray = Typography.strToWordArray str
+    let wordArray = Typography.strToWordArray str
         wordIndex = 0
         (page, wc) = Typography.typesetPage viewDims.textWidth
-                                            linesPerPage
+                                            viewDims.linesPerPage
                                             wordIndex
                                             wordArray
     in  { fullText         = wordArray
@@ -34,11 +34,11 @@ nextState userInput pState =
     case userInput of
         SetText str     -> stringToState str pState.viewDims
         ViewUpdate dims ->
-            let linesPerPage = dims.textHeight // lineHeight
-                (page, wc) = Typography.typesetPage dims.textWidth
-                                                    linesPerPage
+            let (page, wc) = Typography.typesetPage dims.textWidth
+                                                    dims.linesPerPage
                                                     pState.wordIndex
                                                     pState.fullText
+                a = log "word index" pState.wordIndex
             in { fullText         = pState.fullText
                , viewDims         = dims
                , currentPage      = page
@@ -46,12 +46,12 @@ nextState userInput pState =
                , pageWordCount    = wc
                }
         Swipe Next  ->
-            let linesPerPage = pState.viewDims.textHeight // lineHeight
-                wordIndex = pState.wordIndex + pState.pageWordCount
+            let wordIndex = pState.wordIndex + pState.pageWordCount
                 (page, wc) = Typography.typesetPage pState.viewDims.textWidth
-                                                    linesPerPage
+                                                    pState.viewDims.linesPerPage
                                                     wordIndex
                                                     pState.fullText
+                a = log "word index" wordIndex
             in { fullText         = pState.fullText
                , viewDims         = pState.viewDims
                , currentPage      = page
@@ -59,12 +59,12 @@ nextState userInput pState =
                , pageWordCount    = wc
                }
         Swipe Prev  ->
-            let linesPerPage = pState.viewDims.textHeight // lineHeight
-                wordIndex = pState.wordIndex + pState.pageWordCount
-                (page, wc) = Typography.typesetPage pState.viewDims.textWidth
-                                                    linesPerPage
-                                                    wordIndex
-                                                    pState.fullText
+            let (page, wc) = Typography.typesetPrevPage pState.viewDims.textWidth
+                                                        pState.viewDims.linesPerPage
+                                                        pState.wordIndex
+                                                        pState.fullText
+                wordIndex = pState.wordIndex - wc
+                a = log "word index" wordIndex
             in { fullText         = pState.fullText
                , viewDims         = pState.viewDims
                , currentPage      = page
@@ -73,7 +73,7 @@ nextState userInput pState =
                }
         Swipe NoSwipe -> pState
 
-emptyState = stringToState Server.default_text <| viewHelper (600, 300)
+emptyState = stringToState Server.defaultText <| viewHelper (600, 300)
 
 appState : Signal AppState
 appState = S.foldp nextState emptyState userInput
