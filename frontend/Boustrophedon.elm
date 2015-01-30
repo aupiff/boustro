@@ -1,16 +1,12 @@
 import List as L
-import String
-import Html (..)
-import Graphics.Element (..)
-import Dict
+import Html (toElement)
+import Graphics.Element (Element, container, middle)
 import Signal as S
 import Signal ((<~), (~), Signal)
-import Window
 import UI (..)
 import Server
 import Model (..)
 import Utils
-import Maybe as M
 import Debug (log)
 import Typography
 
@@ -19,7 +15,7 @@ stringToState str = { fullText  = Typography.strToWordArray str
                     , wordIndex = 0
                     }
 
-nextState : InputData -> AppState -> AppState
+nextState : UserInput -> AppState -> AppState
 nextState userInput pState =
     case userInput of
         SetText str     -> stringToState str
