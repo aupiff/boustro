@@ -37,10 +37,8 @@ update update (modelState, viewState) =
                   in (newModelState, newViewState)
         Input (Swipe Prev) ->
                   let (page, wc) = Typography.typesetPrevPage modelState viewState.viewDimensions
-                      newModelState = { modelState | wordIndex <- modelState.wordIndex - wc }
-                      view = scene page viewState.viewDimensions
-                      newViewState = { viewState | pageWordCount <- wc
-                                                 , view <- view }
+                      newModelState = { modelState | wordIndex <- max (modelState.wordIndex - wc) 0 }
+                      newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
                   in (newModelState, newViewState)
         Input (Swipe NoSwipe) -> (modelState, viewState)
 
