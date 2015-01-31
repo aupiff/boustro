@@ -1,7 +1,21 @@
 module Model where
 
-import Array (Array)
+import Array
+import Server
+import List as L
+import String
+import Graphics.Element (empty)
 
-type alias ModelState = { fullText  : Array String
+type alias ModelState = { fullText  : Array.Array String
                         , wordIndex : Int
                         }
+
+strToWordArray : String -> Array.Array String
+strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
+                         paragraphPrefix str = "¶ " ++ str
+                         singleParText = String.join " " << L.map paragraphPrefix <| txtLines
+                     in  Array.fromList <| String.words singleParText
+
+stringToModelState : String -> ModelState
+stringToModelState str = { fullText  = strToWordArray str
+                         , wordIndex = 0 }
