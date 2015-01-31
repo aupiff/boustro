@@ -1,10 +1,8 @@
 module Model where
 
 import Array
-import Server
 import List as L
 import String
-import Graphics.Element (empty)
 
 type alias ModelState = { fullText  : Array.Array String
                         , wordIndex : Int
