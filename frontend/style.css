@@ -8,7 +8,13 @@
 }
 
 .maintext {
-  font-family: Georgia, serif
+  font-family: Georgia, serif;
+  color: black;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: white;
 }
 
 p {

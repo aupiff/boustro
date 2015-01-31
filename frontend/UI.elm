@@ -3,7 +3,7 @@ module UI where
 import Time (Time, every, second, millisecond, timestamp)
 import Maybe as M
 import Html (Html, toElement)
-import Graphics.Element (Element, container, middle)
+import Graphics.Element (Element, container, midTop)
 import List as L
 import Touch
 import Signal as S
@@ -31,17 +31,17 @@ scene page viewDimensions =
                                    viewDimensions.textHeight
         fullContainer = container viewDimensions.fullWidth
                                   viewDimensions.fullHeight
-                                  middle
+                                  midTop
     in  fullContainer <| renderTextView page
 
 
 lineHeight = 19 -- TODO this should depend on the styles in Typography
 
 viewHelper : WindowDimensions -> ViewDimensions
-viewHelper (w, h) = let textHeight = (h // lineHeight - 6) * lineHeight
+viewHelper (w, h) = let textHeight = (h // lineHeight - 3) * lineHeight
                     in { fullWidth = w
                        , fullHeight = h
-                       , textWidth = min (w - 40) 650
+                       , textWidth = min (w - 2) 650
                        , textHeight = textHeight
                        , linesPerPage = textHeight // lineHeight
                        }
@@ -51,19 +51,16 @@ initialSetupSignal = S.map Utils.toUnit << S.dropRepeats
                                         << S.foldp (\x p -> 1) 0
                                         <| every (10 * millisecond)
 
-currentWindowDimensions : Signal WindowDimensions
-currentWindowDimensions =
-    let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions
-                           , S.map Utils.toUnit initialSetupSignal
-                           ]
-    in S.sampleOn cues <| Window.dimensions
-
 currentViewDimensions : Signal ViewDimensions
-currentViewDimensions = S.map viewHelper currentWindowDimensions
+currentViewDimensions =
+    let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions
+                           , S.map Utils.toUnit initialSetupSignal ]
+    in S.sampleOn cues <| S.map viewHelper Window.dimensions
 
 type SwipeDir = Next | Prev | NoSwipe
 type UserInput = Swipe SwipeDir
                | SetText String
+type Update = Input UserInput | ViewChange ViewDimensions
 
 type alias Tap = { x : Int, y : Int }
 

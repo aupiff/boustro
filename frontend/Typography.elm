@@ -20,6 +20,7 @@ type Item = Box Int Html
           | Spring Int Int Int
           | Penalty Float Float Bool
 
+-- TODO this has to stay synced up with CSS for now. figure out how to remove that dep
 textStyle = { typeface = [ "Georgia", "serif" ]
             , height   = Just 16
             , color    = Color.black
