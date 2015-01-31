@@ -8,6 +8,7 @@ import List as L
 import Touch
 import Signal as S
 import Signal ((<~), (~), Signal)
+import Server
 import Window
 import Utils
 
@@ -58,8 +59,15 @@ currentViewDimensions =
     in S.sampleOn cues <| S.map viewHelper Window.dimensions
 
 type SwipeDir = Next | Prev | NoSwipe
+
 type UserInput = Swipe SwipeDir
                | SetText String
+
+userInput : Signal UserInput
+userInput = S.mergeMany [ S.map SetText Server.textContent
+                        , S.map Swipe swipe ]
+
+
 type Update = Input UserInput | ViewChange ViewDimensions
 
 type alias Tap = { x : Int, y : Int }
