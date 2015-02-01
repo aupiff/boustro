@@ -6,7 +6,8 @@ import Signal as S
 
 listToMaybe : List a -> Maybe a
 listToMaybe xs = if | L.isEmpty xs -> Nothing
-                    | otherwise  -> Just <| L.head xs
+                    | otherwise    -> Just <| L.head xs
+
 toUnit : a -> ()
 toUnit _ = ()
 

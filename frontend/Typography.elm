@@ -29,12 +29,6 @@ textStyle = { typeface = [ "Georgia", "serif" ]
             , line     = Nothing
             }
 
-strToWordArray : String -> Array String
-strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
-                         paragraphPrefix str = "¶ " ++ str
-                         singleParText = String.join " " << L.map paragraphPrefix <| txtLines
-                     in  Array.fromList <| String.words singleParText
-
 boustro : Html -> (List Html, Bool) -> (List Html, Bool)
 boustro h (hs, reverseState) =
     let classes = classList [ ("reverse", reverseState) ]
@@ -48,32 +42,34 @@ toPage = div [] << L.reverse << fst << L.foldl boustro ([], False)
 wordsPerLine : List Item -> Int
 wordsPerLine = L.length << L.filter (not << isSpring)
 
-wordCount : List (List Item) -> List Item -> Int
-wordCount hs is = (L.sum <| L.map wordsPerLine hs) + L.length is
+wordCount : List (List Item) -> Int
+wordCount hs = (L.sum <| L.map wordsPerLine hs)
+
+maxWordsOnPage : ViewDimensions -> Int
+maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 30
 
 typesetPage : ModelState -> ViewDimensions -> (Html, Int)
 typesetPage state viewDims =
-    let maxWords = viewDims.linesPerPage * viewDims.textWidth // 35 + state.wordIndex
-        wordList = Array.toList <| Array.slice state.wordIndex maxWords state.fullText
+    let maxWords = min (maxWordsOnPage viewDims + state.wordIndex) state.textLength
+        -- TODO probably don't have to chang this from array to LIST!!!
+        wordList = Array.toList <| Array.slice state.wordIndex maxWords
+                                                               state.fullText
         itemList = wordListToItems wordList
         justifyForView = justifyItems viewDims.linesPerPage viewDims.textWidth
         (hs, lastLineItems) = L.foldl justifyForView ([], []) itemList
         htmlList = unjustifyLine lastLineItems :: L.map (justifyLine viewDims.textWidth) hs
-        page = toPage << L.take viewDims.linesPerPage << L.reverse <| htmlList
-        wc = wordCount hs lastLineItems
+        page = toPage << L.reverse <| htmlList
+        wc = wordCount <| lastLineItems :: hs
     in (page, wc)
 
-typesetPrevPage : ModelState -> ViewDimensions -> (Html, Int)
-typesetPrevPage state viewDims =
-    let maxWords = max 0 <| state.wordIndex - viewDims.linesPerPage * viewDims.textWidth // 35
-        wordList = L.reverse << Array.toList <| Array.slice maxWords state.wordIndex state.fullText
+prevPageWordCount : ModelState -> ViewDimensions -> Int
+prevPageWordCount state viewDims =
+    let maxWords = max 0 <| state.wordIndex - maxWordsOnPage viewDims
+        wordList = Array.toList <| Array.slice maxWords state.wordIndex state.fullText
         itemList = wordListToItems wordList
-        (hs, lastLineItems) = L.foldl (justifyItems viewDims.linesPerPage viewDims.textWidth) ([], []) itemList
-        nhs = L.map L.reverse hs
-        nlli = L.reverse lastLineItems
-        page = toPage << L.reverse <| L.take viewDims.linesPerPage << L.reverse <| unjustifyLine nlli :: L.map (justifyLine viewDims.textWidth) nhs
-        wc = wordCount hs lastLineItems
-    in (page, wc)
+        justifyForView = justifyItems viewDims.linesPerPage viewDims.textWidth
+        (hs, lastLineItems) = L.foldr justifyForView ([], []) itemList
+    in wordCount <| lastLineItems :: hs
 
 strWidth : String -> Int
 strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
@@ -137,4 +133,4 @@ justifyItems numLines lineWidth item (hs, is) =
                                    nextIs = if | isSpring item -> []
                                                | otherwise -> [item]
                                in (nextLine :: hs, nextIs)
-                         | otherwise -> (hs, item :: is)
+                            | otherwise -> (hs, item :: is)
