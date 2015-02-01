@@ -39,7 +39,7 @@ scene page viewDimensions =
 lineHeight = 19 -- TODO this should depend on the styles in Typography
 
 viewHelper : WindowDimensions -> ViewDimensions
-viewHelper (w, h) = let textHeight = (h // lineHeight - 3) * lineHeight
+viewHelper (w, h) = let textHeight = (h // lineHeight - 4) * lineHeight
                     in { fullWidth = w
                        , fullHeight = h
                        , textWidth = min (w - 30) 650
@@ -58,8 +58,6 @@ currentViewDimensions =
                            , S.map Utils.toUnit initialSetupSignal ]
     in S.sampleOn cues <| S.map viewHelper Window.dimensions
 
-type SwipeDir = Next | Prev | NoSwipe
-
 type UserInput = Swipe SwipeDir
                | SetText String
 
@@ -71,6 +69,8 @@ userInput = S.mergeMany [ S.map SetText Server.textContent
 type Update = Input UserInput | ViewChange ViewDimensions
 
 type alias Tap = { x : Int, y : Int }
+
+type SwipeDir = Next | Prev | NoSwipe
 
 swipe : Signal SwipeDir
 swipe = let untappedValue : (Time, Tap, Bool)
@@ -86,8 +86,7 @@ swipe = let untappedValue : (Time, Tap, Bool)
 
 isDoubleTap : (Time, Tap) -> (Time, Tap, Bool) -> (Time, Tap, Bool)
 isDoubleTap (newTapTime, newTap) (oldTapTime, oldTap, wasDoubleTap) =
-    let doubleTapMargin : Int
-        doubleTapMargin = 80
+    let doubleTapMargin = 80
         maxDoubleTapInteval : Time
         maxDoubleTapInteval = 0.5 * second
     in if | wasDoubleTap -> (newTapTime, newTap, False)

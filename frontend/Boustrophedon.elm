@@ -33,19 +33,22 @@ update update (modelState, viewState) =
     case update of
         ViewChange viewDims -> (modelState, viewFromModelAndDims modelState viewDims)
         Input (SetText str) ->
-                  let newModelState = stringToModelState str
-                      newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
-                  in (newModelState, newViewState)
+            let newModelState = stringToModelState str
+                newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+            in (newModelState, newViewState)
         Input (Swipe Next) ->
-                  let idx = modelState.wordIndex + viewState.pageWordCount
-                      newModelState = { modelState | wordIndex <- idx }
-                      newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
-                  in (newModelState, newViewState)
+            let idx = modelState.wordIndex + viewState.pageWordCount
+                a = log "idx" idx
+                newModelState = { modelState | wordIndex <- idx }
+                newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+            in (newModelState, newViewState)
         Input (Swipe Prev) ->
-                  let (page, wc) = Typography.typesetPrevPage modelState viewState.viewDimensions
-                      newModelState = { modelState | wordIndex <- max (modelState.wordIndex - wc) 0 }
-                      newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
-                  in (newModelState, newViewState)
+            let wc = Typography.prevPageWordCount modelState viewState.viewDimensions
+                idx = max (modelState.wordIndex - wc) 0
+                a = log "idx" idx
+                newModelState = { modelState | wordIndex <- idx }
+                newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+            in (newModelState, newViewState)
         Input (Swipe NoSwipe) -> (modelState, viewState)
 
 main : Signal Element
