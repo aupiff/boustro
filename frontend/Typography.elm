@@ -50,7 +50,8 @@ maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 30
 
 typesetPage : ModelState -> ViewDimensions -> (Html, Int)
 typesetPage state viewDims =
-    let maxWords = maxWordsOnPage viewDims + state.wordIndex
+    let maxWords = min (maxWordsOnPage viewDims + state.wordIndex) state.textLength
+        -- TODO probably don't have to chang this from array to LIST!!!
         wordList = Array.toList <| Array.slice state.wordIndex maxWords
                                                                state.fullText
         itemList = wordListToItems wordList
@@ -68,8 +69,7 @@ prevPageWordCount state viewDims =
         itemList = wordListToItems wordList
         justifyForView = justifyItems viewDims.linesPerPage viewDims.textWidth
         (hs, lastLineItems) = L.foldr justifyForView ([], []) itemList
-        wc = wordCount <| lastLineItems :: hs
-    in wc
+    in wordCount <| lastLineItems :: hs
 
 strWidth : String -> Int
 strWidth str = let txtElement = Text.rightAligned << Text.style textStyle

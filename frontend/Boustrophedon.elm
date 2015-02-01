@@ -38,10 +38,12 @@ update update (modelState, viewState) =
             in (newModelState, newViewState)
         Input (Swipe Next) ->
             let idx = modelState.wordIndex + viewState.pageWordCount
-                a = log "idx" idx
-                newModelState = { modelState | wordIndex <- idx }
-                newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
-            in (newModelState, newViewState)
+            in if | idx < modelState.textLength ->
+                     let a = log "idx" idx
+                         newModelState = { modelState | wordIndex <- idx }
+                         newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+                     in (newModelState, newViewState)
+                  | otherwise -> (modelState, viewState)
         Input (Swipe Prev) ->
             let wc = Typography.prevPageWordCount modelState viewState.viewDimensions
                 idx = max (modelState.wordIndex - wc) 0

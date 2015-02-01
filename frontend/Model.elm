@@ -4,8 +4,9 @@ import Array
 import List as L
 import String
 
-type alias ModelState = { fullText  : Array.Array String
-                        , wordIndex : Int
+type alias ModelState = { fullText   : Array.Array String
+                        , textLength : Int
+                        , wordIndex  : Int
                         }
 
 strToWordArray : String -> Array.Array String
@@ -15,5 +16,7 @@ strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.l
                      in  Array.fromList <| String.words singleParText
 
 stringToModelState : String -> ModelState
-stringToModelState str = { fullText  = strToWordArray str
-                         , wordIndex = 0 }
+stringToModelState str = let text = strToWordArray str
+                         in { fullText  = text
+                            , textLength = Array.length text
+                            , wordIndex = 0 }
