@@ -26,6 +26,12 @@ type alias ViewState = { pageWordCount  : Int
                        , viewDimensions : ViewDimensions
                        }
 
+viewTopMargin = 10
+minBottomMargin = 8
+textHeight = 17
+lineMarginBottom = 1
+lineHeight = textHeight + lineMarginBottom
+
 scene : Html -> ViewDimensions -> Element
 scene page viewDimensions =
     let renderTextView = toElement viewDimensions.textWidth
@@ -37,12 +43,6 @@ scene page viewDimensions =
                                   viewDimensions.fullHeight
                                   position
     in  fullContainer <| renderTextView page
-
-viewTopMargin = 10
-minBottomMargin = 8
-textHeight = 17
-padding = 1
-lineHeight = textHeight + padding
 
 viewHelper : WindowDimensions -> ViewDimensions
 viewHelper (w, h) = let textHeight = (h - viewTopMargin - minBottomMargin) // lineHeight * lineHeight
@@ -64,31 +64,33 @@ currentViewDimensions =
                            , S.map Utils.toUnit initialSetupSignal ]
     in S.sampleOn cues <| S.map viewHelper Window.dimensions
 
-type UserInput = Swipe SwipeDir
+type UserInput = Gesture GestureType
                | SetText String
 
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText Server.textContent
-                        , S.map Swipe swipe ]
+                        , S.map Gesture gesture ]
 
 
 type Update = Input UserInput | ViewChange ViewDimensions
 
 type alias Tap = { x : Int, y : Int }
 
-type SwipeDir = Next | Prev | NoSwipe
+type GestureType = Next | Prev | NoGesture
 
-swipe : Signal SwipeDir
-swipe = let untappedValue : (Time, Tap, Bool)
-            untappedValue = (0, { x = -1, y = -1 }, False)
-            doubleTap = S.map (\(x,y,z) -> z) <| S.foldp isDoubleTap untappedValue
-                                              <| timestamp Touch.taps
-            toSwipeDir tap viewDims =
-                if | tap.x < (viewDims.fullWidth // 2 - 10) -> Prev
-                   | tap.x > (viewDims.fullWidth // 2 + 10) -> Next
-                   | otherwise -> NoSwipe
-            currentSwipeDir = S.map2 toSwipeDir Touch.taps currentViewDimensions
-        in  S.sampleOn (Utils.onFalseTrueTransition doubleTap) currentSwipeDir
+gesture : Signal GestureType
+gesture =
+    let untappedValue : (Time, Tap, Bool)
+        untappedValue = (0, { x = -1, y = -1 }, False)
+        doubleTap = S.map (\(x,y,z) -> z) <| S.foldp isDoubleTap untappedValue
+                                          <| timestamp Touch.taps
+        toGestureType tap viewDims =
+            if | tap.x < (viewDims.fullWidth // 2 - 40) -> Prev
+               | tap.x > (viewDims.fullWidth // 2 + 40) -> Next
+               | otherwise -> NoGesture
+        currentGestureType = S.map2 toGestureType Touch.taps
+                                                  currentViewDimensions
+    in  S.sampleOn (Utils.onFalseTrueTransition doubleTap) currentGestureType
 
 isDoubleTap : (Time, Tap) -> (Time, Tap, Bool) -> (Time, Tap, Bool)
 isDoubleTap (newTapTime, newTap) (oldTapTime, oldTap, wasDoubleTap) =

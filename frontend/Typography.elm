@@ -110,7 +110,7 @@ isSpring item = case item of
 toSpring : Int -> Item
 toSpring w = Spring w 0 0
 
-lineDivStyle = style [ ("margin-bottom", toString UI.padding ++ "px") ]
+lineDivStyle = style [ ("margin-bottom", toString UI.lineMarginBottom ++ "px") ]
 
 justifyLine : Int -> List Item -> Html
 justifyLine lineWidth is =
