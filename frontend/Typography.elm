@@ -14,15 +14,14 @@ import Dict
 import Dict (Dict)
 import Model (ModelState)
 import Utils
-import UI (ViewDimensions)
+import UI
 
 type Item = Box Int Html
           | Spring Int Int Int
           | Penalty Float Float Bool
 
--- TODO this has to stay synced up with CSS for now. figure out how to remove that dep
 textStyle = { typeface = [ "Georgia", "serif" ]
-            , height   = Just 16
+            , height   = Just UI.textHeight
             , color    = Color.black
             , bold     = False
             , italic   = False
@@ -32,7 +31,8 @@ textStyle = { typeface = [ "Georgia", "serif" ]
 boustro : Html -> (List Html, Bool) -> (List Html, Bool)
 boustro h (hs, reverseState) =
     let classes = classList [ ("reverse", reverseState) ]
-        nextH = div [ classes ] [ h ]
+        divStyle = style [ ("height", toString UI.lineHeight ++ "px") ]
+        nextH = div [ classes, divStyle ] [ h ]
         nextLineState = not reverseState
     in (nextH :: hs, nextLineState)
 
@@ -45,10 +45,10 @@ wordsPerLine = L.length << L.filter (not << isSpring)
 wordCount : List (List Item) -> Int
 wordCount hs = (L.sum <| L.map wordsPerLine hs)
 
-maxWordsOnPage : ViewDimensions -> Int
+maxWordsOnPage : UI.ViewDimensions -> Int
 maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 30
 
-typesetPage : ModelState -> ViewDimensions -> (Html, Int)
+typesetPage : ModelState -> UI.ViewDimensions -> (Html, Int)
 typesetPage state viewDims =
     let maxWords = min (maxWordsOnPage viewDims + state.wordIndex) state.textLength
         -- TODO probably don't have to chang this from array to LIST!!!
@@ -62,7 +62,7 @@ typesetPage state viewDims =
         wc = wordCount <| lastLineItems :: hs
     in (page, wc)
 
-prevPageWordCount : ModelState -> ViewDimensions -> Int
+prevPageWordCount : ModelState -> UI.ViewDimensions -> Int
 prevPageWordCount state viewDims =
     let maxWords = max 0 <| state.wordIndex - maxWordsOnPage viewDims
         wordList = Array.toList <| Array.slice maxWords state.wordIndex state.fullText
@@ -92,6 +92,7 @@ itemHtml : Item -> Html
 itemHtml item =
     let spanStyle : Int -> Attribute
         spanStyle w = style [ ("width", toString w ++ "px")
+                            , ("height", "16px")
                             , ("display", "inline-block") ]
     in case item of
             Box w h   -> span [spanStyle w] [h]
@@ -109,6 +110,8 @@ isSpring item = case item of
 toSpring : Int -> Item
 toSpring w = Spring w 0 0
 
+lineDivStyle = style [ ("margin-bottom", toString UI.padding ++ "px") ]
+
 justifyLine : Int -> List Item -> Html
 justifyLine lineWidth is =
     let cleanList = L.filter (not << isSpring) is
@@ -119,10 +122,10 @@ justifyLine lineWidth is =
         widthsToAdd = L.repeat remainingWidth (baseSpringWidth + 1) ++ L.repeat (numberSprings - remainingWidth) baseSpringWidth
         springs = L.map toSpring widthsToAdd
         items = Utils.interleave cleanList springs
-    in p [] << L.map itemHtml <| items
+    in div [ lineDivStyle ] << L.map itemHtml <| items
 
 unjustifyLine : List Item -> Html
-unjustifyLine = p [] << L.map itemHtml << L.reverse
+unjustifyLine = div [ lineDivStyle ] << L.map itemHtml << L.reverse
 
 justifyItems : Int -> Int -> Item -> (List (List Item), List Item) -> (List (List Item), List Item)
 justifyItems numLines lineWidth item (hs, is) =

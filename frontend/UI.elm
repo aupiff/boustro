@@ -3,7 +3,7 @@ module UI where
 import Time (Time, every, second, millisecond, timestamp)
 import Maybe as M
 import Html (Html, toElement)
-import Graphics.Element (Element, container, midTop)
+import Graphics.Element (Element, container, relative, absolute, midTopAt)
 import List as L
 import Touch
 import Signal as S
@@ -30,16 +30,22 @@ scene : Html -> ViewDimensions -> Element
 scene page viewDimensions =
     let renderTextView = toElement viewDimensions.textWidth
                                    viewDimensions.textHeight
+        horizontalMiddle = absolute <| viewDimensions.fullWidth // 2
+        topMargin = absolute viewTopMargin
+        position = midTopAt horizontalMiddle topMargin
         fullContainer = container viewDimensions.fullWidth
                                   viewDimensions.fullHeight
-                                  midTop
+                                  position
     in  fullContainer <| renderTextView page
 
-
-lineHeight = 19 -- TODO this should depend on the styles in Typography
+viewTopMargin = 10
+minBottomMargin = 5
+textHeight = 17
+padding = 1
+lineHeight = textHeight + padding
 
 viewHelper : WindowDimensions -> ViewDimensions
-viewHelper (w, h) = let textHeight = (h // lineHeight - 4) * lineHeight
+viewHelper (w, h) = let textHeight = (h - viewTopMargin - minBottomMargin) // lineHeight * lineHeight
                     in { fullWidth = w
                        , fullHeight = h
                        , textWidth = min (w - 30) 650
