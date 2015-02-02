@@ -49,7 +49,7 @@ viewHelper (w, h) = let textHeight = (h // lineHeight - 4) * lineHeight
 
 initialSetupSignal : Signal ()
 initialSetupSignal = S.map Utils.toUnit << S.dropRepeats
-                                        << S.foldp (\x p -> 1) 0
+                                        << S.foldp (\_ _ -> 1) 0
                                         <| every (10 * millisecond)
 
 currentViewDimensions : Signal ViewDimensions
@@ -87,10 +87,10 @@ swipe = let untappedValue : (Time, Tap, Bool)
 isDoubleTap : (Time, Tap) -> (Time, Tap, Bool) -> (Time, Tap, Bool)
 isDoubleTap (newTapTime, newTap) (oldTapTime, oldTap, wasDoubleTap) =
     let doubleTapMargin = 80
-        maxDoubleTapInteval : Time
-        maxDoubleTapInteval = 0.5 * second
+        maxDoubleTapInterval : Time
+        maxDoubleTapInterval = 0.5 * second
     in if | wasDoubleTap -> (newTapTime, newTap, False)
-          | newTapTime - oldTapTime < maxDoubleTapInteval &&
+          | newTapTime - oldTapTime < maxDoubleTapInterval &&
               abs (newTap.x - oldTap.x) < doubleTapMargin &&
               abs (newTap.y - oldTap.y) < doubleTapMargin ->
                             (newTapTime, newTap, True)

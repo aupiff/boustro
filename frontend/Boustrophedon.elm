@@ -6,7 +6,6 @@ import UI (..)
 import Server
 import Model (..)
 import Utils
-import Debug (log)
 import Typography
 
 viewFromModelAndDims : ModelState -> ViewDimensions -> ViewState
@@ -39,15 +38,13 @@ update update (modelState, viewState) =
         Input (Swipe Next) ->
             let idx = modelState.wordIndex + viewState.pageWordCount
             in if | idx < modelState.textLength ->
-                     let a = log "idx" idx
-                         newModelState = { modelState | wordIndex <- idx }
+                     let newModelState = { modelState | wordIndex <- idx }
                          newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
                      in (newModelState, newViewState)
                   | otherwise -> (modelState, viewState)
         Input (Swipe Prev) ->
             let wc = Typography.prevPageWordCount modelState viewState.viewDimensions
                 idx = max (modelState.wordIndex - wc) 0
-                a = log "idx" idx
                 newModelState = { modelState | wordIndex <- idx }
                 newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
             in (newModelState, newViewState)
