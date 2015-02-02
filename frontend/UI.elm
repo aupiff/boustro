@@ -39,7 +39,7 @@ scene page viewDimensions =
     in  fullContainer <| renderTextView page
 
 viewTopMargin = 10
-minBottomMargin = 5
+minBottomMargin = 8
 textHeight = 17
 padding = 1
 lineHeight = textHeight + padding
@@ -48,7 +48,7 @@ viewHelper : WindowDimensions -> ViewDimensions
 viewHelper (w, h) = let textHeight = (h - viewTopMargin - minBottomMargin) // lineHeight * lineHeight
                     in { fullWidth = w
                        , fullHeight = h
-                       , textWidth = min (w - 30) 650
+                       , textWidth = min (w - 20) 650
                        , textHeight = textHeight
                        , linesPerPage = textHeight // lineHeight
                        }
