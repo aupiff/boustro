@@ -1,8 +1,8 @@
 module Typography where
 
 import String
-import Html (Html, Attribute, span, div, text, toElement, fromElement, p)
-import Html.Attributes (style, classList)
+import Html
+import Html.Attributes (style)
 import Graphics.Element (widthOf)
 import List as L
 import Array
@@ -16,7 +16,7 @@ import Model (ModelState)
 import Utils
 import UI
 
-type Item = Box Int Html
+type Item = Box Int Html.Html
           | Spring Int Int Int
           | Penalty Float Float Bool
 
@@ -28,16 +28,30 @@ textStyle = { typeface = [ "Georgia", "serif" ]
             , line     = Nothing
             }
 
-boustro : Html -> (List Html, Bool) -> (List Html, Bool)
+reverseStyle : Html.Attribute
+reverseStyle = style [ ("-moz-transform", "scaleX(-1)")
+                     , ("-o-transform",  "scaleX(-1)")
+                     , ("-webkit-transform", "scaleX(-1)")
+                     , ("transform", "scaleX(-1)")
+                     , ("filter", "FlipH")
+                     , ("-ms-filter", "\"FlipH\"") ]
+
+mainTextStyle : Html.Attribute
+mainTextStyle = style [ ("font-family", "Georgia, serif")
+                      , ("color", "black")
+                      , ("-webkit-font-smoothing", "antialiased") ]
+
+boustro : Html.Html -> (List Html.Html, Bool) -> (List Html.Html, Bool)
 boustro h (hs, reverseState) =
-    let classes = classList [ ("reverse", reverseState) ]
-        divStyle = style [ ("height", toString UI.lineHeight ++ "px") ]
-        nextH = div [ classes, divStyle ] [ h ]
+    let divStyle = style [ ("height", toString UI.lineHeight ++ "px") ]
+        styles = if | reverseState -> reverseStyle :: [ divStyle ]
+                    | otherwise -> [ divStyle ]
+        nextH = Html.div styles [ h ]
         nextLineState = not reverseState
     in (nextH :: hs, nextLineState)
 
-toPage : List Html -> Html
-toPage = div [] << L.reverse << fst << L.foldl boustro ([], False)
+toPage : List Html.Html -> Html.Html
+toPage = Html.div [] << L.reverse << fst << L.foldl boustro ([], False)
 
 wordsPerLine : List Item -> Int
 wordsPerLine = L.length << L.filter (not << isSpring)
@@ -48,7 +62,7 @@ wordCount hs = (L.sum <| L.map wordsPerLine hs)
 maxWordsOnPage : UI.ViewDimensions -> Int
 maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 30
 
-typesetPage : ModelState -> UI.ViewDimensions -> (Html, Int)
+typesetPage : ModelState -> UI.ViewDimensions -> (Html.Html, Int)
 typesetPage state viewDims =
     let maxWords = min (maxWordsOnPage viewDims + state.wordIndex) state.textLength
         -- TODO probably don't have to chang this from array to LIST!!!
@@ -78,8 +92,8 @@ strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
 
 wordListToItems : List String -> List Item
 wordListToItems words =
-        let classes = classList [ ("maintext", True) ]
-            toItem word = Box (strWidth word) (p [classes] [ text word ])
+        let toItem word = Box (strWidth word) <| Html.div [ mainTextStyle ]
+                                                          [ Html.text word ]
         in L.intersperse (Spring 4 2 2) <| L.map toItem words
 
 itemWidth : Item -> Int
@@ -88,16 +102,16 @@ itemWidth i = case i of
     Spring w _ _ -> w
     otherwise    -> 0
 
-itemHtml : Item -> Html
+itemHtml : Item -> Html.Html
 itemHtml item =
-    let spanStyle : Int -> Attribute
+    let spanStyle : Int -> Html.Attribute
         spanStyle w = style [ ("width", toString w ++ "px")
                             , ("height", "16px")
                             , ("display", "inline-block") ]
     in case item of
-            Box w h   -> span [spanStyle w] [h]
-            Spring w _ _ -> span [spanStyle w] []
-            otherwise -> div [] []
+            Box w h   -> Html.span [spanStyle w] [h]
+            Spring w _ _ -> Html.span [spanStyle w] []
+            otherwise -> Html.div [] []
 
 itemListWidth : List Item -> Int
 itemListWidth = L.sum << L.map itemWidth
@@ -112,7 +126,7 @@ toSpring w = Spring w 0 0
 
 lineDivStyle = style [ ("margin-bottom", toString UI.lineMarginBottom ++ "px") ]
 
-justifyLine : Int -> List Item -> Html
+justifyLine : Int -> List Item -> Html.Html
 justifyLine lineWidth is =
     let cleanList = L.filter (not << isSpring) is
         widthToAdd = lineWidth - itemListWidth cleanList
@@ -122,10 +136,10 @@ justifyLine lineWidth is =
         widthsToAdd = L.repeat remainingWidth (baseSpringWidth + 1) ++ L.repeat (numberSprings - remainingWidth) baseSpringWidth
         springs = L.map toSpring widthsToAdd
         items = Utils.interleave cleanList springs
-    in div [ lineDivStyle ] << L.map itemHtml <| items
+    in Html.div [ lineDivStyle ] << L.map itemHtml <| items
 
-unjustifyLine : List Item -> Html
-unjustifyLine = div [ lineDivStyle ] << L.map itemHtml << L.reverse
+unjustifyLine : List Item -> Html.Html
+unjustifyLine = Html.div [ lineDivStyle ] << L.map itemHtml << L.reverse
 
 justifyItems : Int -> Int -> Item -> (List (List Item), List Item) -> (List (List Item), List Item)
 justifyItems numLines lineWidth item (hs, is) =
