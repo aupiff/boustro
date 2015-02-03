@@ -5,7 +5,7 @@ import Html
 import Html.Attributes (style)
 import Svg (svg, rect, circle)
 import Svg.Attributes (version, x, y, cx, cy, r, fill, width, height, viewBox)
-import Graphics.Element (widthOf)
+import Graphics.Element (widthOf, heightOf)
 import List as L
 import Array
 import Array (Array)
@@ -17,37 +17,17 @@ import Dict (Dict)
 import Model (ModelState)
 import Utils
 import UI
+import Style
 
 type Item = Box Int Html.Html
           | Spring Int Int Int
           | Penalty Float Float Bool
 
-textStyle = { typeface = [ "Georgia", "serif" ]
-            , height   = Just UI.fontHeight
-            , color    = Color.black
-            , bold     = False
-            , italic   = False
-            , line     = Nothing
-            }
-
-reverseStyle : Html.Attribute
-reverseStyle = style [ ("-moz-transform", "scaleX(-1)")
-                     , ("-o-transform",  "scaleX(-1)")
-                     , ("-webkit-transform", "scaleX(-1)")
-                     , ("transform", "scaleX(-1)")
-                     , ("filter", "FlipH")
-                     , ("-ms-filter", "\"FlipH\"") ]
-
-mainTextStyle : Html.Attribute
-mainTextStyle = style [ ("font-family", "Georgia, serif")
-                      , ("color", "black")
-                      , ("-webkit-font-smoothing", "antialiased") ]
-
 -- divStyle necessary for even spacing on mobile devices TODO figure out why!
 boustro : Html.Html -> (List Html.Html, Bool) -> (List Html.Html, Bool)
 boustro h (hs, reverseState) =
-    let divStyle =  style [ ("height", toString UI.lineHeight ++ "px") ]
-        styles = if | reverseState -> [ divStyle , reverseStyle ]
+    let divStyle =  style [ ("height", toString Style.lineHeight ++ "px") ]
+        styles = if | reverseState -> [ divStyle , Style.reverseStyle ]
                     | otherwise    -> [ divStyle ]
         nextH = Html.div styles [ h ]
         nextLineState = not reverseState
@@ -55,7 +35,8 @@ boustro h (hs, reverseState) =
 
 -- pageStyle is necessary to keep bottom indicator in the same position
 toPage : Int -> List Html.Html -> Html.Html
-toPage h = let pageStyle = style [ ("height", toString h ++ "px") ]
+toPage h = let pageStyle = style [ ("height", toString h ++ "px")
+                                 , ("overflow", "hidden") ]
          in Html.div [ pageStyle ] << L.reverse << fst << L.foldl boustro ([], False)
 
 wordsPerLine : List Item -> Int
@@ -68,14 +49,16 @@ maxWordsOnPage : UI.ViewDimensions -> Int
 maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 30
 
 -- TODO remove magic numbers
-progressSVG : Int -> Int -> Int -> Html.Html
-progressSVG currentWord totalWords textWidth =
-    let svgWidth = min 200 <| textWidth // 2
+progressSVG : Int -> Int -> UI.ViewDimensions -> Html.Html
+progressSVG currentWord totalWords viewDims =
+    let svgWidth = min 200 <| viewDims.textWidth // 2
+        leftMargin = viewDims.textWidth // 2 - svgWidth
         circleTravelWidth = svgWidth - 8
-        svgWrapper = svg [ version "1.1", viewBox <| "0 0 " ++ toString svgWidth ++ " 8"]
         divWrapper = Html.div [ style [ ("margin", "auto")
-                                      , ("width", toString svgWidth ++ "px")
-                                      , ("height", "14px") ] ]
+                                      , ("width", toString svgWidth ++ "px") ] ]
+        svgStyle = style [ ("width", toString svgWidth ++ "px")
+                         , ("height", toString Style.progressBarHeight ++ "px") ]
+        svgWrapper = svg [ svgStyle, version "1.1", viewBox <| "0 0 " ++ toString svgWidth ++ " " ++ toString Style.progressBarHeight]
         ratio = toFloat currentWord / toFloat totalWords
         rects = if | ratio < 0.01 -> rect [ fill "black", width "100", height "8" ] []
                    | ratio > 0.99 -> rect [ fill "black", width "100", height "8" ] []
@@ -109,7 +92,7 @@ typesetPage state viewDims =
                               unjustifyLine lastLineItems :: fullLines
                          | otherwise -> fullLines
         page = toPage viewDims.textHeight << L.reverse <| htmlList
-        progressBar = progressSVG state.wordIndex state.textLength viewDims.textWidth
+        progressBar = progressSVG state.wordIndex state.textLength viewDims
         wc = wordCount <| lastLineItems :: hs
     in (Html.div [] [ page, progressBar ], wc)
 
@@ -123,13 +106,13 @@ prevPageWordCount state viewDims =
     in wordCount <| lastLineItems :: hs
 
 strWidth : String -> Int
-strWidth str = let txtElement = Text.rightAligned << Text.style textStyle
+strWidth str = let txtElement = Text.rightAligned << Text.style Style.textStyle
                                                   <| Text.fromString str
                in widthOf txtElement
 
 wordListToItems : List String -> List Item
 wordListToItems words =
-        let toItem word = Box (strWidth word) <| Html.div [ mainTextStyle ]
+        let toItem word = Box (strWidth word) <| Html.div [ Style.mainTextStyle ]
                                                           [ Html.text word ]
         in L.intersperse (Spring 4 2 2) <| L.map toItem words
 

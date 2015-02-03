@@ -2,16 +2,18 @@ module UI where
 
 import Time (Time, every, second, millisecond, timestamp)
 import Maybe as M
-import Html (Html, toElement)
-import Graphics.Element (Element, container, relative, absolute, midTopAt)
+import Html
+import Graphics.Element (Element, container, relative, absolute, midTopAt, heightOf)
 import List as L
 import Touch
+import Text
 import Signal as S
 import Signal ((<~), (~), Signal)
 import Server
 import Window
 import Utils
 import Keyboard
+import Style
 
 type alias WindowDimensions = (Int, Int)
 
@@ -27,17 +29,12 @@ type alias ViewState = { pageWordCount  : Int
                        , viewDimensions : ViewDimensions
                        }
 
-viewTopMargin = 8
-minBottomMargin = 30
-fontHeight = 17
-lineHeight = fontHeight + 2
-
-scene : Html -> ViewDimensions -> Element
+scene : Html.Html -> ViewDimensions -> Element
 scene page viewDimensions =
-    let renderTextView = toElement viewDimensions.textWidth
-                                   viewDimensions.textHeight
+    let renderTextView = Html.toElement viewDimensions.textWidth
+                                        viewDimensions.textHeight
         horizontalMiddle = absolute <| viewDimensions.fullWidth // 2
-        topMargin = absolute viewTopMargin
+        topMargin = absolute Style.viewTopMargin
         position = midTopAt horizontalMiddle topMargin
         fullContainer = container viewDimensions.fullWidth
                                   viewDimensions.fullHeight
@@ -45,11 +42,11 @@ scene page viewDimensions =
     in  fullContainer <| renderTextView page
 
 viewHelper : WindowDimensions -> ViewDimensions
-viewHelper (w, h) = let linesPerPage = (h - viewTopMargin - minBottomMargin) // lineHeight
+viewHelper (w, h) = let linesPerPage = Style.linesPerPage h
                     in { fullWidth = w
                        , fullHeight = h
                        , textWidth = min (w - 20) 650
-                       , textHeight = linesPerPage * lineHeight
+                       , textHeight = linesPerPage * Style.lineHeight
                        , linesPerPage = linesPerPage
                        }
 
