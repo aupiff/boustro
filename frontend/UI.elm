@@ -11,6 +11,7 @@ import Signal ((<~), (~), Signal)
 import Server
 import Window
 import Utils
+import Keyboard
 
 type alias WindowDimensions = (Int, Int)
 
@@ -78,8 +79,16 @@ type alias Tap = { x : Int, y : Int }
 
 type GestureType = Next | Prev | NoGesture
 
-gesture : Signal GestureType
-gesture =
+gesture = S.merge arrowGesture tapGesture
+
+arrowGesture : Signal GestureType
+arrowGesture = let toGesture x = if | x < 0 -> Prev
+                                    | x > 0 -> Next
+                                    | otherwise -> NoGesture
+               in S.map (toGesture << .x) Keyboard.arrows
+
+tapGesture : Signal GestureType
+tapGesture =
     let untappedValue : (Time, Tap, Bool)
         untappedValue = (0, { x = -1, y = -1 }, False)
         doubleTap = S.map (\(x,y,z) -> z) <| S.foldp isDoubleTap untappedValue
