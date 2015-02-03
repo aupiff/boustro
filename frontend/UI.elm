@@ -28,10 +28,9 @@ type alias ViewState = { pageWordCount  : Int
                        }
 
 viewTopMargin = 10
-minBottomMargin = 10
-textHeight = 17
-lineMarginBottom = 1
-lineHeight = textHeight + lineMarginBottom
+minBottomMargin = 12
+fontHeight = 17
+lineHeight = fontHeight + 2
 
 scene : Html -> ViewDimensions -> Element
 scene page viewDimensions =

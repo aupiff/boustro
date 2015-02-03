@@ -17,13 +17,14 @@ import Dict (Dict)
 import Model (ModelState)
 import Utils
 import UI
+import Debug (log)
 
 type Item = Box Int Html.Html
           | Spring Int Int Int
           | Penalty Float Float Bool
 
 textStyle = { typeface = [ "Georgia", "serif" ]
-            , height   = Just UI.textHeight
+            , height   = Just UI.fontHeight
             , color    = Color.black
             , bold     = False
             , italic   = False
@@ -50,6 +51,7 @@ boustro h (hs, reverseState) =
                     | otherwise    -> [ divStyle ]
         nextH = Html.div styles [ h ]
         nextLineState = not reverseState
+        a = log "reverseState" reverseState
     in (nextH :: hs, nextLineState)
 
 toPage : Int -> List Html.Html -> Html.Html
@@ -68,24 +70,26 @@ maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 30
 -- TODO remove magic numbers
 progressSVG : Int -> Int -> Int -> Html.Html
 progressSVG currentWord totalWords textWidth =
-    let svgWidth = textWidth // 2
+    let svgWidth = min 200 <| textWidth // 2
         circleTravelWidth = svgWidth - 8
         svgWrapper = svg [ version "1.1", width <| toString svgWidth, height "8" ]
-        divWrapper = Html.div [ style [ ("margin", "0 auto")
-                                      , ("width", toString svgWidth ++ "px") ] ]
+        divWrapper = Html.div [ style [ ("margin", "auto")
+                                      , ("width", toString svgWidth ++ "px")
+                                      , ("height", "8px") ] ]
         ratio = toFloat currentWord / toFloat totalWords
         rects = if | ratio < 0.01 -> rect [ fill "black", width "100", height "8" ] []
                    | ratio > 0.99 -> rect [ fill "black", width "100", height "8" ] []
                    | otherwise    -> rect [ fill "black", width "100", height "8" ] []
         circleX = (toFloat circleTravelWidth * ratio) + 4
         circleIndicator = circle [ cx <| toString circleX, cy "4", r "4", fill "black" ] []
+        barHeight = toString 4
         leftBar = rect [ x "0",
-                         y "4",
+                         y barHeight,
                          height "1",
                          width (toString <| max 0 <| circleX - 6 ),
                          fill "black" ] []
         rightBar = rect [ x (toString <| min circleTravelWidth <| ceiling <| circleX + 6 )
-                        , y "4"
+                        , y barHeight
                         , height "1"
                         , width (toString <| max 0 <| circleTravelWidth - (floor circleX) )
                         , fill "black" ] []
@@ -139,7 +143,6 @@ itemHtml : Item -> Html.Html
 itemHtml item =
     let spanStyle : Int -> Html.Attribute
         spanStyle w = style [ ("width", toString w ++ "px")
-                            , ("height", "16px")
                             , ("display", "inline-block") ]
     in case item of
             Box w h   -> Html.span [spanStyle w] [h]
@@ -157,8 +160,6 @@ isSpring item = case item of
 toSpring : Int -> Item
 toSpring w = Spring w 0 0
 
-lineDivStyle = style [ ("margin-bottom", toString UI.lineMarginBottom ++ "px") ]
-
 justifyLine : Int -> List Item -> Html.Html
 justifyLine lineWidth is =
     let cleanList = L.filter (not << isSpring) is
@@ -169,10 +170,10 @@ justifyLine lineWidth is =
         widthsToAdd = L.repeat remainingWidth (baseSpringWidth + 1) ++ L.repeat (numberSprings - remainingWidth) baseSpringWidth
         springs = L.map toSpring widthsToAdd
         items = Utils.interleave cleanList springs
-    in Html.div [ lineDivStyle ] << L.map itemHtml <| items
+    in Html.div [] << L.map itemHtml <| items
 
 unjustifyLine : List Item -> Html.Html
-unjustifyLine = Html.div [ lineDivStyle ] << L.map itemHtml << L.reverse
+unjustifyLine = Html.div [] << L.map itemHtml << L.reverse
 
 justifyItems : Int -> Int -> Item -> (List (List Item), List Item) -> (List (List Item), List Item)
 justifyItems numLines lineWidth item (hs, is) =
