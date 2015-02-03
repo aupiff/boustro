@@ -4,7 +4,7 @@ import String
 import Html
 import Html.Attributes (style)
 import Svg (svg, rect, circle)
-import Svg.Attributes (version, x, y, cx, cy, r, fill, width, height)
+import Svg.Attributes (version, x, y, cx, cy, r, fill, width, height, viewBox)
 import Graphics.Element (widthOf)
 import List as L
 import Array
@@ -17,7 +17,6 @@ import Dict (Dict)
 import Model (ModelState)
 import Utils
 import UI
-import Debug (log)
 
 type Item = Box Int Html.Html
           | Spring Int Int Int
@@ -44,19 +43,20 @@ mainTextStyle = style [ ("font-family", "Georgia, serif")
                       , ("color", "black")
                       , ("-webkit-font-smoothing", "antialiased") ]
 
+-- divStyle necessary for even spacing on mobile devices TODO figure out why!
 boustro : Html.Html -> (List Html.Html, Bool) -> (List Html.Html, Bool)
 boustro h (hs, reverseState) =
-    let divStyle = style [ ("height", toString UI.lineHeight ++ "px") ]
-        styles = if | reverseState -> [ reverseStyle, divStyle ]
+    let divStyle =  style [ ("height", toString UI.lineHeight ++ "px") ]
+        styles = if | reverseState -> [ divStyle , reverseStyle ]
                     | otherwise    -> [ divStyle ]
         nextH = Html.div styles [ h ]
         nextLineState = not reverseState
-        a = log "reverseState" reverseState
     in (nextH :: hs, nextLineState)
 
+-- pageStyle is necessary to keep bottom indicator in the same position
 toPage : Int -> List Html.Html -> Html.Html
-toPage h =  let divStyle = style [ ("height", toString h ++ "px") ]
-            in Html.div [ divStyle ] << L.reverse << fst << L.foldl boustro ([], False)
+toPage h = let pageStyle = style [ ("height", toString h ++ "px") ]
+         in Html.div [ pageStyle ] << L.reverse << fst << L.foldl boustro ([], False)
 
 wordsPerLine : List Item -> Int
 wordsPerLine = L.length << L.filter (not << isSpring)
@@ -72,10 +72,10 @@ progressSVG : Int -> Int -> Int -> Html.Html
 progressSVG currentWord totalWords textWidth =
     let svgWidth = min 200 <| textWidth // 2
         circleTravelWidth = svgWidth - 8
-        svgWrapper = svg [ version "1.1", width <| toString svgWidth, height "8" ]
+        svgWrapper = svg [ version "1.1", viewBox <| "0 0 " ++ toString svgWidth ++ " 8"]
         divWrapper = Html.div [ style [ ("margin", "auto")
                                       , ("width", toString svgWidth ++ "px")
-                                      , ("height", "8px") ] ]
+                                      , ("height", "14px") ] ]
         ratio = toFloat currentWord / toFloat totalWords
         rects = if | ratio < 0.01 -> rect [ fill "black", width "100", height "8" ] []
                    | ratio > 0.99 -> rect [ fill "black", width "100", height "8" ] []

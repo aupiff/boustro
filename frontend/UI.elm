@@ -27,8 +27,8 @@ type alias ViewState = { pageWordCount  : Int
                        , viewDimensions : ViewDimensions
                        }
 
-viewTopMargin = 10
-minBottomMargin = 12
+viewTopMargin = 8
+minBottomMargin = 30
 fontHeight = 17
 lineHeight = fontHeight + 2
 
@@ -45,12 +45,12 @@ scene page viewDimensions =
     in  fullContainer <| renderTextView page
 
 viewHelper : WindowDimensions -> ViewDimensions
-viewHelper (w, h) = let textHeight = (h - viewTopMargin - minBottomMargin) // lineHeight * lineHeight
+viewHelper (w, h) = let linesPerPage = (h - viewTopMargin - minBottomMargin) // lineHeight
                     in { fullWidth = w
                        , fullHeight = h
                        , textWidth = min (w - 20) 650
-                       , textHeight = textHeight
-                       , linesPerPage = textHeight // lineHeight
+                       , textHeight = linesPerPage * lineHeight
+                       , linesPerPage = linesPerPage
                        }
 
 initialSetupSignal : Signal ()
