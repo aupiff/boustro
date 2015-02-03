@@ -27,7 +27,7 @@ type alias ViewState = { pageWordCount  : Int
                        }
 
 viewTopMargin = 10
-minBottomMargin = 8
+minBottomMargin = 10
 textHeight = 17
 lineMarginBottom = 1
 lineHeight = textHeight + lineMarginBottom

@@ -3,6 +3,8 @@ module Typography where
 import String
 import Html
 import Html.Attributes (style)
+import Svg (svg, rect, circle)
+import Svg.Attributes (version, x, y, cx, cy, r, fill, width, height)
 import Graphics.Element (widthOf)
 import List as L
 import Array
@@ -44,14 +46,15 @@ mainTextStyle = style [ ("font-family", "Georgia, serif")
 boustro : Html.Html -> (List Html.Html, Bool) -> (List Html.Html, Bool)
 boustro h (hs, reverseState) =
     let divStyle = style [ ("height", toString UI.lineHeight ++ "px") ]
-        styles = if | reverseState -> reverseStyle :: [ divStyle ]
-                    | otherwise -> [ divStyle ]
+        styles = if | reverseState -> [ reverseStyle, divStyle ]
+                    | otherwise    -> [ divStyle ]
         nextH = Html.div styles [ h ]
         nextLineState = not reverseState
     in (nextH :: hs, nextLineState)
 
-toPage : List Html.Html -> Html.Html
-toPage = Html.div [] << L.reverse << fst << L.foldl boustro ([], False)
+toPage : Int -> List Html.Html -> Html.Html
+toPage h =  let divStyle = style [ ("height", toString h ++ "px") ]
+            in Html.div [ divStyle ] << L.reverse << fst << L.foldl boustro ([], False)
 
 wordsPerLine : List Item -> Int
 wordsPerLine = L.length << L.filter (not << isSpring)
@@ -62,6 +65,32 @@ wordCount hs = (L.sum <| L.map wordsPerLine hs)
 maxWordsOnPage : UI.ViewDimensions -> Int
 maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 30
 
+-- TODO remove magic numbers
+progressSVG : Int -> Int -> Int -> Html.Html
+progressSVG currentWord totalWords textWidth =
+    let svgWidth = textWidth // 2
+        circleTravelWidth = svgWidth - 8
+        svgWrapper = svg [ version "1.1", width <| toString svgWidth, height "8" ]
+        divWrapper = Html.div [ style [ ("margin", "0 auto")
+                                      , ("width", toString svgWidth ++ "px") ] ]
+        ratio = toFloat currentWord / toFloat totalWords
+        rects = if | ratio < 0.01 -> rect [ fill "black", width "100", height "8" ] []
+                   | ratio > 0.99 -> rect [ fill "black", width "100", height "8" ] []
+                   | otherwise    -> rect [ fill "black", width "100", height "8" ] []
+        circleX = (toFloat circleTravelWidth * ratio) + 4
+        circleIndicator = circle [ cx <| toString circleX, cy "4", r "4", fill "black" ] []
+        leftBar = rect [ x "0",
+                         y "4",
+                         height "1",
+                         width (toString <| max 0 <| circleX - 6 ),
+                         fill "black" ] []
+        rightBar = rect [ x (toString <| min circleTravelWidth <| ceiling <| circleX + 6 )
+                        , y "4"
+                        , height "1"
+                        , width (toString <| max 0 <| circleTravelWidth - (floor circleX) )
+                        , fill "black" ] []
+    in  divWrapper [ svgWrapper [ circleIndicator, leftBar, rightBar ] ]
+
 typesetPage : ModelState -> UI.ViewDimensions -> (Html.Html, Int)
 typesetPage state viewDims =
     let maxWords = min (maxWordsOnPage viewDims + state.wordIndex) state.textLength
@@ -71,10 +100,14 @@ typesetPage state viewDims =
         itemList = wordListToItems wordList
         justifyForView = justifyItems viewDims.linesPerPage viewDims.textWidth
         (hs, lastLineItems) = L.foldl justifyForView ([], []) itemList
-        htmlList = unjustifyLine lastLineItems :: L.map (justifyLine viewDims.textWidth) hs
-        page = toPage << L.reverse <| htmlList
+        htmlList = let fullLines = L.map (justifyLine viewDims.textWidth) hs
+                   in if | not <| L.isEmpty lastLineItems ->
+                              unjustifyLine lastLineItems :: fullLines
+                         | otherwise -> fullLines
+        page = toPage viewDims.textHeight << L.reverse <| htmlList
+        progressBar = progressSVG state.wordIndex state.textLength viewDims.textWidth
         wc = wordCount <| lastLineItems :: hs
-    in (page, wc)
+    in (Html.div [] [ page, progressBar ], wc)
 
 prevPageWordCount : ModelState -> UI.ViewDimensions -> Int
 prevPageWordCount state viewDims =
