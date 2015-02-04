@@ -36,6 +36,7 @@ boustro h (hs, reverseState) =
 -- pageStyle is necessary to keep bottom indicator in the same position
 toPage : Int -> List Html.Html -> Html.Html
 toPage h = let pageStyle = style [ ("height", toString h ++ "px")
+                                 , ("font-size", toString Style.fontHeight ++ "px") -- TODO remove this, shouldn't be necessary
                                  , ("overflow", "hidden") ]
          in Html.div [ pageStyle ] << L.reverse << fst << L.foldl boustro ([], False)
 
@@ -60,9 +61,6 @@ progressSVG currentWord totalWords viewDims =
                          , ("height", toString Style.progressBarHeight ++ "px") ]
         svgWrapper = svg [ svgStyle, version "1.1", viewBox <| "0 0 " ++ toString svgWidth ++ " " ++ toString Style.progressBarHeight]
         ratio = toFloat currentWord / toFloat totalWords
-        rects = if | ratio < 0.01 -> rect [ fill "black", width "100", height "8" ] []
-                   | ratio > 0.99 -> rect [ fill "black", width "100", height "8" ] []
-                   | otherwise    -> rect [ fill "black", width "100", height "8" ] []
         circleX = (toFloat circleTravelWidth * ratio) + 4
         circleIndicator = circle [ cx <| toString circleX, cy "4", r "4", fill "black" ] []
         barHeight = toString 4
@@ -74,7 +72,7 @@ progressSVG currentWord totalWords viewDims =
         rightBar = rect [ x (toString <| min circleTravelWidth <| ceiling <| circleX + 6 )
                         , y barHeight
                         , height "1"
-                        , width (toString <| max 0 <| circleTravelWidth - (floor circleX) )
+                        , width (toString <| max 0 <| circleTravelWidth - floor circleX - 6 )
                         , fill "black" ] []
     in  divWrapper [ svgWrapper [ circleIndicator, leftBar, rightBar ] ]
 
