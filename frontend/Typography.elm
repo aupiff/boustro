@@ -70,10 +70,18 @@ typesetPage state viewDims =
                                                                state.fullText
         maxPageText = wordListToItems wordList
         floatTextWidth = toFloat viewDims.textWidth
-        pagePar = L.map (justifyLine floatTextWidth) << L.take viewDims.linesPerPage <| par1 floatTextWidth maxPageText
+        pagePar = L.map (justifyLine floatTextWidth) << L.take viewDims.linesPerPage <| toPar floatTextWidth maxPageText
         page = toPage (toFloat viewDims.textHeight) pagePar
-        a = log "line lengths" <| L.map (L.length) pagePar
-    in (page, 0)
+    in (page, wordCount pagePar)
+
+prevPageWordCount : ModelState -> UI.ViewDimensions -> Int
+prevPageWordCount state viewDims =
+    let maxWords = max 0 <| state.wordIndex - maxWordsOnPage viewDims
+        wordList = Array.toList <| Array.slice maxWords state.wordIndex state.fullText
+        maxPageText = wordListToItems wordList
+        floatTextWidth = toFloat viewDims.textWidth
+        pagePar = L.map (justifyLine floatTextWidth) << L.take viewDims.linesPerPage <| toPar floatTextWidth maxPageText
+    in  wordCount pagePar
 
 strWidth : String -> Float
 strWidth str = let txtElement = Text.rightAligned << Text.style Style.textStyle
@@ -93,17 +101,8 @@ newLine w ls = [ w ] :: ls
 addToLine : Item -> List Line -> List Line
 addToLine w (l :: ls) = (w :: l) :: ls
 
-pars : DocumentText -> List Paragraph
-pars = let nextWord : Item -> List Paragraph -> List Paragraph
-           nextWord w ps = L.map (newLine w) ps ++ L.map (addToLine w) ps
-       in L.foldr nextWord [ [ [ (Spring 0 0 0) ] ] ]
-
-par0 : Float -> DocumentText -> Paragraph
-par0 lineWidth = minWith (paragraphBadness lineWidth)
-                    << L.filter (L.all (fits lineWidth)) << pars
-
-par1 : Float -> DocumentText -> Paragraph
-par1 lineWidth =
+toPar : Float -> DocumentText -> Paragraph
+toPar lineWidth =
     let fitH = fits lineWidth << L.head
         minBad = minWith (paragraphBadness lineWidth)
         nextWord w ps = L.filter fitH ( newLine w (minBad ps) :: L.map (addToLine w) ps )
