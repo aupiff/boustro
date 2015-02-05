@@ -59,7 +59,7 @@ typesetPage state viewDims =
                                                                state.fullText
         maxPageText = wordListToItems wordList
         floatTextWidth = toFloat viewDims.textWidth
-        pagePar = par0 maxPageText
+        pagePar = par0 floatTextWidth maxPageText
     in (Html.p [] [ Html.text "not yet implemented"], 0)
 
 strWidth : String -> Float
@@ -69,7 +69,8 @@ strWidth str = let txtElement = Text.rightAligned << Text.style Style.textStyle
 
 wordListToItems : List String -> DocumentText
 wordListToItems words =
-        let toItem word = Box (strWidth word) <| Html.div [ Style.mainTextStyle ]
+        let toItem : String -> Item
+            toItem word = Box (strWidth word) <| Html.div [ Style.mainTextStyle ]
                                                           [ Html.text word ]
         in L.intersperse (Spring 4 3 2) <| L.map toItem words
 
@@ -82,13 +83,14 @@ addToLine w (l :: ls) = (w :: l) :: ls
 pars : DocumentText -> List Paragraph
 pars = let nextWord : Item -> List Paragraph -> List Paragraph
            nextWord w ps = L.map (newLine w) ps ++ L.map (addToLine w) ps
-       in L.foldr nextWord (Spring 0 0 0)
+       in L.foldr nextWord [ [ [ (Spring 0 0 0) ] ] ]
 
 paragraphBadness : Float -> Paragraph -> Float
 paragraphBadness lineWidth ls = L.sum <| L.map (badness lineWidth) ls
 
-par0 : DocumentText -> Paragraph
-par0 = minWith paragraphBadness << L.filter (L.all fits) << pars
+par0 : Float -> DocumentText -> Paragraph
+par0 lineWidth = minWith (paragraphBadness lineWidth)
+                    << L.filter (L.all (fits lineWidth)) << pars
 
 minWith : (a -> comparable) -> List a -> a
 minWith f = L.foldl1 (\x p -> if | f x > f p -> x
