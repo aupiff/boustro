@@ -29,11 +29,11 @@ mainTextStyle = style [ ("font-family", "Georgia, serif")
 
 lineHeight : Int
 lineHeight = let txtElement = Text.rightAligned << Text.style textStyle
-                                                <| Text.fromString "fuck"
+                                                <| Text.fromString "test"
              in Graphics.Element.heightOf txtElement
-progressBarHeight = 8
 
-viewTopMargin = 8
+progressBarHeight = 8
+viewTopMargin = 10
 minBottomMargin = 8
 fontHeight = 17
 

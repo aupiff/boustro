@@ -45,7 +45,7 @@ viewHelper : WindowDimensions -> ViewDimensions
 viewHelper (w, h) = let linesPerPage = Style.linesPerPage h
                     in { fullWidth = w
                        , fullHeight = h
-                       , textWidth = min (w - 20) 650
+                       , textWidth = min (w - 30) 650
                        , textHeight = linesPerPage * Style.lineHeight
                        , linesPerPage = linesPerPage
                        }

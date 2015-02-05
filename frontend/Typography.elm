@@ -19,8 +19,8 @@ import Utils
 import UI
 import Style
 
-type Item = Box Int Html.Html
-          | Spring Int Int Int
+type Item = Box Float Html.Html
+          | Spring Float Float Float
           | Penalty Float Float Bool
 
 -- divStyle necessary for even spacing on mobile devices TODO figure out why!
@@ -103,10 +103,10 @@ prevPageWordCount state viewDims =
         (hs, lastLineItems) = L.foldr justifyForView ([], []) itemList
     in wordCount <| lastLineItems :: hs
 
-strWidth : String -> Int
+strWidth : String -> Float
 strWidth str = let txtElement = Text.rightAligned << Text.style Style.textStyle
                                                   <| Text.fromString str
-               in widthOf txtElement
+               in toFloat <| widthOf txtElement
 
 wordListToItems : List String -> List Item
 wordListToItems words =
@@ -114,7 +114,7 @@ wordListToItems words =
                                                           [ Html.text word ]
         in L.intersperse (Spring 4 2 2) <| L.map toItem words
 
-itemWidth : Item -> Int
+itemWidth : Item -> Float
 itemWidth i = case i of
     Box w _      -> w
     Spring w _ _ -> w
@@ -122,7 +122,7 @@ itemWidth i = case i of
 
 itemHtml : Item -> Html.Html
 itemHtml item =
-    let spanStyle : Int -> Html.Attribute
+    let spanStyle : Float -> Html.Attribute
         spanStyle w = style [ ("width", toString w ++ "px")
                             , ("display", "inline-block") ]
     in case item of
@@ -130,7 +130,7 @@ itemHtml item =
             Spring w _ _ -> Html.span [spanStyle w] []
             otherwise -> Html.div [] []
 
-itemListWidth : List Item -> Int
+itemListWidth : List Item -> Float
 itemListWidth = L.sum << L.map itemWidth
 
 isSpring : Item -> Bool
@@ -138,17 +138,16 @@ isSpring item = case item of
     Spring _ _ _ -> True
     otherwise    -> False
 
-toSpring : Int -> Item
+toSpring : Float -> Item
 toSpring w = Spring w 0 0
 
 justifyLine : Int -> List Item -> Html.Html
 justifyLine lineWidth is =
     let cleanList = L.filter (not << isSpring) is
-        widthToAdd = lineWidth - itemListWidth cleanList
+        widthToAdd = toFloat lineWidth - itemListWidth cleanList
         numberSprings = L.length cleanList - 1
-        baseSpringWidth = widthToAdd // numberSprings
-        remainingWidth = rem widthToAdd numberSprings
-        widthsToAdd = L.repeat remainingWidth (baseSpringWidth + 1) ++ L.repeat (numberSprings - remainingWidth) baseSpringWidth
+        springWidth = widthToAdd / toFloat numberSprings
+        widthsToAdd = L.repeat numberSprings springWidth
         springs = L.map toSpring widthsToAdd
         items = Utils.interleave cleanList springs
     in Html.div [] << L.map itemHtml <| items
@@ -160,7 +159,7 @@ justifyItems : Int -> Int -> Item -> (List (List Item), List Item) -> (List (Lis
 justifyItems numLines lineWidth item (hs, is) =
     if | L.length hs == numLines -> (hs, [])
        | otherwise -> let currentWidth = itemListWidth (item :: is)
-                      in if | currentWidth > lineWidth ->
+                      in if | currentWidth > toFloat lineWidth ->
                                let nextLine = L.reverse is
                                    nextIs = if | isSpring item -> []
                                                | otherwise -> [item]
