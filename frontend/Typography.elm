@@ -44,15 +44,14 @@ toPage h paragraph =
         htmlLines = L.map (L.map itemHtml) paragraph
     in Html.div [ pageStyle ] << L.reverse << fst << L.foldl boustro ([], False) <| htmlLines
 
-justifyLine : Float -> Line -> Html.Html
+justifyLine : Float -> Line -> Line
 justifyLine lineWidth is =
     let cleanList = L.filter (not << isSpring) is
         widthToAdd = lineWidth - itemListWidth cleanList
         numberSprings = L.length cleanList - 1
         springWidth = widthToAdd / toFloat numberSprings
         springs = L.repeat numberSprings (Box springWidth <| Html.div [ Style.mainTextStyle ] [ Html.text " " ])
-        items = Utils.interleave cleanList springs
-    in Html.div [] << L.map itemHtml <| items
+    in Utils.interleave cleanList springs
 
 wordsPerLine : Line -> Int
 wordsPerLine = L.length << L.filter (not << isSpring)
@@ -71,7 +70,7 @@ typesetPage state viewDims =
                                                                state.fullText
         maxPageText = wordListToItems wordList
         floatTextWidth = toFloat viewDims.textWidth
-        pagePar = L.take viewDims.linesPerPage <| par1 floatTextWidth maxPageText
+        pagePar = L.map (justifyLine floatTextWidth) << L.take viewDims.linesPerPage <| par1 floatTextWidth maxPageText
         page = toPage (toFloat viewDims.textHeight) pagePar
         a = log "line lengths" <| L.map (L.length) pagePar
     in (page, 0)
