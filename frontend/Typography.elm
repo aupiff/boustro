@@ -71,7 +71,7 @@ typesetPage state viewDims =
                                                                state.fullText
         maxPageText = wordListToItems wordList
         floatTextWidth = toFloat viewDims.textWidth
-        pagePar = L.take viewDims.linesPerPage <| par0 floatTextWidth maxPageText
+        pagePar = L.take viewDims.linesPerPage <| par1 floatTextWidth maxPageText
         page = toPage (toFloat viewDims.textHeight) pagePar
         a = log "line lengths" <| L.map (L.length) pagePar
     in (page, 0)
@@ -103,6 +103,13 @@ par0 : Float -> DocumentText -> Paragraph
 par0 lineWidth = minWith (paragraphBadness lineWidth)
                     << L.filter (L.all (fits lineWidth)) << pars
 
+par1 : Float -> DocumentText -> Paragraph
+par1 lineWidth =
+    let fitH = fits lineWidth << L.head
+        minBad = minWith (paragraphBadness lineWidth)
+        nextWord w ps = L.filter fitH ( newLine w (minBad ps) :: L.map (addToLine w) ps )
+    in  minBad << L.foldr nextWord [ [ [ (Spring 0 0 0) ] ] ]
+
 minWith : (a -> comparable) -> List a -> a
 minWith f = L.foldl1 (\x p -> if | f x < f p -> x
                                  | otherwise -> p)
@@ -114,7 +121,7 @@ paragraphBadness lineWidth ls = L.sum <| L.map (badness lineWidth) ls
 badness : Float -> Line -> Float
 badness lineWidth l =
     let adjRatio = adjustmentRatio lineWidth l
-        a = log "adjRatio" adjRatio
+        --a = log "adjRatio" adjRatio
        -- 10000 is a stand in for infinity, should I just use inifinity?
     in if | adjRatio < -1 -> 10000
           | otherwise     -> 100 * (abs <| adjRatio ^ 3)
