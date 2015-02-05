@@ -26,22 +26,34 @@ type alias Line = List Item
 type alias Paragraph = List Line
 
 -- divStyle necessary for even spacing on mobile devices TODO figure out why!
-boustro : Html.Html -> (List Html.Html, Bool) -> (List Html.Html, Bool)
-boustro h (hs, reverseState) =
+boustro : List Html.Html -> (List Html.Html, Bool) -> (List Html.Html, Bool)
+boustro is (hs, reverseState) =
     let divStyle =  style [ ("height", toString Style.lineHeight ++ "px") ]
         styles = if | reverseState -> [ divStyle , Style.reverseStyle ]
                     | otherwise    -> [ divStyle ]
-        nextH = Html.div styles [ h ]
+        nextH = Html.div styles is
         nextLineState = not reverseState
     in (nextH :: hs, nextLineState)
 
 -- pageStyle is necessary to keep bottom indicator in the same position
---toPage : Float -> Paragraph -> Html.Html
---toPage h = let pageStyle = style [ ("height", toString h ++ "px")
---                                 , ("font-size", toString Style.fontHeight ++ "px") -- TODO remove this, shouldn't be necessary
---                                 , ("overflow", "hidden") ]
---         in Html.div [ pageStyle ] << L.reverse << fst << L.foldl boustro ([], False)
---
+toPage : Float -> Paragraph -> Html.Html
+toPage h paragraph =
+    let pageStyle = style [ ("height", toString h ++ "px")
+                          , ("font-size", toString Style.fontHeight ++ "px") -- TODO remove this, shouldn't be necessary
+                          , ("overflow", "hidden") ]
+        htmlLines = L.map (L.map itemHtml) paragraph
+    in Html.div [ pageStyle ] << L.reverse << fst << L.foldl boustro ([], False) <| htmlLines
+
+justifyLine : Float -> Line -> Html.Html
+justifyLine lineWidth is =
+    let cleanList = L.filter (not << isSpring) is
+        widthToAdd = lineWidth - itemListWidth cleanList
+        numberSprings = L.length cleanList - 1
+        springWidth = widthToAdd / toFloat numberSprings
+        springs = L.repeat numberSprings (Box springWidth <| Html.div [ Style.mainTextStyle ] [ Html.text " " ])
+        items = Utils.interleave cleanList springs
+    in Html.div [] << L.map itemHtml <| items
+
 wordsPerLine : List Item -> Int
 wordsPerLine = L.length << L.filter (not << isSpring)
 
@@ -59,8 +71,10 @@ typesetPage state viewDims =
                                                                state.fullText
         maxPageText = wordListToItems wordList
         floatTextWidth = toFloat viewDims.textWidth
-        pagePar = par0 floatTextWidth maxPageText
-    in (Html.p [] [ Html.text "not yet implemented"], 0)
+        pagePar = L.take viewDims.linesPerPage <| par0 floatTextWidth maxPageText
+        page = toPage (toFloat viewDims.textHeight) pagePar
+        a = log "line lengths" <| L.map (L.length) pagePar
+    in (page, 0)
 
 strWidth : String -> Float
 strWidth str = let txtElement = Text.rightAligned << Text.style Style.textStyle
