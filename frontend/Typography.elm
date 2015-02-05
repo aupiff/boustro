@@ -54,10 +54,10 @@ justifyLine lineWidth is =
         items = Utils.interleave cleanList springs
     in Html.div [] << L.map itemHtml <| items
 
-wordsPerLine : List Item -> Int
+wordsPerLine : Line -> Int
 wordsPerLine = L.length << L.filter (not << isSpring)
 
-wordCount : List (List Item) -> Int
+wordCount : Paragraph -> Int
 wordCount hs = (L.sum <| L.map wordsPerLine hs)
 
 maxWordsOnPage : UI.ViewDimensions -> Int
@@ -99,40 +99,41 @@ pars = let nextWord : Item -> List Paragraph -> List Paragraph
            nextWord w ps = L.map (newLine w) ps ++ L.map (addToLine w) ps
        in L.foldr nextWord [ [ [ (Spring 0 0 0) ] ] ]
 
-paragraphBadness : Float -> Paragraph -> Float
-paragraphBadness lineWidth ls = L.sum <| L.map (badness lineWidth) ls
-
 par0 : Float -> DocumentText -> Paragraph
 par0 lineWidth = minWith (paragraphBadness lineWidth)
                     << L.filter (L.all (fits lineWidth)) << pars
 
 minWith : (a -> comparable) -> List a -> a
-minWith f = L.foldl1 (\x p -> if | f x > f p -> x
+minWith f = L.foldl1 (\x p -> if | f x < f p -> x
                                  | otherwise -> p)
+
+paragraphBadness : Float -> Paragraph -> Float
+paragraphBadness lineWidth ls = L.sum <| L.map (badness lineWidth) ls
 
 -- knuth recommends 100 * | r_j ^ 3 |, but what could that 100 possibly do?
 badness : Float -> Line -> Float
 badness lineWidth l =
     let adjRatio = adjustmentRatio lineWidth l
+        a = log "adjRatio" adjRatio
        -- 10000 is a stand in for infinity, should I just use inifinity?
     in if | adjRatio < -1 -> 10000
-          | otherwise     -> abs <| adjRatio ^ 3
+          | otherwise     -> 100 * (abs <| adjRatio ^ 3)
 
 fits : Float -> Line -> Bool
 fits lineWidth ls = (adjustmentRatio lineWidth ls) > -1
 
 adjustmentRatio : Float -> List Item -> Float
-adjustmentRatio lineWidth hs =
+adjustmentRatio optimalLineWidth hs =
     let lineWidth = itemListWidth hs
         springs = L.filter isSpring hs
-        widthDifference = lineWidth - lineWidth
-    in if | lineWidth > lineWidth ->
+        widthDifference = optimalLineWidth - lineWidth
+    in if | lineWidth > optimalLineWidth ->
             let shrinkability = L.sum << L.map (\(Spring _ _ z) -> z) <| springs
             in widthDifference / shrinkability
-          | lineWidth < lineWidth ->
+          | lineWidth < optimalLineWidth ->
             let stretchability = L.sum << L.map (\(Spring _ y _) -> y) <| springs
             in widthDifference / stretchability
-          | lineWidth == lineWidth -> 0
+          | lineWidth == optimalLineWidth -> 0
 
 itemWidth : Item -> Float
 itemWidth i = case i of

@@ -19,5 +19,5 @@ textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fil
               in S.map getContent response
 
 defaultText ="""
-I met a traveller from an antique land
+I met a traveller
 """
