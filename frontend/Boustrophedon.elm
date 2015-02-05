@@ -35,20 +35,21 @@ update update (modelState, viewState) =
             let newModelState = stringToModelState str
                 newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
             in (newModelState, newViewState)
-        Input (Gesture Next) ->
-            let idx = modelState.wordIndex + viewState.pageWordCount
-            in if | idx < modelState.textLength ->
-                     let newModelState = { modelState | wordIndex <- idx }
-                         newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
-                     in (newModelState, newViewState)
-                  | otherwise -> (modelState, viewState)
-        Input (Gesture Prev) ->
-            let wc = Typography.prevPageWordCount modelState viewState.viewDimensions
-                idx = max (modelState.wordIndex - wc) 0
-                newModelState = { modelState | wordIndex <- idx }
-                newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
-            in (newModelState, newViewState)
-        Input (Gesture NoGesture) -> (modelState, viewState)
+        otherwise -> (modelState, viewState)
+        --Input (Gesture Next) ->
+        --    let idx = modelState.wordIndex + viewState.pageWordCount
+        --    in if | idx < modelState.textLength ->
+        --             let newModelState = { modelState | wordIndex <- idx }
+        --                 newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+        --             in (newModelState, newViewState)
+        --          | otherwise -> (modelState, viewState)
+        --Input (Gesture Prev) ->
+        --    let wc = Typography.prevPageWordCount modelState viewState.viewDimensions
+        --        idx = max (modelState.wordIndex - wc) 0
+        --        newModelState = { modelState | wordIndex <- idx }
+        --        newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
+        --    in (newModelState, newViewState)
+        --Input (Gesture NoGesture) -> (modelState, viewState)
 
 main : Signal Element
 main = S.map (.view << snd) appState
