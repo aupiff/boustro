@@ -18,10 +18,11 @@ import Model (ModelState)
 import Utils
 import UI
 import Style
+import Debug (log)
 
-type Item = Box Float Html.Html
-          | Spring Float Float Float
-          | Penalty Float Float Bool
+type Item = Box Float Html.Html      -- width, representation
+          | Spring Float Float Float -- width, strechability, shrinkability
+          | Penalty Float Float Bool -- TODO fill this in
 
 -- divStyle necessary for even spacing on mobile devices TODO figure out why!
 boustro : Html.Html -> (List Html.Html, Bool) -> (List Html.Html, Bool)
@@ -83,9 +84,11 @@ typesetPage state viewDims =
         wordList = Array.toList <| Array.slice state.wordIndex maxWords
                                                                state.fullText
         itemList = wordListToItems wordList
-        justifyForView = justifyItems viewDims.linesPerPage viewDims.textWidth
+        floatTextWidth = toFloat viewDims.textWidth
+        justifyForView = justifyItems viewDims.linesPerPage floatTextWidth
         (hs, lastLineItems) = L.foldl justifyForView ([], []) itemList
-        htmlList = let fullLines = L.map (justifyLine viewDims.textWidth) hs
+        a = log "adj ratios" <| L.map (adjustmentRatio floatTextWidth) hs
+        htmlList = let fullLines = L.map (justifyLine floatTextWidth) hs
                    in if | not <| L.isEmpty lastLineItems ->
                               unjustifyLine lastLineItems :: fullLines
                          | otherwise -> fullLines
@@ -96,10 +99,10 @@ typesetPage state viewDims =
 
 prevPageWordCount : ModelState -> UI.ViewDimensions -> Int
 prevPageWordCount state viewDims =
-    let maxWords = max 0 <| state.wordIndex - maxWordsOnPage viewDims
+    let maxWords = max 0 <| state.wordIndex - (maxWordsOnPage viewDims)
         wordList = Array.toList <| Array.slice maxWords state.wordIndex state.fullText
         itemList = wordListToItems wordList
-        justifyForView = justifyItems viewDims.linesPerPage viewDims.textWidth
+        justifyForView = justifyItems viewDims.linesPerPage <| toFloat viewDims.textWidth
         (hs, lastLineItems) = L.foldr justifyForView ([], []) itemList
     in wordCount <| lastLineItems :: hs
 
@@ -113,6 +116,19 @@ wordListToItems words =
         let toItem word = Box (strWidth word) <| Html.div [ Style.mainTextStyle ]
                                                           [ Html.text word ]
         in L.intersperse (Spring 4 2 2) <| L.map toItem words
+
+adjustmentRatio : Float -> List Item -> Float
+adjustmentRatio optimalLineWidth hs =
+    let lineWidth = itemListWidth hs
+        springs = L.filter isSpring hs
+        widthDifference = optimalLineWidth - lineWidth
+    in if | lineWidth > optimalLineWidth ->
+            let shrinkability = L.sum << L.map (\(Spring _ _ z) -> z) <| springs
+            in widthDifference / shrinkability
+          | lineWidth < optimalLineWidth ->
+            let stretchability = L.sum << L.map (\(Spring _ y _) -> y) <| springs
+            in widthDifference / stretchability
+          | lineWidth == optimalLineWidth -> 0
 
 itemWidth : Item -> Float
 itemWidth i = case i of
@@ -141,10 +157,10 @@ isSpring item = case item of
 toSpring : Float -> Item
 toSpring w = Spring w 0 0
 
-justifyLine : Int -> List Item -> Html.Html
+justifyLine : Float -> List Item -> Html.Html
 justifyLine lineWidth is =
     let cleanList = L.filter (not << isSpring) is
-        widthToAdd = toFloat lineWidth - itemListWidth cleanList
+        widthToAdd = lineWidth - itemListWidth cleanList
         numberSprings = L.length cleanList - 1
         springWidth = widthToAdd / toFloat numberSprings
         widthsToAdd = L.repeat numberSprings springWidth
@@ -155,11 +171,11 @@ justifyLine lineWidth is =
 unjustifyLine : List Item -> Html.Html
 unjustifyLine = Html.div [] << L.map itemHtml << L.reverse
 
-justifyItems : Int -> Int -> Item -> (List (List Item), List Item) -> (List (List Item), List Item)
+justifyItems : Int -> Float -> Item -> (List (List Item), List Item) -> (List (List Item), List Item)
 justifyItems numLines lineWidth item (hs, is) =
     if | L.length hs == numLines -> (hs, [])
        | otherwise -> let currentWidth = itemListWidth (item :: is)
-                      in if | currentWidth > toFloat lineWidth ->
+                      in if | currentWidth > lineWidth ->
                                let nextLine = L.reverse is
                                    nextIs = if | isSpring item -> []
                                                | otherwise -> [item]
