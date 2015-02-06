@@ -72,7 +72,8 @@ typesetPage state viewDims =
         floatTextWidth = toFloat viewDims.textWidth
         pagePar = L.map (justifyLine floatTextWidth) << L.take viewDims.linesPerPage <| toPar floatTextWidth maxPageText
         page = toPage (toFloat viewDims.textHeight) pagePar
-    in (page, wordCount pagePar)
+        progressBar = Style.progressSVG state.wordIndex state.textLength viewDims.textWidth
+    in (Html.div [] [ page, progressBar ], wordCount pagePar)
 
 prevPageWordCount : ModelState -> UI.ViewDimensions -> Int
 prevPageWordCount state viewDims =
