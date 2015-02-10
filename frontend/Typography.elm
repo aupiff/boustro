@@ -94,7 +94,8 @@ wordListToItems words =
         let toItem : String -> Item
             toItem word = Box (strWidth word) <| Html.div [ Style.mainTextStyle ]
                                                           [ Html.text word ]
-        in L.intersperse (Spring 4 3 2) <| L.map toItem words
+           -- TODO this defines the default space must be played with
+        in L.intersperse (Spring 5 3 2) <| L.map toItem words
 
 newLine : Item -> List Line -> List Line
 newLine w ls = [ w ] :: ls
@@ -104,9 +105,13 @@ addToLine w (l :: ls) = (w :: l) :: ls
 
 toPar : Float -> DocumentText -> Paragraph
 toPar lineWidth =
-    let fitH = fits lineWidth << L.head
+    let headFits : Paragraph -> Bool
+        headFits = fits lineWidth << L.head -- we only check head here because
+                        -- we necessarily have already checked the tail elements
+        minBad : List Paragraph -> Paragraph
         minBad = minWith (paragraphBadness lineWidth)
-        nextWord w ps = L.filter fitH ( newLine w (minBad ps) :: L.map (addToLine w) ps )
+        nextWord : Item -> List Paragraph -> List Paragraph
+        nextWord w ps = L.filter headFits ( newLine w (minBad ps) :: L.map (addToLine w) ps )
     in  minBad << L.foldr nextWord [ [ [ (Spring 0 0 0) ] ] ]
 
 minWith : (a -> comparable) -> List a -> a
@@ -120,10 +125,9 @@ paragraphBadness lineWidth ls = L.sum <| L.map (badness lineWidth) ls
 badness : Float -> Line -> Float
 badness lineWidth l =
     let adjRatio = adjustmentRatio lineWidth l
-        --a = log "adjRatio" adjRatio
        -- 10000 is a stand in for infinity, should I just use inifinity?
     in if | adjRatio < -1 -> 10000
-          | otherwise     -> 100 * (abs <| adjRatio ^ 3)
+          | otherwise     -> adjRatio ^ 2
 
 fits : Float -> Line -> Bool
 fits lineWidth ls = (adjustmentRatio lineWidth ls) > -1
