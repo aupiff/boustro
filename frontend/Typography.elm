@@ -118,6 +118,7 @@ minWith : (a -> comparable) -> List a -> a
 minWith f = L.foldl1 (\x p -> if | f x < f p -> x
                                  | otherwise -> p)
 
+-- TeX checks that neighboring lines have similar adj ratios... this would be a good thing to add!
 paragraphBadness : Float -> Paragraph -> Float
 paragraphBadness lineWidth ls = L.sum <| L.map (badness lineWidth) ls
 

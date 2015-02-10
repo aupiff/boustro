@@ -50,5 +50,6 @@ update update (modelState, viewState) =
                 newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
             in (newModelState, newViewState)
         otherwise -> (modelState, viewState)
+
 main : Signal Element
 main = S.map (.view << snd) appState
