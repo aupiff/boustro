@@ -8,6 +8,10 @@ listToMaybe : List a -> Maybe a
 listToMaybe xs = if | L.isEmpty xs -> Nothing
                     | otherwise    -> Just <| L.head xs
 
+minWith : (a -> comparable) -> List a -> a
+minWith f = L.foldl1 (\x p -> if | f x < f p -> x
+                                 | otherwise -> p)
+
 toUnit : a -> ()
 toUnit _ = ()
 

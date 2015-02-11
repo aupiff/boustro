@@ -24,7 +24,7 @@ type Item = Box Float Html.Html      -- width, representation
 type alias DocumentText = List Item
 type alias Line = List Item
 type alias Paragraph = ( List Line, -- lines of paragraph
-                         Float,     -- width of head of `Line` list
+                         Float,     -- current line width
                          Float      -- badness of whole paragraph
                        )
 
@@ -104,18 +104,16 @@ wordListToItems words =
            -- TODO this defines the default space must be played with
         in L.intersperse (Spring spaceWidth 3 2) <| L.map toItem words
 
-newLine : Float -> Item -> Paragraph -> Paragraph
-newLine lineWidth w (ls, lw, pBadness) =
+-- This will change when lineWidth becomes variable
+newLine : Item -> Paragraph -> Paragraph
+newLine w (ls, lineWidth, pBadness) =
     let nls = [ w ] :: ls
-        nlw = itemWidth w
-        pBadness = paragraphBadness lineWidth (ls, lw, pBadness)
-    in (nls, nlw, pBadness)
+    in (nls, lineWidth, pBadness)
 
-addToLine : Float -> Item -> Paragraph -> Paragraph
-addToLine lineWidth w ((l :: ls), lw, pb) =
+addToLine : Item -> Paragraph -> Paragraph
+addToLine w ((l :: ls), lineWidth, pb) =
     let nls = (w :: l) :: ls
-        nlw = lw + spaceWidth + itemWidth w
-    in (nls, nlw, pb)
+    in (nls, lineWidth, pb)
 
 toPar : Float -> DocumentText -> Paragraph
 toPar lineWidth =
@@ -123,14 +121,10 @@ toPar lineWidth =
         headFits (par, _, _) = fits lineWidth <| L.head par -- we only check head here because
                         -- we necessarily have already checked the tail elements
         minBad : List Paragraph -> Paragraph
-        minBad = minWith (paragraphBadness lineWidth)
+        minBad = Utils.minWith (paragraphBadness lineWidth)
         nextWord : Item -> List Paragraph -> List Paragraph
-        nextWord w ps = L.filter headFits ( newLine lineWidth w (minBad ps) :: L.map (addToLine lineWidth w) ps )
+        nextWord w ps = L.filter headFits ( newLine w (minBad ps) :: L.map (addToLine w) ps )
     in  minBad << L.foldr nextWord [ ([ [ (Spring 0 0 0) ] ], 0, 0) ]
-
-minWith : (a -> comparable) -> List a -> a
-minWith f = L.foldl1 (\x p -> if | f x < f p -> x
-                                 | otherwise -> p)
 
 -- TeX checks that neighboring lines have similar adj ratios... this would be a good thing to add!
 paragraphBadness : Float -> Paragraph -> Float
