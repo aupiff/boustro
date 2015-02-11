@@ -23,7 +23,10 @@ type Item = Box Float Html.Html      -- width, representation
           | Penalty Float Float Bool -- TODO fill this in
 type alias DocumentText = List Item
 type alias Line = List Item
-type alias Paragraph = List Line
+type alias Paragraph = ( List Line, -- lines of paragraph
+                         Float,     -- width of head of `Line` list
+                         Float      -- badness of whole paragraph
+                       )
 
 -- divStyle necessary for even spacing on mobile devices TODO figure out why!
 boustro : List Html.Html -> (List Html.Html, Bool) -> (List Html.Html, Bool)
@@ -36,7 +39,7 @@ boustro is (hs, reverseState) =
     in (nextH :: hs, nextLineState)
 
 -- pageStyle is necessary to keep bottom indicator in the same position
-toPage : Float -> Paragraph -> Html.Html
+toPage : Float -> List Line -> Html.Html
 toPage h paragraph =
     let pageStyle = style [ ("height", toString h ++ "px")
                           , ("font-size", toString Style.fontHeight ++ "px") -- TODO remove this, shouldn't be necessary
@@ -56,8 +59,8 @@ justifyLine lineWidth is =
 wordsPerLine : Line -> Int
 wordsPerLine = L.length << L.filter (not << isSpring)
 
-wordCount : Paragraph -> Int
-wordCount hs = (L.sum <| L.map wordsPerLine hs)
+wordCount : List Line -> Int
+wordCount = L.sum << L.map wordsPerLine
 
 maxWordsOnPage : UI.ViewDimensions -> Int
 maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 30
@@ -70,7 +73,8 @@ typesetPage state viewDims =
                                                                state.fullText
         maxPageText = wordListToItems wordList
         floatTextWidth = toFloat viewDims.textWidth
-        pagePar = L.map (justifyLine floatTextWidth) << L.take viewDims.linesPerPage <| toPar floatTextWidth maxPageText
+        (par, _, _) = toPar floatTextWidth maxPageText
+        pagePar = L.map (justifyLine floatTextWidth) <| L.take viewDims.linesPerPage par
         page = toPage (toFloat viewDims.textHeight) pagePar
         progressBar = Style.progressSVG state.wordIndex state.textLength viewDims.textWidth
     in (Html.div [] [ page, progressBar ], wordCount pagePar)
@@ -81,7 +85,8 @@ prevPageWordCount state viewDims =
         wordList = Array.toList <| Array.slice maxWords state.wordIndex state.fullText
         maxPageText = wordListToItems wordList
         floatTextWidth = toFloat viewDims.textWidth
-        pagePar = L.map (justifyLine floatTextWidth) << L.take viewDims.linesPerPage <| toPar floatTextWidth maxPageText
+        (par, _, _) = toPar floatTextWidth maxPageText
+        pagePar = L.map (justifyLine floatTextWidth) <| L.take viewDims.linesPerPage par
     in  wordCount pagePar
 
 strWidth : String -> Float
@@ -89,30 +94,39 @@ strWidth str = let txtElement = Text.rightAligned << Text.style Style.textStyle
                                                   <| Text.fromString str
                in toFloat <| widthOf txtElement
 
+spaceWidth = 5
+
 wordListToItems : List String -> DocumentText
 wordListToItems words =
         let toItem : String -> Item
             toItem word = Box (strWidth word) <| Html.div [ Style.mainTextStyle ]
                                                           [ Html.text word ]
            -- TODO this defines the default space must be played with
-        in L.intersperse (Spring 5 3 2) <| L.map toItem words
+        in L.intersperse (Spring spaceWidth 3 2) <| L.map toItem words
 
-newLine : Item -> List Line -> List Line
-newLine w ls = [ w ] :: ls
+newLine : Float -> Item -> Paragraph -> Paragraph
+newLine lineWidth w (ls, lw, pBadness) =
+    let nls = [ w ] :: ls
+        nlw = itemWidth w
+        pBadness = paragraphBadness lineWidth (ls, lw, pBadness)
+    in (nls, nlw, pBadness)
 
-addToLine : Item -> List Line -> List Line
-addToLine w (l :: ls) = (w :: l) :: ls
+addToLine : Float -> Item -> Paragraph -> Paragraph
+addToLine lineWidth w ((l :: ls), lw, pb) =
+    let nls = (w :: l) :: ls
+        nlw = lw + spaceWidth + itemWidth w
+    in (nls, nlw, pb)
 
 toPar : Float -> DocumentText -> Paragraph
 toPar lineWidth =
     let headFits : Paragraph -> Bool
-        headFits = fits lineWidth << L.head -- we only check head here because
+        headFits (par, _, _) = fits lineWidth <| L.head par -- we only check head here because
                         -- we necessarily have already checked the tail elements
         minBad : List Paragraph -> Paragraph
         minBad = minWith (paragraphBadness lineWidth)
         nextWord : Item -> List Paragraph -> List Paragraph
-        nextWord w ps = L.filter headFits ( newLine w (minBad ps) :: L.map (addToLine w) ps )
-    in  minBad << L.foldr nextWord [ [ [ (Spring 0 0 0) ] ] ]
+        nextWord w ps = L.filter headFits ( newLine lineWidth w (minBad ps) :: L.map (addToLine lineWidth w) ps )
+    in  minBad << L.foldr nextWord [ ([ [ (Spring 0 0 0) ] ], 0, 0) ]
 
 minWith : (a -> comparable) -> List a -> a
 minWith f = L.foldl1 (\x p -> if | f x < f p -> x
@@ -120,7 +134,9 @@ minWith f = L.foldl1 (\x p -> if | f x < f p -> x
 
 -- TeX checks that neighboring lines have similar adj ratios... this would be a good thing to add!
 paragraphBadness : Float -> Paragraph -> Float
-paragraphBadness lineWidth ls = L.sum <| L.map (badness lineWidth) ls
+paragraphBadness lineWidth (ls, _, pb) = case ls of
+    [_] -> 0
+    (l :: _) -> pb + badness lineWidth l
 
 -- knuth recommends 100 * | r_j ^ 3 |, but what could that 100 possibly do?
 badness : Float -> Line -> Float
