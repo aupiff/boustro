@@ -125,6 +125,8 @@ toPar lineWidth =
                         -- we necessarily have already checked the tail elements
         minBad : List Paragraph -> Paragraph
         minBad = Utils.minWith paragraphBadness
+        -- TODO must calculate cost relative to the number of lines actually being displayed
+        -- have to ignore the lines that will be dropped // do that dropping in this function? prolly
         nextWord : Item -> List Paragraph -> List Paragraph
         nextWord w ps = L.foldr trim [] <| L.filter headFits ( newLine w (minBad ps) :: L.map (addToLine w) ps )
     in  minBad << L.foldr nextWord [ ([ [ (Spring 0 0 0) ] ], lineWidth, 0) ]
