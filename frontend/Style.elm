@@ -27,17 +27,21 @@ reverseStyle = [ ("-moz-transform", "scaleX(-1)")
 mainTextStyle : Html.Attribute
 mainTextStyle = style [ ("font-family", "Georgia, serif")
                       , ("color", "black")
-                      , ("-webkit-font-smoothing", "antialiased") ]
+                      , ("-webkit-font-smoothing", "antialiased")
+                      , ("margin-top", toString textMargins ++ "px")
+                      , ("margin-bottom", toString textMargins ++ "px")
+                      ]
 
 lineHeight : Int
 lineHeight = let txtElement = Text.rightAligned << Text.style textStyle
                                                 <| Text.fromString "test"
-             in Graphics.Element.heightOf txtElement
+             in Graphics.Element.heightOf txtElement + textMargins * 2
 
 progressBarHeight = 8
 viewTopMargin = 10
 minBottomMargin = 8
 fontHeight = 17
+textMargins = 1
 
 linesPerPage : Int -> Int
 linesPerPage h = (h - viewTopMargin - progressBarHeight - minBottomMargin) // lineHeight
@@ -54,17 +58,19 @@ progressSVG currentWord totalWords textWidth =
                          , ("height", toString progressBarHeight ++ "px") ]
         svgWrapper = svg [ svgStyle, version "1.1", viewBox <| "0 0 " ++ toString svgWidth ++ " " ++ toString progressBarHeight]
         ratio = toFloat currentWord / toFloat totalWords
-        circleX = (toFloat circleTravelWidth * ratio) + 4
-        circleIndicator = circle [ cx <| toString circleX, cy "4", r "4", fill "black" ] []
+        radius = 3
+        strRadius = toString radius
+        circleX = (toFloat circleTravelWidth * ratio) + radius
+        circleIndicator = circle [ cx <| toString circleX, cy "4", r strRadius, fill "black" ] []
         barHeight = toString 4
         leftBar = rect [ x "0",
                          y barHeight,
                          height "1",
-                         width (toString <| max 0 <| circleX - 6 ),
+                         width (toString <| max 0 <| circleX - radius - 2 ),
                          fill "black" ] []
-        rightBar = rect [ x (toString <| min circleTravelWidth <| ceiling <| circleX + 6 )
+        rightBar = rect [ x (toString <| min circleTravelWidth <| ceiling <| circleX + radius + 2 )
                         , y barHeight
                         , height "1"
-                        , width (toString <| max 0 <| circleTravelWidth - floor circleX - 6 )
+                        , width (toString <| max 0 <| circleTravelWidth - floor circleX - radius - 2 )
                         , fill "black" ] []
     in  divWrapper [ svgWrapper [ circleIndicator, leftBar, rightBar ] ]

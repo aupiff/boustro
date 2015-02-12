@@ -65,7 +65,7 @@ wordCount : List Line -> Int
 wordCount = L.sum << L.map wordsPerLine
 
 maxWordsOnPage : UI.ViewDimensions -> Int
-maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 30
+maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 32
 
 typesetPage : ModelState -> UI.ViewDimensions -> (Html.Html, Int)
 typesetPage state viewDims =
@@ -104,7 +104,7 @@ wordListToItems words =
             toItem word = Box (strWidth word) <| Html.div [ Style.mainTextStyle ]
                                                           [ Html.text word ]
            -- TODO this defines the default space must be played with
-        in L.intersperse (Spring spaceWidth 3 2) <| L.map toItem words
+        in L.intersperse (Spring spaceWidth 2 3) <| L.map toItem words
 
 -- This will change when lineWidth becomes variable
 newLine : Item -> Paragraph -> Paragraph
