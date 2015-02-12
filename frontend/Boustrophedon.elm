@@ -42,13 +42,14 @@ update update (modelState, viewState) =
                          newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
                      in (newModelState, newViewState)
                   | otherwise -> (modelState, viewState)
+        Input (Gesture NoGesture) -> (modelState, viewState)
         Input (Gesture Prev) ->
             let wc = Typography.prevPageWordCount modelState viewState.viewDimensions
                 idx = max (modelState.wordIndex - wc) 0
                 newModelState = { modelState | wordIndex <- idx }
                 newViewState = viewFromModelAndDims newModelState viewState.viewDimensions
             in (newModelState, newViewState)
-        Input (Gesture NoGesture) -> (modelState, viewState)
+        otherwise -> (modelState, viewState)
 
 main : Signal Element
 main = S.map (.view << snd) appState
