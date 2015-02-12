@@ -126,8 +126,16 @@ toPar lineWidth =
         minBad : List Paragraph -> Paragraph
         minBad = Utils.minWith paragraphBadness
         nextWord : Item -> List Paragraph -> List Paragraph
-        nextWord w ps = L.filter headFits ( newLine w (minBad ps) :: L.map (addToLine w) ps )
+        nextWord w ps = L.foldr trim [] <| L.filter headFits ( newLine w (minBad ps) :: L.map (addToLine w) ps )
     in  minBad << L.foldr nextWord [ ([ [ (Spring 0 0 0) ] ], lineWidth, 0) ]
+
+trim : Paragraph -> List Paragraph -> List Paragraph
+trim q ps = case ps of
+  [] -> [ q ]
+  (p :: ps') -> let qParBad = paragraphBadness q
+                    pParBad = paragraphBadness p
+                in if | qParBad <= pParBad -> q :: ps'
+                      | otherwise -> q :: ps
 
 -- TeX checks that neighboring lines have similar adj ratios... this would be a good thing to add!
 paragraphBadness : Paragraph -> Float
