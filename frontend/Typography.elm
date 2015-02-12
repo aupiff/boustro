@@ -16,7 +16,6 @@ import Model (ModelState)
 import Utils
 import UI
 import Style
-import Debug (log)
 
 type Item = Box Float Html.Html      -- width, representation
           | Spring Float Float Float -- width, strechability, shrinkability
@@ -28,18 +27,19 @@ type alias Paragraph = ( List Line, -- lines of paragraph
                          Float      -- badness of whole paragraph
                        )
 
+-- TODO can't apply multiple styles for some reason... either elm error, or code versions mismatch
 -- divStyle necessary for even spacing on mobile devices TODO figure out why!
 boustro : List Html.Html -> (List Html.Html, Bool) -> (List Html.Html, Bool)
 boustro is (hs, reverseState) =
-    let divStyle =  style [ ("height", toString Style.lineHeight ++ "px") ]
-        styles = if | reverseState -> [ divStyle , Style.reverseStyle ]
-                    | otherwise    -> [ divStyle ]
+    let divStyle =  [ ("height", toString Style.lineHeight ++ "px") ]
+        styles = if | reverseState -> [ style <| divStyle ++ Style.reverseStyle ]
+                    | otherwise    -> [ style divStyle ]
         nextH = Html.div styles is
         nextLineState = not reverseState
     in (nextH :: hs, nextLineState)
 
 -- pageStyle is necessary to keep bottom indicator in the same position
-toPage : Float -> List Line -> Html.Html
+toPage : Int -> List Line -> Html.Html
 toPage h paragraph =
     let pageStyle = style [ ("height", toString h ++ "px")
                           , ("font-size", toString Style.fontHeight ++ "px") -- TODO remove this, shouldn't be necessary
@@ -55,7 +55,7 @@ justifyLine lineWidth is =
         baseSpringWidth = widthToAdd // numberSprings
         remainingWidth = rem widthToAdd numberSprings
         widthsToAdd = L.repeat remainingWidth (baseSpringWidth + 1) ++ L.repeat (numberSprings - remainingWidth) baseSpringWidth
-        springs = L.map (\x -> (Box (toFloat x) <| Html.div [ Style.mainTextStyle ] [ Html.text " " ])) widthsToAdd
+        springs = L.map (\x -> (Spring (toFloat x) 0 0)) widthsToAdd
     in Utils.interleave cleanList springs
 
 wordsPerLine : Line -> Int
@@ -77,7 +77,7 @@ typesetPage state viewDims =
         floatTextWidth = toFloat viewDims.textWidth
         (par, _, _) = toPar floatTextWidth maxPageText
         pagePar = L.map (justifyLine floatTextWidth) <| L.take viewDims.linesPerPage par
-        page = toPage (toFloat viewDims.textHeight) pagePar
+        page = toPage viewDims.textHeight pagePar
         progressBar = Style.progressSVG state.wordIndex state.textLength viewDims.textWidth
     in (Html.div [] [ page, progressBar ], wordCount pagePar)
 
@@ -96,7 +96,7 @@ strWidth str = let txtElement = Text.rightAligned << Text.style Style.textStyle
                                                   <| Text.fromString str
                in toFloat <| widthOf txtElement
 
-spaceWidth = 4.5
+spaceWidth = 5
 
 wordListToItems : List String -> DocumentText
 wordListToItems words =
@@ -132,8 +132,8 @@ toPar lineWidth =
 -- TeX checks that neighboring lines have similar adj ratios... this would be a good thing to add!
 paragraphBadness : Paragraph -> Float
 paragraphBadness (ls, lineWidth, pb) = case ls of
-    [_] -> 0
-    (l :: _) -> pb + badness lineWidth l
+    [ _ ]      -> 0
+    ( l :: _ ) -> pb + badness lineWidth l
 
 -- knuth recommends 100 * | r_j ^ 3 |, but what could that 100 possibly do?
 badness : Float -> Line -> Float
@@ -168,7 +168,7 @@ itemWidth i = case i of
 itemHtml : Item -> Html.Html
 itemHtml item =
     let spanStyle : Float -> Html.Attribute
-        spanStyle w = style [ ("width", toString w ++ "px")
+        spanStyle w = style [ ("width", toString (round w) ++ "px")
                             , ("display", "inline-block") ]
     in case item of
             Box w h   -> Html.span [spanStyle w] [h]

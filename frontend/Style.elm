@@ -16,13 +16,13 @@ textStyle = { typeface = [ "Georgia", "serif" ]
             , line     = Nothing
             }
 
-reverseStyle : Html.Attribute
-reverseStyle = style [ ("-moz-transform", "scaleX(-1)")
-                     , ("-o-transform",  "scaleX(-1)")
-                     , ("-webkit-transform", "scaleX(-1)")
-                     , ("transform", "scaleX(-1)")
-                     , ("filter", "FlipH")
-                     , ("-ms-filter", "\"FlipH\"") ]
+-- reverseStyle : Html.Attribute
+reverseStyle = [ ("-moz-transform", "scaleX(-1)")
+               , ("-o-transform",  "scaleX(-1)")
+               , ("-webkit-transform", "scaleX(-1)")
+               , ("transform", "scaleX(-1)")
+               , ("filter", "FlipH")
+               , ("-ms-filter", "\"FlipH\"") ]
 
 mainTextStyle : Html.Attribute
 mainTextStyle = style [ ("font-family", "Georgia, serif")
