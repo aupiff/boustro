@@ -50,10 +50,12 @@ toPage h paragraph =
 justifyLine : Float -> Line -> Line
 justifyLine lineWidth is =
     let cleanList = L.filter (not << isSpring) is
-        widthToAdd = lineWidth - itemListWidth cleanList
+        widthToAdd = round <| lineWidth - itemListWidth cleanList
         numberSprings = L.length cleanList - 1
-        springWidth = widthToAdd / toFloat numberSprings
-        springs = L.repeat numberSprings (Box springWidth <| Html.div [ Style.mainTextStyle ] [ Html.text " " ])
+        baseSpringWidth = widthToAdd // numberSprings
+        remainingWidth = rem widthToAdd numberSprings
+        widthsToAdd = L.repeat remainingWidth (baseSpringWidth + 1) ++ L.repeat (numberSprings - remainingWidth) baseSpringWidth
+        springs = L.map (\x -> (Box (toFloat x) <| Html.div [ Style.mainTextStyle ] [ Html.text " " ])) widthsToAdd
     in Utils.interleave cleanList springs
 
 wordsPerLine : Line -> Int
@@ -94,7 +96,7 @@ strWidth str = let txtElement = Text.rightAligned << Text.style Style.textStyle
                                                   <| Text.fromString str
                in toFloat <| widthOf txtElement
 
-spaceWidth = 5
+spaceWidth = 4.5
 
 wordListToItems : List String -> DocumentText
 wordListToItems words =
@@ -108,7 +110,8 @@ wordListToItems words =
 newLine : Item -> Paragraph -> Paragraph
 newLine w (ls, lineWidth, pBadness) =
     let nls = [ w ] :: ls
-    in (nls, lineWidth, pBadness)
+        npBadness = paragraphBadness (nls, lineWidth, pBadness)
+    in (nls, lineWidth, npBadness)
 
 addToLine : Item -> Paragraph -> Paragraph
 addToLine w ((l :: ls), lineWidth, pb) =
@@ -121,14 +124,14 @@ toPar lineWidth =
         headFits (par, _, _) = fits lineWidth <| L.head par -- we only check head here because
                         -- we necessarily have already checked the tail elements
         minBad : List Paragraph -> Paragraph
-        minBad = Utils.minWith (paragraphBadness lineWidth)
+        minBad = Utils.minWith paragraphBadness
         nextWord : Item -> List Paragraph -> List Paragraph
         nextWord w ps = L.filter headFits ( newLine w (minBad ps) :: L.map (addToLine w) ps )
-    in  minBad << L.foldr nextWord [ ([ [ (Spring 0 0 0) ] ], 0, 0) ]
+    in  minBad << L.foldr nextWord [ ([ [ (Spring 0 0 0) ] ], lineWidth, 0) ]
 
 -- TeX checks that neighboring lines have similar adj ratios... this would be a good thing to add!
-paragraphBadness : Float -> Paragraph -> Float
-paragraphBadness lineWidth (ls, _, pb) = case ls of
+paragraphBadness : Paragraph -> Float
+paragraphBadness (ls, lineWidth, pb) = case ls of
     [_] -> 0
     (l :: _) -> pb + badness lineWidth l
 
@@ -138,7 +141,7 @@ badness lineWidth l =
     let adjRatio = adjustmentRatio lineWidth l
        -- 10000 is a stand in for infinity, should I just use inifinity?
     in if | adjRatio < -1 -> 10000
-          | otherwise     -> adjRatio ^ 2
+          | otherwise     -> adjRatio ^ 3
 
 fits : Float -> Line -> Bool
 fits lineWidth ls = (adjustmentRatio lineWidth ls) > -1
