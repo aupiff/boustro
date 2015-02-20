@@ -15,6 +15,7 @@ import           Control.Lens
 import           Data.Maybe
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import qualified Data.ByteString.Char8 as BS
 import           Data.Time.Clock
 import qualified Database.PostgreSQL.Simple as P
 import           Snap
@@ -56,14 +57,13 @@ routes = [ ("/", serveFile "frontend/boustro.html")
 
 showUsersHandler = do
     results <- query_ "select * from snap_auth_user"
-    liftIO $ renderHtmlNodes $ p $ show (results :: [AuthUser])
-
+    writeBS . BS.pack $ show (results :: [AuthUser])
 
 addUserHandler = do
     mname <- getParam "uname"
     let name = maybe "guest" T.decodeUtf8 mname
     u <- with auth $ createUser name ""
-    liftIO $ print u
+    writeBS . BS.pack $ show u
 
 ------------------------------------------------------------------------------
 -- | The application initializer.
