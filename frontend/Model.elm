@@ -3,11 +3,25 @@ module Model where
 import Array
 import List as L
 import String
+import Graphics.Element (Element, empty)
 
-type alias ModelState = { fullText   : Array.Array String
-                        , textLength : Int
-                        , wordIndex  : Int
-                        }
+type alias TextPart = { title : String
+                      , path  : String
+                      }
+
+type ModelState = EmptyModel
+                | MenuModel MenuModelData
+                | TextModel TextModelData
+
+type alias TextModelData = { fullText       : Array.Array String
+                           , wordIndex      : Int
+                           , pageWordCount  : Int
+                           , view           : Element
+                           }
+
+type alias MenuModelData = { texts : List TextPart
+                           , view : Element
+                           }
 
 strToWordArray : String -> Array.Array String
 strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
@@ -15,8 +29,7 @@ strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.l
                          singleParText = String.join " " << L.map paragraphPrefix <| txtLines
                      in  Array.fromList <| String.words singleParText
 
-stringToModelState : String -> ModelState
-stringToModelState str = let text = strToWordArray str
-                         in { fullText  = text
-                            , textLength = Array.length text
-                            , wordIndex = 0 }
+modelToView model = case model of
+    EmptyModel -> empty
+    MenuModel data -> data.view
+    TextModel data -> data.view

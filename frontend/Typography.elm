@@ -12,7 +12,7 @@ import Color
 import Maybe
 import Dict
 import Dict (Dict)
-import Model (ModelState)
+import Model (ModelState, TextModelData)
 import Utils
 import UI
 import Style
@@ -67,24 +67,24 @@ wordCount = L.sum << L.map wordsPerLine
 maxWordsOnPage : UI.ViewDimensions -> Int
 maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 32
 
-typesetPage : ModelState -> UI.ViewDimensions -> (Html.Html, Int)
-typesetPage state viewDims =
-    let maxWords = min (maxWordsOnPage viewDims + state.wordIndex) state.textLength
+typesetPage : Array.Array String -> Int -> UI.ViewDimensions -> (Html.Html, Int)
+typesetPage text wordIndex viewDims =
+    let textLength = Array.length text
+        maxWords = min (maxWordsOnPage viewDims + wordIndex) textLength
         -- TODO probably don't have to chang this from array to LIST!!!
-        wordList = Array.toList <| Array.slice state.wordIndex maxWords
-                                                               state.fullText
+        wordList = Array.toList <| Array.slice wordIndex maxWords text
         maxPageText = wordListToItems wordList
         floatTextWidth = toFloat viewDims.textWidth
         (par, _, _) = toPar floatTextWidth maxPageText
         pagePar = L.map (justifyLine floatTextWidth) <| L.take viewDims.linesPerPage par
         page = toPage viewDims.textHeight pagePar
-        progressBar = Style.progressSVG state.wordIndex state.textLength viewDims.textWidth
+        progressBar = Style.progressSVG wordIndex textLength viewDims.textWidth
     in (Html.div [] [ page, progressBar ], wordCount pagePar)
 
-prevPageWordCount : ModelState -> UI.ViewDimensions -> Int
-prevPageWordCount state viewDims =
-    let maxWords = max 0 <| state.wordIndex - maxWordsOnPage viewDims
-        wordList = Array.toList <| Array.slice maxWords state.wordIndex state.fullText
+prevPageWordCount : Array.Array String -> Int -> UI.ViewDimensions -> Int
+prevPageWordCount text wordIndex viewDims =
+    let maxWords = max 0 <| wordIndex - maxWordsOnPage viewDims
+        wordList = Array.toList <| Array.slice maxWords wordIndex text
         maxPageText = wordListToItems wordList
         floatTextWidth = toFloat viewDims.textWidth
         (par, _, _) = toPar floatTextWidth maxPageText

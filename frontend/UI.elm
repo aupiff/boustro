@@ -1,19 +1,18 @@
 module UI where
 
 import Time (Time, every, second, millisecond, timestamp)
-import Maybe as M
 import Html
-import Graphics.Element (Element, container, relative, absolute, midTopAt, heightOf)
+import Graphics.Element (Element, container, relative,
+                         absolute, midTopAt, heightOf, empty)
 import List as L
 import Touch
-import Text
 import Signal as S
-import Signal ((<~), (~), Signal)
 import Server
 import Window
 import Utils
 import Keyboard
 import Style
+import Model
 
 type alias WindowDimensions = (Int, Int)
 
@@ -24,13 +23,11 @@ type alias ViewDimensions = { fullWidth    : Int
                             , linesPerPage : Int
                             }
 
-type alias ViewState = { pageWordCount  : Int
-                       , view           : Element
-                       , viewDimensions : ViewDimensions
-                       }
+menuScene : List Model.TextPart -> ViewDimensions -> Element
+menuScene _ _ = empty
 
-scene : Html.Html -> ViewDimensions -> Element
-scene page viewDimensions =
+textScene : Html.Html -> ViewDimensions -> Element
+textScene page viewDimensions =
     let renderTextView = Html.toElement viewDimensions.textWidth
                                         viewDimensions.textHeight
         horizontalMiddle = absolute <| viewDimensions.fullWidth // 2
@@ -63,9 +60,11 @@ currentViewDimensions =
 
 type UserInput = Gesture GestureType
                | SetText String
+               | SummonMenu (Maybe String)
 
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText Server.textContent
+                        , S.map SummonMenu Server.textList
                         , S.map Gesture gesture ]
 
 
