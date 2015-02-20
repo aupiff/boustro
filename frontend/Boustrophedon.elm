@@ -46,24 +46,32 @@ updateState update (viewDimensions, modelState) =
             in (viewDimensions, newModelState)
         Input (Gesture Next) ->
             case modelState of
-                TextModel textModelData ->
-                    let idx = textModelData.wordIndex + textModelData.pageWordCount
-                    in if | idx < (Array.length textModelData.fullText) ->
-                            let newModelState = TextModel { textModelData | wordIndex <- idx }
-                                newViewState = viewFromModelAndDims newModelState textViewData.viewDimensions
-                            in (newModelState, newViewState)
-                          | otherwise -> (modelState, viewState)
-                otherwise -> (modelState, viewState)
-        Input (Gesture NoGesture) -> (modelState, viewState)
+                TextModel textModel ->
+                    let idx = textModel.wordIndex + textModel.pageWordCount
+                    in if | idx < (Array.length textModel.fullText) ->
+                            let (page, wc) = Typography.typesetPage textModel.fullText idx viewDimensions
+                                view = textScene page viewDimensions
+                            in ( viewDimensions
+                               , TextModel { textModel | wordIndex <- idx
+                                                       , view <- view
+                                                       , pageWordCount <- wc
+                                           })
+                          | otherwise -> (viewDimensions, modelState)
+                otherwise -> (viewDimensions, modelState)
+        Input (Gesture NoGesture) -> (viewDimensions, modelState)
         Input (Gesture Prev) ->
-            case (viewState, modelState) of
-                (TextView textViewData, TextModel textModelData)  ->
-                    let wc = Typography.prevPageWordCount textModelData textViewData.viewDimensions
-                        idx = max (textModelData.wordIndex - wc) 0
-                        newModelState = TextModel { textModelData | wordIndex <- idx }
-                        newViewState = viewFromModelAndDims newModelState textViewData.viewDimensions
-                    in (newModelState, newViewState)
-                otherwise -> (modelState, viewState)
+            case modelState of
+                TextModel textModel ->
+                    let pwc = Typography.prevPageWordCount textModel.fullText idx viewDimensions
+                        idx = max (textModel.wordIndex - pwc) 0
+                        (page, wc) = Typography.typesetPage textModel.fullText idx viewDimensions
+                        view = textScene page viewDimensions
+                    in ( viewDimensions
+                       , TextModel { textModel | wordIndex <- idx
+                                               , view <- view
+                                               , pageWordCount <- wc
+                                   })
+                otherwise -> (viewDimensions, modelState)
 
 main : Signal Element
-main = S.map (viewToElement << snd) appState
+main = S.map (modelToView << snd) appState
