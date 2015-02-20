@@ -50,10 +50,24 @@ routes = [ ("/", serveFile "frontend/boustro.html")
          , ("elm.js", serveFile "frontend/elm.js")
          , ("style.css", serveFile "frontend/style.css")
          , ("texts", serveDirectory "texts")
+         , ("listtexts", showTextsHandler)
          , ("hyphenation", serveDirectory "hyphenation")
          , ("user", showUsersHandler)
          , ("user/:uname", addUserHandler)
          ]
+
+data TextPart = TextPart
+  { title :: T.Text
+  , path  :: T.Text
+  } deriving (Show, Eq)
+
+instance FromRow TextPart where
+     fromRow = TextPart <$> field <*> field
+
+-- TODO add type annotations to all of these
+showTextsHandler = do
+    results <- query_ "select * from texts"
+    writeBS . BS.pack $ show (results :: [TextPart])
 
 showUsersHandler = do
     results <- query_ "select * from snap_auth_user"
