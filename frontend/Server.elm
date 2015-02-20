@@ -2,8 +2,19 @@ module Server where
 
 import Signal as S
 import Http
+import Debug (log)
 
 serverUrl = "http://localhost:8000/"
+
+textList : Signal String
+textList = let response = Http.sendGet <| S.constant <| serverUrl ++ "text"
+               getContent : Http.Response String -> String
+               getContent response = case response of
+                   Http.Success str -> let _ = log "text List" str
+                                       in str
+                   Http.Waiting     -> "waiting."
+                   Http.Failure _ _ -> "loading text failed."
+           in S.map getContent response
 
 fileName : Signal String
 fileName = S.constant "apology.txt"

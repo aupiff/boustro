@@ -4,10 +4,20 @@ import Array
 import List as L
 import String
 
-type alias ModelState = { fullText   : Array.Array String
-                        , textLength : Int
-                        , wordIndex  : Int
-                        }
+type alias TextPart = { title : String
+                      , path  : String
+                      }
+
+type ModelState = EmptyModel
+                | MenuModel MenuModelData
+                | TextModel TextModelData
+
+type alias TextModelData = { fullText   : Array.Array String
+                           , textLength : Int
+                           , wordIndex  : Int
+                           }
+
+type alias MenuModelData = { texts : List TextPart }
 
 strToWordArray : String -> Array.Array String
 strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.lines <| str
@@ -17,6 +27,7 @@ strToWordArray str = let txtLines = L.filter (not << String.isEmpty) << String.l
 
 stringToModelState : String -> ModelState
 stringToModelState str = let text = strToWordArray str
-                         in { fullText  = text
-                            , textLength = Array.length text
-                            , wordIndex = 0 }
+                         in TextModel { fullText  = text
+                                      , textLength = Array.length text
+                                      , wordIndex = 0
+                                      }

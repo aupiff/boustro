@@ -12,7 +12,7 @@ import Color
 import Maybe
 import Dict
 import Dict (Dict)
-import Model (ModelState)
+import Model (ModelState, TextModelData)
 import Utils
 import UI
 import Style
@@ -67,7 +67,7 @@ wordCount = L.sum << L.map wordsPerLine
 maxWordsOnPage : UI.ViewDimensions -> Int
 maxWordsOnPage viewDims = viewDims.linesPerPage * viewDims.textWidth // 32
 
-typesetPage : ModelState -> UI.ViewDimensions -> (Html.Html, Int)
+typesetPage : TextModelData -> UI.ViewDimensions -> (Html.Html, Int)
 typesetPage state viewDims =
     let maxWords = min (maxWordsOnPage viewDims + state.wordIndex) state.textLength
         -- TODO probably don't have to chang this from array to LIST!!!
@@ -81,7 +81,7 @@ typesetPage state viewDims =
         progressBar = Style.progressSVG state.wordIndex state.textLength viewDims.textWidth
     in (Html.div [] [ page, progressBar ], wordCount pagePar)
 
-prevPageWordCount : ModelState -> UI.ViewDimensions -> Int
+prevPageWordCount : TextModelData -> UI.ViewDimensions -> Int
 prevPageWordCount state viewDims =
     let maxWords = max 0 <| state.wordIndex - maxWordsOnPage viewDims
         wordList = Array.toList <| Array.slice maxWords state.wordIndex state.fullText
