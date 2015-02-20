@@ -16,7 +16,7 @@ viewFromModelAndDims modelState viewDimensions =
        , view = view
        , viewDimensions = viewDimensions }
 
-emptyState = ( stringToModelState Server.defaultText
+emptyState = ( stringToModelState ""
              , { pageWordCount = 0
                , view = empty
                , viewDimensions = viewHelper (300, 300) }

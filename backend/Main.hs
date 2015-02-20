@@ -49,13 +49,15 @@ routes = [ ("/", serveFile "frontend/boustro.html")
          , ("elm.js", serveFile "frontend/elm.js")
          , ("style.css", serveFile "frontend/style.css")
          , ("texts", serveDirectory "texts")
+         , ("hyphenation", serveDirectory "hyphenation")
          , ("user", showUsersHandler)
          , ("user/:uname", addUserHandler)
          ]
 
 showUsersHandler = do
     results <- query_ "select * from snap_auth_user"
-    liftIO $ print (results :: [AuthUser])
+    liftIO $ renderHtmlNodes $ p $ show (results :: [AuthUser])
+
 
 addUserHandler = do
     mname <- getParam "uname"
