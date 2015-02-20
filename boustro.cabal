@@ -17,6 +17,7 @@ executable boustro
   hs-source-dirs:      backend
   build-depends:       base >=4.7 && <4.8,
                        bytestring,
+                       aeson,
                        xmlhtml,
                        text,
                        time,
@@ -26,6 +27,7 @@ executable boustro
                        snap,
                        snap-core,
                        snap-server,
+                       snap-extras >= 0.7,
                        snaplet-postgresql-simple,
                        postgresql-simple,
                        heist

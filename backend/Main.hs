@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Main where
 
@@ -15,9 +16,11 @@ import           Control.Lens
 import           Data.Maybe
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import           Data.Aeson.Types (ToJSON)
 import qualified Data.ByteString.Char8 as BS
 import           Data.Time.Clock
 import qualified Database.PostgreSQL.Simple as P
+import           GHC.Generics
 import           Snap
 import           Snap.Snaplet.Auth
 import           Snap.Snaplet.Auth.Backends.PostgresqlSimple
@@ -25,6 +28,7 @@ import           Snap.Snaplet.Heist
 import           Snap.Snaplet.PostgresqlSimple
 import           Snap.Snaplet.Session
 import           Snap.Snaplet.Session.Backends.CookieSession
+import           Snap.Extras.JSON (writeJSON)
 import           Snap.Util.FileServe
 import           Heist
 import           Text.XmlHtml hiding (render)
@@ -60,15 +64,17 @@ routes = [ ("/", method GET $ serveFile "frontend/boustro.html")
 data TextPart = TextPart
   { title :: T.Text
   , path  :: T.Text
-  } deriving (Show, Eq)
+  } deriving (Show, Eq, Generic)
 
 instance FromRow TextPart where
      fromRow = TextPart <$> field <*> field
 
+instance ToJSON TextPart
+
 showTextsHandler :: Handler App App ()
 showTextsHandler = do
     results <- query_ "select * from texts"
-    writeBS . BS.pack $ show (results :: [TextPart])
+    writeJSON (results :: [TextPart])
 
 addTextHandler :: Handler App App ()
 addTextHandler = do
@@ -80,7 +86,7 @@ addTextHandler = do
 showUsersHandler :: Handler App App ()
 showUsersHandler = do
     results <- query_ "select * from snap_auth_user"
-    writeBS . BS.pack $ show (results :: [AuthUser])
+    writeJSON (results :: [AuthUser])
 
 addUserHandler :: Handler App App ()
 addUserHandler = do
