@@ -6,7 +6,6 @@ import UI (..)
 import Model (..)
 import Utils
 import Typography
-import Debug (log)
 
 stringToModelState : String -> ViewDimensions -> ModelState
 stringToModelState str viewDimensions =
@@ -14,7 +13,6 @@ stringToModelState str viewDimensions =
         wordIndex = 0
         (page, wc) = Typography.typesetPage text wordIndex viewDimensions
         view = textScene page viewDimensions
-        _ = log "wc" <| toString wc
     in TextModel { fullText  = text
                  , wordIndex = wordIndex
                  , pageWordCount = wc
@@ -54,9 +52,6 @@ updateState update (viewDimensions, modelState) =
                             idx = if newWordIndex < textLength then newWordIndex else textModel.wordIndex
                             (page, wc) = Typography.typesetPage textModel.fullText idx viewDimensions
                             view = textScene page viewDimensions
-                            _ = log "new word index" <| toString idx
-                            _ = log "old word index" <| toString textModel.wordIndex
-                            _ = log "word count" <| toString textModel.pageWordCount
                         in TextModel { textModel | wordIndex <- idx
                                                  , pageWordCount <- wc
                                                  , view <- view }
