@@ -23,24 +23,8 @@ type alias ViewDimensions = { fullWidth    : Int
                             , linesPerPage : Int
                             }
 
--- TODO View Dims should be stored elsewhere
-type ViewState = TextView { pageWordCount  : Int
-                          , view           : Element
-                          , viewDimensions : ViewDimensions
-                          }
-               | MenuView { view : Element
-                          , viewDimensions : ViewDimensions
-                          }
-               | EmptyView { viewDimensions : ViewDimensions }
-
-viewToElement : ViewState -> Element
-viewToElement viewState = case viewState of
-    TextView obj -> obj.view
-    MenuView obj -> obj.view
-    EmptyView _ -> empty
-
-selectionScene : Model.MenuModelData -> ViewDimensions -> Element
-selectionScene _ _ = empty
+menuScene : Model.MenuModelData -> ViewDimensions -> Element
+menuScene _ _ = empty
 
 textScene : Html.Html -> ViewDimensions -> Element
 textScene page viewDimensions =

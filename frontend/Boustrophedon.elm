@@ -1,4 +1,5 @@
 import List as L
+import Array
 import Signal as S
 import Graphics.Element (Element, empty)
 import UI (..)
@@ -6,46 +7,48 @@ import Model (..)
 import Utils
 import Typography
 
--- TODO figure out how to ensure view element w/ Elm's record system
-viewFromModelAndDims : ModelState -> ViewDimensions -> ViewState
-viewFromModelAndDims modelState viewDimensions = case modelState of
-    EmptyModel -> EmptyView { viewDimensions = viewDimensions }
-    MenuModel selectionModel ->
-        let view = selectionScene selectionModel viewDimensions
-        in MenuView { view = view
-                    , viewDimensions = viewDimensions
-                    }
-    TextModel textModel ->
-        let (page, wc) = Typography.typesetPage textModel viewDimensions
-            view = textScene page viewDimensions
-        in TextView { pageWordCount = wc
-                    , view = view
-                    , viewDimensions = viewDimensions
-                    }
+stringToModelState : String -> ViewDimensions -> ModelState
+stringToModelState str viewDimensions =
+    let text = strToWordArray str
+        wordIndex = 0
+        (page, wc) = Typography.typesetPage text wordIndex viewDimensions
+        view = textScene page viewDimensions
+    in TextModel { fullText  = text
+                 , wordIndex = wordIndex
+                 , pageWordCount = wc
+                 , view = view
+                 }
 
-appState : Signal (ModelState, ViewState)
+updateView : ModelState -> ViewDimensions -> ModelState
+updateView modelState viewDimensions = case modelState of
+    EmptyModel -> EmptyModel
+    MenuModel menuModel ->
+        let view = menuScene menuModel viewDimensions
+        in MenuModel { menuModel | view <- view }
+    TextModel textModel ->
+        let (page, wc) = Typography.typesetPage textModel.fullText textModel.wordIndex viewDimensions
+            view = textScene page viewDimensions
+        in TextModel { textModel | pageWordCount <- wc
+                                 , view <- view }
+
+appState : Signal (ViewDimensions, ModelState)
 appState = let input = (S.map Input userInput)
                viewChange = (S.map ViewChange currentViewDimensions)
-               emptyState = (EmptyModel, EmptyView { viewDimensions = viewHelper (300, 300) } )
+               emptyState = (viewHelper (300, 300), EmptyModel)
            in S.foldp updateState emptyState <| S.merge input viewChange
 
-updateState : Update -> (ModelState, ViewState) -> (ModelState, ViewState)
-updateState update (modelState, viewState) =
+updateState : Update -> (ViewDimensions, ModelState) -> (ViewDimensions, ModelState)
+updateState update (viewDimensions, modelState) =
     case update of
-        ViewChange viewDims -> (modelState, viewFromModelAndDims modelState viewDims)
+        ViewChange newViewDims -> (newViewDims, updateView modelState newViewDims)
         Input (SetText str) ->
-            let viewDimensions = case viewState of
-                    TextView textViewData -> textViewData.viewDimensions
-                    MenuView menuViewData -> menuViewData.viewDimensions
-                    EmptyView emptyViewData -> emptyViewData.viewDimensions
-                newModelState = stringToModelState str
-                newViewState = viewFromModelAndDims newModelState viewDimensions
-            in (newModelState, newViewState)
+            let newModelState = stringToModelState str viewDimensions
+            in (viewDimensions, newModelState)
         Input (Gesture Next) ->
-            case (viewState, modelState) of
-                (TextView textViewData, TextModel textModelData)  ->
-                    let idx = textModelData.wordIndex + textViewData.pageWordCount
-                    in if | idx < textModelData.textLength ->
+            case modelState of
+                TextModel textModelData ->
+                    let idx = textModelData.wordIndex + textModelData.pageWordCount
+                    in if | idx < (Array.length textModelData.fullText) ->
                             let newModelState = TextModel { textModelData | wordIndex <- idx }
                                 newViewState = viewFromModelAndDims newModelState textViewData.viewDimensions
                             in (newModelState, newViewState)
