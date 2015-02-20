@@ -23,7 +23,7 @@ type alias ViewDimensions = { fullWidth    : Int
                             , linesPerPage : Int
                             }
 
-menuScene : Model.MenuModelData -> ViewDimensions -> Element
+menuScene : List Model.TextPart -> ViewDimensions -> Element
 menuScene _ _ = empty
 
 textScene : Html.Html -> ViewDimensions -> Element
@@ -60,9 +60,11 @@ currentViewDimensions =
 
 type UserInput = Gesture GestureType
                | SetText String
+               | SummonMenu (Maybe String)
 
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText Server.textContent
+                        , S.map SummonMenu Server.textList
                         , S.map Gesture gesture ]
 
 

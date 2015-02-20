@@ -51,6 +51,7 @@ instance HasPostgres (Handler b App) where
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
 routes = [ ("/", method GET $ serveFile "frontend/boustro.html")
+         , ("/menu", method GET $ serveFile "frontend/menu.html")
          , ("elm.js", method GET $ serveFile "frontend/elm.js")
          , ("style.css", method GET $ serveFile "frontend/style.css")
          , ("texts", method GET $ serveDirectory "texts")

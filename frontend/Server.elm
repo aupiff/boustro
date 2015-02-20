@@ -2,18 +2,19 @@ module Server where
 
 import Signal as S
 import Http
+import Maybe (Maybe(Just, Nothing))
 import Debug (log)
 
 serverUrl = "http://localhost:8000/"
 
-textList : Signal String
+textList : Signal (Maybe String)
 textList = let response = Http.sendGet <| S.constant <| serverUrl ++ "text"
-               getContent : Http.Response String -> String
+               getContent : Http.Response String -> Maybe String
                getContent response = case response of
                    Http.Success str -> let _ = log "text List" str
-                                       in str
-                   Http.Waiting     -> "waiting."
-                   Http.Failure _ _ -> "loading text failed."
+                                       in Just str
+                   Http.Waiting     -> Nothing
+                   Http.Failure _ _ -> Nothing
            in S.map getContent response
 
 fileName : Signal String

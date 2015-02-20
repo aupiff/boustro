@@ -19,11 +19,18 @@ stringToModelState str viewDimensions =
                  , view = view
                  }
 
+--listToMenuState : String -> ViewDimensions -> ModelState
+--listToMenuState list viewDimensions =
+--    let texts = [{ title = "test", path = "test.txt"}]
+--    in { texts = texts
+--       , view = menuScene texts viewDimensions
+--       }
+
 updateView : ModelState -> ViewDimensions -> ModelState
 updateView modelState viewDimensions = case modelState of
     EmptyModel -> EmptyModel
     MenuModel menuModel ->
-        let view = menuScene menuModel viewDimensions
+        let view = menuScene menuModel.texts viewDimensions
         in MenuModel { menuModel | view <- view }
     TextModel textModel ->
         let (page, wc) = Typography.typesetPage textModel.fullText textModel.wordIndex viewDimensions
@@ -57,7 +64,6 @@ updateState update (viewDimensions, modelState) =
                                                  , view <- view }
                     otherwise -> modelState
             in (viewDimensions, newModel)
-        Input (Gesture NoGesture) -> (viewDimensions, modelState)
         Input (Gesture Prev) ->
             let newModel = case modelState of
                     TextModel textModel ->
@@ -70,6 +76,13 @@ updateState update (viewDimensions, modelState) =
                                                  , view <- view }
                     otherwise -> modelState
             in (viewDimensions, newModel)
+        otherwise -> (viewDimensions, modelState)
+        --Input (SummonMenu textListM) ->
+        --    case textListM of
+        --        Just list -> let newModel = listToMenuState list viewDimensions
+        --                     in (viewDimensions, menuScene)
+        --        Nothing -> (viewDimensions, modelState)
+
 
 main : Signal Element
 main = S.map (modelToView << snd) appState
