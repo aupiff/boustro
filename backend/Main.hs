@@ -46,14 +46,15 @@ instance HasPostgres (Handler b App) where
 ------------------------------------------------------------------------------
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
-routes = [ ("/", serveFile "frontend/boustro.html")
-         , ("elm.js", serveFile "frontend/elm.js")
-         , ("style.css", serveFile "frontend/style.css")
-         , ("texts", serveDirectory "texts")
-         , ("listtexts", showTextsHandler)
-         , ("hyphenation", serveDirectory "hyphenation")
-         , ("user", showUsersHandler)
-         , ("user/:uname", addUserHandler)
+routes = [ ("/", method GET $ serveFile "frontend/boustro.html")
+         , ("elm.js", method GET $ serveFile "frontend/elm.js")
+         , ("style.css", method GET $ serveFile "frontend/style.css")
+         , ("texts", method GET $ serveDirectory "texts")
+         , ("text", method GET showTextsHandler)
+         , ("text", method POST addTextHandler)
+         , ("hyphenation", method GET $ serveDirectory "hyphenation")
+         , ("user", method GET showUsersHandler)
+         , ("user/:uname", method POST addUserHandler)
          ]
 
 data TextPart = TextPart
@@ -64,15 +65,24 @@ data TextPart = TextPart
 instance FromRow TextPart where
      fromRow = TextPart <$> field <*> field
 
--- TODO add type annotations to all of these
+showTextsHandler :: Handler App App ()
 showTextsHandler = do
     results <- query_ "select * from texts"
     writeBS . BS.pack $ show (results :: [TextPart])
 
+addTextHandler :: Handler App App ()
+addTextHandler = do
+  title <- getPostParam "title"
+  path <- getPostParam "path"
+  newTextPart <- execute "INSERT INTO texts VALUES (?, ?)" (title, path)
+  writeBS . BS.pack $ show newTextPart
+
+showUsersHandler :: Handler App App ()
 showUsersHandler = do
     results <- query_ "select * from snap_auth_user"
     writeBS . BS.pack $ show (results :: [AuthUser])
 
+addUserHandler :: Handler App App ()
 addUserHandler = do
     mname <- getParam "uname"
     let name = maybe "guest" T.decodeUtf8 mname
