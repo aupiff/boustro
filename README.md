@@ -1,10 +1,10 @@
-# boustro
+# [boustro](http://boustro.com)
 
-a web app for reading texts in [boustrophedon](http://en.wikipedia.org/wiki/Boustrophedon)
+a web app for reading texts in
+[boustrophedon](http://en.wikipedia.org/wiki/Boustrophedon)
 
-the frontend is written in [Elm](http://elm-lang.org/), a language you should really check
-out!
+## demo usage
 
-# todo
-
--- include links to all useful papers: Knuth, bridging the gap (oxford), liang
+Try the live [demo](http://boustro.com)! turn pages with arrow keys on
+a personal computer. On mobile devices, double tap left and right side of
+screen to go back and advance pages, respectively.
