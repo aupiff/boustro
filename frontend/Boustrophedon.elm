@@ -20,10 +20,9 @@ stringToModelState str viewDimensions =
                  , view = view
                  }
 
-listToMenuState : String -> ViewDimensions -> ModelState
-listToMenuState list viewDimensions =
-    let texts = [{ title = "test", path = "test.txt"}]
-        _ = log "called menuState" list
+jsonToMenuState : String -> ViewDimensions -> ModelState
+jsonToMenuState json viewDimensions =
+    let texts = jsonToTextPartlist json
     in MenuModel { texts = texts
                  , view = menuScene texts viewDimensions
                  }
@@ -83,7 +82,7 @@ updateState update (viewDimensions, modelState) =
             in (viewDimensions, newModel)
         Input (SummonMenu textListM) ->
             case textListM of
-                Just list -> let newModelState = listToMenuState list viewDimensions
+                Just json -> let newModelState = jsonToMenuState json viewDimensions
                                  _ = log "just" newModelState
                              in (viewDimensions, newModelState)
                 Nothing -> (viewDimensions, modelState)

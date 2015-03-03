@@ -20,7 +20,7 @@ textList = let response = Http.sendGet <| textUrl
            in S.map getContent response
 
 fileName : S.Channel String
-fileName = S.channel "apology.txt"
+fileName = S.channel ""
 
 -- TODO do a drop updates thing so this doesn't happen twice
 textContent : Signal String
