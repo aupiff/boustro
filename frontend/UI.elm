@@ -54,7 +54,7 @@ viewHelper (w, h) = let linesPerPage = Style.linesPerPage h
 currentViewDimensions : Signal ViewDimensions
 currentViewDimensions =
     let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions
-                           , Utils.initialSetupSignal2 ]
+                           , Utils.initialSetupSignal ]
     in S.sampleOn cues <| S.map viewHelper Window.dimensions
 
 type UserInput = Gesture GestureType

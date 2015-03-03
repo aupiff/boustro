@@ -6,6 +6,7 @@ import UI (..)
 import Model (..)
 import Utils
 import Typography
+import Debug (log)
 
 stringToModelState : String -> ViewDimensions -> ModelState
 stringToModelState str viewDimensions =
@@ -22,6 +23,7 @@ stringToModelState str viewDimensions =
 listToMenuState : String -> ViewDimensions -> ModelState
 listToMenuState list viewDimensions =
     let texts = [{ title = "test", path = "test.txt"}]
+        _ = log "called menuState" list
     in MenuModel { texts = texts
                  , view = menuScene texts viewDimensions
                  }
@@ -46,7 +48,10 @@ appState = let input = (S.map Input userInput)
 
 updateState : Update -> (ViewDimensions, ModelState) -> (ViewDimensions, ModelState)
 updateState update (viewDimensions, modelState) =
-    case update of
+ let _ = log "mstate" modelState
+     _ = log "dim" viewDimensions
+     _ = log "update" update
+ in case update of
         ViewChange newViewDims -> (newViewDims, updateView modelState newViewDims)
         Input (SetText str) ->
             let newModelState = stringToModelState str viewDimensions
@@ -76,11 +81,13 @@ updateState update (viewDimensions, modelState) =
                                                  , view <- view }
                     otherwise -> modelState
             in (viewDimensions, newModel)
-        otherwise -> (viewDimensions, modelState)
         Input (SummonMenu textListM) ->
             case textListM of
-                Just list -> (viewDimensions, listToMenuState list viewDimensions)
+                Just list -> let newModelState = listToMenuState list viewDimensions
+                                 _ = log "just" newModelState
+                             in (viewDimensions, newModelState)
                 Nothing -> (viewDimensions, modelState)
+        otherwise -> (viewDimensions, modelState)
 
 main : Signal Element
 main = S.map (modelToView << snd) appState

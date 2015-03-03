@@ -8,12 +8,7 @@ import Time (every, millisecond)
 initialSetupSignal : Signal ()
 initialSetupSignal = S.map toUnit << S.dropRepeats
                                   << S.foldp (\_ _ -> 1) 0
-                                  <| every (200 * millisecond)
-
-initialSetupSignal2 : Signal ()
-initialSetupSignal2 = S.map toUnit << S.dropRepeats
-                                  << S.foldp (\_ _ -> 1) 0
-                                  <| every (20 * millisecond)
+                                  <| every (10 * millisecond)
 
 listToMaybe : List a -> Maybe a
 listToMaybe xs = if | L.isEmpty xs -> Nothing

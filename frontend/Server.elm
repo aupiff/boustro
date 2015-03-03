@@ -3,20 +3,18 @@ module Server where
 import Signal as S
 import Http
 import Maybe (Maybe(Just, Nothing))
-import Debug (log)
 import Utils
 
 serverUrl  : String
 serverUrl = "http://localhost:8000/"
 
-textUrl = S.sampleOn (Utils.initialSetupSignal) <| S.constant <| serverUrl ++ "text"
+textUrl = S.constant <| serverUrl ++ "text"
 
 textList : Signal (Maybe String)
 textList = let response = Http.sendGet <| textUrl
                getContent : Http.Response String -> Maybe String
                getContent response = case response of
-                   Http.Success str -> let _ = log "text List" str
-                                       in Just str
+                   Http.Success str -> Just str
                    Http.Waiting     -> Nothing
                    Http.Failure _ _ -> Nothing
            in S.map getContent response
