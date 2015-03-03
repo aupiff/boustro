@@ -82,6 +82,5 @@ updateState update (viewDimensions, modelState) =
                 Just list -> (viewDimensions, listToMenuState list viewDimensions)
                 Nothing -> (viewDimensions, modelState)
 
-
 main : Signal Element
 main = S.map (modelToView << snd) appState

@@ -4,11 +4,15 @@ import Signal as S
 import Http
 import Maybe (Maybe(Just, Nothing))
 import Debug (log)
+import Utils
 
+serverUrl  : String
 serverUrl = "http://localhost:8000/"
 
+textUrl = S.sampleOn (Utils.initialSetupSignal) <| S.constant <| serverUrl ++ "text"
+
 textList : Signal (Maybe String)
-textList = let response = Http.sendGet <| S.constant <| serverUrl ++ "text"
+textList = let response = Http.sendGet <| textUrl
                getContent : Http.Response String -> Maybe String
                getContent response = case response of
                    Http.Success str -> let _ = log "text List" str
@@ -17,12 +21,12 @@ textList = let response = Http.sendGet <| S.constant <| serverUrl ++ "text"
                    Http.Failure _ _ -> Nothing
            in S.map getContent response
 
-fileName : Signal String
-fileName = S.constant "apology.txt"
+fileName : S.Channel String
+fileName = S.channel "apology.txt"
 
 -- TODO do a drop updates thing so this doesn't happen twice
 textContent : Signal String
-textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) fileName
+textContent = let req = S.map (\x -> Http.get (serverUrl ++ "texts/"  ++ x)) <| S.subscribe fileName
                   response = Http.send <| req
                   getContent : Http.Response String -> String
                   getContent response = case response of

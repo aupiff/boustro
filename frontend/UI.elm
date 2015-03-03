@@ -3,7 +3,8 @@ module UI where
 import Time (Time, every, second, millisecond, timestamp)
 import Html
 import Graphics.Element (Element, container, relative,
-                         absolute, midTopAt, heightOf, empty)
+                         absolute, midTopAt, heightOf, empty, flow, down)
+import Graphics.Input
 import List as L
 import Touch
 import Signal as S
@@ -13,6 +14,7 @@ import Utils
 import Keyboard
 import Style
 import Model
+import Server (fileName)
 
 type alias WindowDimensions = (Int, Int)
 
@@ -24,7 +26,9 @@ type alias ViewDimensions = { fullWidth    : Int
                             }
 
 menuScene : List Model.TextPart -> ViewDimensions -> Element
-menuScene _ _ = empty
+menuScene ts viewDims =
+    let toSelectionButton tp = Graphics.Input.button (S.send fileName (tp.path)) tp.title
+    in flow down <| L.map toSelectionButton ts
 
 textScene : Html.Html -> ViewDimensions -> Element
 textScene page viewDimensions =
@@ -47,15 +51,10 @@ viewHelper (w, h) = let linesPerPage = Style.linesPerPage h
                        , linesPerPage = linesPerPage
                        }
 
-initialSetupSignal : Signal ()
-initialSetupSignal = S.map Utils.toUnit << S.dropRepeats
-                                        << S.foldp (\_ _ -> 1) 0
-                                        <| every (10 * millisecond)
-
 currentViewDimensions : Signal ViewDimensions
 currentViewDimensions =
     let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions
-                           , S.map Utils.toUnit initialSetupSignal ]
+                           , Utils.initialSetupSignal2 ]
     in S.sampleOn cues <| S.map viewHelper Window.dimensions
 
 type UserInput = Gesture GestureType
