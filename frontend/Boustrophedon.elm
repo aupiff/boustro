@@ -19,12 +19,12 @@ stringToModelState str viewDimensions =
                  , view = view
                  }
 
---listToMenuState : String -> ViewDimensions -> ModelState
---listToMenuState list viewDimensions =
---    let texts = [{ title = "test", path = "test.txt"}]
---    in { texts = texts
---       , view = menuScene texts viewDimensions
---       }
+listToMenuState : String -> ViewDimensions -> ModelState
+listToMenuState list viewDimensions =
+    let texts = [{ title = "test", path = "test.txt"}]
+    in MenuModel { texts = texts
+                 , view = menuScene texts viewDimensions
+                 }
 
 updateView : ModelState -> ViewDimensions -> ModelState
 updateView modelState viewDimensions = case modelState of
@@ -77,11 +77,10 @@ updateState update (viewDimensions, modelState) =
                     otherwise -> modelState
             in (viewDimensions, newModel)
         otherwise -> (viewDimensions, modelState)
-        --Input (SummonMenu textListM) ->
-        --    case textListM of
-        --        Just list -> let newModel = listToMenuState list viewDimensions
-        --                     in (viewDimensions, menuScene)
-        --        Nothing -> (viewDimensions, modelState)
+        Input (SummonMenu textListM) ->
+            case textListM of
+                Just list -> (viewDimensions, listToMenuState list viewDimensions)
+                Nothing -> (viewDimensions, modelState)
 
 
 main : Signal Element
