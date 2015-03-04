@@ -6,7 +6,6 @@ import UI (..)
 import Model (..)
 import Utils
 import Typography
-import Debug (log)
 
 stringToModelState : String -> ViewDimensions -> ModelState
 stringToModelState str viewDimensions =
@@ -47,10 +46,7 @@ appState = let input = (S.map Input userInput)
 
 updateState : Update -> (ViewDimensions, ModelState) -> (ViewDimensions, ModelState)
 updateState update (viewDimensions, modelState) =
- let _ = log "mstate" modelState
-     _ = log "dim" viewDimensions
-     _ = log "update" update
- in case update of
+    case update of
         ViewChange newViewDims -> (newViewDims, updateView modelState newViewDims)
         Input (SetText str) ->
             let newModelState = stringToModelState str viewDimensions
@@ -83,7 +79,6 @@ updateState update (viewDimensions, modelState) =
         Input (SummonMenu textListM) ->
             case textListM of
                 Just json -> let newModelState = jsonToMenuState json viewDimensions
-                                 _ = log "just" newModelState
                              in (viewDimensions, newModelState)
                 Nothing -> (viewDimensions, modelState)
         otherwise -> (viewDimensions, modelState)

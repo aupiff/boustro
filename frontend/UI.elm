@@ -9,12 +9,14 @@ import List as L
 import Touch
 import Signal as S
 import Server
+import Char
 import Window
 import Utils
 import Keyboard
 import Style
 import Model
 import Server (fileName)
+import Debug (log)
 
 type alias WindowDimensions = (Int, Int)
 
@@ -61,11 +63,15 @@ type UserInput = Gesture GestureType
                | SetText String
                | SummonMenu (Maybe String)
 
+showMenu : Signal (Maybe String)
+showMenu = let menuKey = Utils.onTrueUpdate <| Keyboard.space -- Keyboard.isDown <| Char.toCode 'm'
+               menuCues = S.mergeMany [menuKey, S.map Utils.toUnit Server.textList]
+           in S.sampleOn menuCues Server.textList
+
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText Server.textContent
-                        , S.map SummonMenu Server.textList
+                        , S.map SummonMenu showMenu
                         , S.map Gesture gesture ]
-
 
 type Update = Input UserInput | ViewChange ViewDimensions
 

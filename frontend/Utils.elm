@@ -5,6 +5,9 @@ import Set
 import Signal as S
 import Time (every, millisecond)
 
+onTrueUpdate : Signal Bool -> Signal ()
+onTrueUpdate signal = S.keepWhen signal () (S.map toUnit signal)
+
 initialSetupSignal : Signal ()
 initialSetupSignal = S.map toUnit << S.dropRepeats
                                   << S.foldp (\_ _ -> 1) 0
