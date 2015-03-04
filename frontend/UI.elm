@@ -4,12 +4,14 @@ import Time (Time, every, second, millisecond, timestamp)
 import Html
 import Graphics.Element (Element, container, relative,
                          absolute, midTopAt, heightOf, empty, flow, down)
+import Graphics.Element
 import Graphics.Input
 import List as L
 import Touch
 import Signal as S
 import Server
 import Char
+import Text
 import Window
 import Utils
 import Keyboard
@@ -27,10 +29,17 @@ type alias ViewDimensions = { fullWidth    : Int
                             , linesPerPage : Int
                             }
 
+menuButton : String -> Element
+menuButton = Text.centered << Text.style Style.menuStyle << Text.fromString
+
 menuScene : List Model.TextPart -> ViewDimensions -> Element
-menuScene ts viewDims =
-    let toSelectionButton tp = Graphics.Input.button (S.send fileName (tp.path)) tp.title
-    in flow down <| L.map toSelectionButton ts
+menuScene ts viewDimensions =
+    let toSelectionButton tp = Graphics.Input.clickable (S.send fileName (tp.path)) <| menuButton tp.title
+        textButtons = flow down <| L.map toSelectionButton ts
+        fullContainer = container viewDimensions.fullWidth
+                                  viewDimensions.fullHeight
+                                  Graphics.Element.middle
+    in fullContainer <| textButtons
 
 textScene : Html.Html -> ViewDimensions -> Element
 textScene page viewDimensions =

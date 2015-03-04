@@ -8,6 +8,16 @@ import Svg (svg, rect, circle)
 import Svg.Attributes (version, x, y, cx, cy, r, fill, width, height, viewBox)
 import Graphics.Element
 
+menuStyle : Text.Style
+menuStyle = { typeface = [ "Georgia", "serif" ]
+            , height   = Just menuFontHeight
+            , color    = Color.black
+            , bold     = False
+            , italic   = False
+            , line     = Nothing
+            }
+
+textStyle : Text.Style
 textStyle = { typeface = [ "Georgia", "serif" ]
             , height   = Just fontHeight
             , color    = Color.black
@@ -41,6 +51,7 @@ progressBarHeight = 8
 viewTopMargin = 10
 minBottomMargin = 8
 fontHeight = 17
+menuFontHeight = 30
 textMargins = 1
 
 linesPerPage : Int -> Int
