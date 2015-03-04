@@ -11,7 +11,7 @@ import Graphics.Element
 menuStyle : Text.Style
 menuStyle = { typeface = [ "Georgia", "serif" ]
             , height   = Just menuFontHeight
-            , color    = Color.black
+            , color    = Color.blue
             , bold     = False
             , italic   = False
             , line     = Nothing

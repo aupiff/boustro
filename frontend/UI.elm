@@ -30,7 +30,9 @@ type alias ViewDimensions = { fullWidth    : Int
                             }
 
 menuButton : String -> Element
-menuButton = Text.centered << Text.style Style.menuStyle << Text.fromString
+menuButton = let buttonContainer = container 400 80 Graphics.Element.middle
+             in buttonContainer << Text.centered << Text.style Style.menuStyle << Text.fromString
+
 
 menuScene : List Model.TextPart -> ViewDimensions -> Element
 menuScene ts viewDimensions =

@@ -6,13 +6,8 @@ import Html.Attributes (style)
 import Graphics.Element (widthOf, heightOf)
 import List as L
 import Array
-import Array (Array)
 import Text
-import Color
 import Maybe
-import Dict
-import Dict (Dict)
-import Model (ModelState, TextModelData)
 import Utils
 import UI
 import Style

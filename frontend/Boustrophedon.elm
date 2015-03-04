@@ -7,8 +7,8 @@ import Model (..)
 import Utils
 import Typography
 
-stringToModelState : String -> ViewDimensions -> ModelState
-stringToModelState str viewDimensions =
+stringToTextState : String -> ViewDimensions -> Model
+stringToTextState str viewDimensions =
     let text = strToWordArray str
         wordIndex = 0
         (page, wc) = Typography.typesetPage text wordIndex viewDimensions
@@ -19,14 +19,14 @@ stringToModelState str viewDimensions =
                  , view = view
                  }
 
-jsonToMenuState : String -> ViewDimensions -> ModelState
+jsonToMenuState : String -> ViewDimensions -> Model
 jsonToMenuState json viewDimensions =
     let texts = jsonToTextPartlist json
     in MenuModel { texts = texts
                  , view = menuScene texts viewDimensions
                  }
 
-updateView : ModelState -> ViewDimensions -> ModelState
+updateView : Model -> ViewDimensions -> Model
 updateView modelState viewDimensions = case modelState of
     EmptyModel -> EmptyModel
     MenuModel menuModel ->
@@ -38,19 +38,19 @@ updateView modelState viewDimensions = case modelState of
         in TextModel { textModel | pageWordCount <- wc
                                  , view <- view }
 
-appState : Signal (ViewDimensions, ModelState)
+appState : Signal (ViewDimensions, Model)
 appState = let input = (S.map Input userInput)
                viewChange = (S.map ViewChange currentViewDimensions)
                emptyState = (viewHelper (300, 300), EmptyModel)
            in S.foldp updateState emptyState <| S.merge input viewChange
 
-updateState : Update -> (ViewDimensions, ModelState) -> (ViewDimensions, ModelState)
+updateState : Update -> (ViewDimensions, Model) -> (ViewDimensions, Model)
 updateState update (viewDimensions, modelState) =
     case update of
-        ViewChange newViewDims -> (newViewDims, updateView modelState newViewDims)
+        ViewChange newViewDims ->
+            (newViewDims, updateView modelState newViewDims)
         Input (SetText str) ->
-            let newModelState = stringToModelState str viewDimensions
-            in (viewDimensions, newModelState)
+            (viewDimensions, stringToTextState str viewDimensions)
         Input (Gesture Next) ->
             let newModel = case modelState of
                     TextModel textModel ->
@@ -78,8 +78,8 @@ updateState update (viewDimensions, modelState) =
             in (viewDimensions, newModel)
         Input (SummonMenu textListM) ->
             case textListM of
-                Just json -> let newModelState = jsonToMenuState json viewDimensions
-                             in (viewDimensions, newModelState)
+                Just json -> let newState = jsonToMenuState json viewDimensions
+                             in (viewDimensions, newState)
                 Nothing -> (viewDimensions, modelState)
         otherwise -> (viewDimensions, modelState)
 

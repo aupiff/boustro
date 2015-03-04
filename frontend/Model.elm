@@ -28,9 +28,9 @@ textPartDecoder = Json.Decode.object2 (,)
                         ("title" := Json.Decode.string)
                         ("path" := Json.Decode.string)
 
-type ModelState = EmptyModel
-                | MenuModel MenuModelData
-                | TextModel TextModelData
+type Model = EmptyModel
+           | MenuModel MenuModelData
+           | TextModel TextModelData
 
 type alias TextModelData = { fullText       : Array.Array String
                            , wordIndex      : Int
