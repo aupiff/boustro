@@ -1,9 +1,9 @@
 import List as L
 import Array
 import Signal as S
-import Graphics.Element (Element, empty)
-import UI (..)
-import Model (..)
+import Graphics.Element exposing (Element, empty)
+import UI exposing (..)
+import Model exposing (..)
 import Utils
 import Typography
 

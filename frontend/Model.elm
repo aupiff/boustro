@@ -3,9 +3,9 @@ module Model where
 import Array
 import List as L
 import String
-import Graphics.Element (Element, empty)
+import Graphics.Element exposing (Element, empty)
 import Json.Decode
-import Json.Decode ((:=))
+import Json.Decode exposing ((:=))
 
 type alias TextPart = { title : String
                       , path  : String

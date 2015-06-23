@@ -1,9 +1,9 @@
 module UI where
 
-import Time (Time, every, second, millisecond, timestamp)
+import Time exposing (Time, every, second, millisecond, timestamp)
 import Html
-import Graphics.Element (Element, container, relative,
-                         absolute, midTopAt, heightOf, empty, flow, down)
+import Graphics.Element exposing (Element, container, relative,
+                                  absolute, midTopAt, heightOf, empty, flow, down)
 import Graphics.Element
 import Graphics.Input
 import List as L
@@ -17,8 +17,8 @@ import Utils
 import Keyboard
 import Style
 import Model
-import Server (fileName)
-import Debug (log)
+import Server exposing (fileName)
+import Debug exposing (log)
 
 type alias WindowDimensions = (Int, Int)
 

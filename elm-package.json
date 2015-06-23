@@ -3,14 +3,16 @@
     "summary": "reading in comfort",
     "repository": "https://github.com/aupiff/boustro.git",
     "license": "BSD3",
+    "elm-version": "0.15.0 <= v < 0.16.0",
     "source-directories": [
         "frontend"
     ],
     "exposed-modules": [],
     "dependencies": {
-        "elm-lang/core": "1.1.0 <= v < 2.0.0",
-        "evancz/local-channel": "1.0.0 <= v < 2.0.0",
-        "evancz/elm-html": "1.1.0 <= v < 2.0.0",
-        "evancz/elm-svg": "1.0.1 <= v <= 1.0.1"
+        "elm-lang/core": "2.1.0 <= v < 3.0.0",
+        "evancz/elm-html": "3.0.0 <= v < 4.0.0",
+        "evancz/elm-svg": "1.0.2 <= v < 2.0.1",
+        "evancz/elm-http": "1.0.0 <= v < 2.0.0",
+        "Apanatshka/elm-signal-extra": "4.0.1 <= v < 5.0.0"
     }
 }

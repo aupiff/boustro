@@ -3,9 +3,9 @@ module Style where
 import Color
 import Html
 import Text
-import Html.Attributes (style)
-import Svg (svg, rect, circle)
-import Svg.Attributes (version, x, y, cx, cy, r, fill, width, height, viewBox)
+import Html.Attributes exposing (style)
+import Svg exposing (svg, rect, circle)
+import Svg.Attributes exposing (version, x, y, cx, cy, r, fill, width, height, viewBox)
 import Graphics.Element
 
 menuStyle : Text.Style
@@ -43,8 +43,8 @@ mainTextStyle = style [ ("font-family", "Georgia, serif")
                       ]
 
 lineHeight : Int
-lineHeight = let txtElement = Text.rightAligned << Text.style textStyle
-                                                <| Text.fromString "test"
+lineHeight = let txtElement = Graphics.Element.rightAligned << Text.style textStyle
+                                                            <| Text.fromString "test"
              in Graphics.Element.heightOf txtElement + textMargins * 2
 
 progressBarHeight = 8

@@ -2,7 +2,7 @@ module Server where
 
 import Signal as S
 import Http
-import Maybe (Maybe(Just, Nothing))
+import Maybe exposing (Maybe(Just, Nothing))
 import Utils
 
 serverUrl  : String
@@ -15,7 +15,7 @@ textList = let response = Http.sendGet <| textUrl
                getContent : Http.Response String -> Maybe String
                getContent response = case response of
                    Http.Success str -> Just str
-                   Http.Waiting     -> Nothing
+                   Http.Waiting     -> Just "loading..."
                    Http.Failure _ _ -> Nothing
            in S.map getContent response
 

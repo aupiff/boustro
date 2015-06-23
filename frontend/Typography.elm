@@ -2,8 +2,8 @@ module Typography where
 
 import String
 import Html
-import Html.Attributes (style)
-import Graphics.Element (widthOf, heightOf)
+import Html.Attributes exposing (style)
+import Graphics.Element exposing (widthOf, heightOf)
 import List as L
 import Array
 import Text
