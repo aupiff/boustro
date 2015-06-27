@@ -7,13 +7,16 @@ import Model exposing (..)
 import Utils
 import Typography
 import Server
-import Server exposing (textList)
+import Server exposing (textList, fileName, textContent)
 import Task exposing (Task, andThen)
 import Http
 
 port textListRunner : Task Http.Error ()
 port textListRunner = Http.getString (Server.serverUrl ++ "text") `andThen`
                       (Signal.send textList.address)
+
+port textContentRunner : Signal (Task Http.Error ())
+port textContentRunner = S.map (\x -> Http.getString (Server.serverUrl ++ "texts/"  ++ x) `andThen` (Signal.send textContent.address)) <| fileName.signal
 
 stringToTextState : String -> ViewDimensions -> Model
 stringToTextState str viewDimensions =

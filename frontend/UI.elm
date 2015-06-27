@@ -17,7 +17,7 @@ import Utils
 import Keyboard
 import Style
 import Model
-import Server exposing (fileName)
+import Server exposing (fileName, textContent)
 import Debug exposing (log)
 
 type alias WindowDimensions = (Int, Int)
@@ -81,7 +81,7 @@ showMenu = S.constant (Just "fuck")
            -- in S.sampleOn menuCues Server.textListM.signal
 
 userInput : Signal UserInput
-userInput = S.mergeMany [ S.map SetText Server.textContent
+userInput = S.mergeMany [ S.map SetText textContent.signal
                         , S.map SummonMenu showMenu
                         , S.map Gesture gesture ]
 
