@@ -31,12 +31,12 @@ type alias ViewDimensions = { fullWidth    : Int
 
 menuButton : String -> Element
 menuButton = let buttonContainer = container 400 80 Graphics.Element.middle
-             in buttonContainer << Text.centered << Text.style Style.menuStyle << Text.fromString
+             in buttonContainer << Graphics.Element.centered << Text.style Style.menuStyle << Text.fromString
 
 
 menuScene : List Model.TextPart -> ViewDimensions -> Element
 menuScene ts viewDimensions =
-    let toSelectionButton tp = Graphics.Input.clickable (S.send fileName (tp.path)) <| menuButton tp.title
+    let toSelectionButton tp = Graphics.Input.clickable (S.message fileName.address (tp.path)) <| menuButton tp.title
         textButtons = flow down <| L.map toSelectionButton ts
         fullContainer = container viewDimensions.fullWidth
                                   viewDimensions.fullHeight
@@ -75,9 +75,10 @@ type UserInput = Gesture GestureType
                | SummonMenu (Maybe String)
 
 showMenu : Signal (Maybe String)
-showMenu = let menuKey = Utils.onTrueUpdate <| Keyboard.space -- Keyboard.isDown <| Char.toCode 'm'
-               menuCues = S.mergeMany [menuKey, S.map Utils.toUnit Server.textList]
-           in S.sampleOn menuCues Server.textList
+showMenu = S.constant (Just "fuck")
+           -- let menuKey = Utils.onTrueUpdate <| Keyboard.space -- Keyboard.isDown <| Char.toCode 'm'
+           --     menuCues = S.mergeMany [ menuKey, S.map Utils.toUnit Server.textListM.signal ]
+           -- in S.sampleOn menuCues Server.textListM.signal
 
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText Server.textContent

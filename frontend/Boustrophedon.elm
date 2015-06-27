@@ -6,6 +6,14 @@ import UI exposing (..)
 import Model exposing (..)
 import Utils
 import Typography
+import Server
+import Server exposing (textList)
+import Task exposing (Task, andThen)
+import Http
+
+port textListRunner : Task Http.Error ()
+port textListRunner = Http.getString (Server.serverUrl ++ "text") `andThen`
+                      (Signal.send textList.address)
 
 stringToTextState : String -> ViewDimensions -> Model
 stringToTextState str viewDimensions =

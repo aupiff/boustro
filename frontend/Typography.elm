@@ -11,6 +11,7 @@ import Maybe
 import Utils
 import UI
 import Style
+import Task exposing (Task, andThen)
 
 type Item = Box Float Html.Html      -- width, representation
           | Spring Float Float Float -- width, strechability, shrinkability
@@ -87,8 +88,8 @@ prevPageWordCount text wordIndex viewDims =
     in  wordCount pagePar
 
 strWidth : String -> Float
-strWidth str = let txtElement = Text.rightAligned << Text.style Style.textStyle
-                                                  <| Text.fromString str
+strWidth str = let txtElement = Graphics.Element.rightAligned << Text.style Style.textStyle
+                                                              <| Text.fromString str
                in toFloat <| widthOf txtElement
 
 spaceWidth = 5
@@ -116,7 +117,7 @@ addToLine w ((l :: ls), lineWidth, pb) =
 toPar : Float -> DocumentText -> Paragraph
 toPar lineWidth =
     let headFits : Paragraph -> Bool
-        headFits (par, _, _) = fits lineWidth <| L.head par -- we only check head here because
+        headFits (par, _, _) = fits lineWidth << Maybe.withDefault [] <| L.head par -- we only check head here because
                         -- we necessarily have already checked the tail elements
         minBad : List Paragraph -> Paragraph
         minBad = Utils.minWith paragraphBadness
