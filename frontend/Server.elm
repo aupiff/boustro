@@ -5,12 +5,13 @@ import Http
 import Maybe exposing (Maybe(Just, Nothing))
 import Utils
 import Task exposing (Task)
+import Model exposing (TextPart)
 
 serverUrl  : String
 serverUrl = "http://localhost:8000/"
 
-textList : S.Mailbox String
-textList = S.mailbox ""
+textList : S.Mailbox (List TextPart)
+textList = S.mailbox []
 
 fileName : S.Mailbox String
 fileName = S.mailbox "my-lost-city-fitzgerald.txt"

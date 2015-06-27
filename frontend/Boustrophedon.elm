@@ -12,7 +12,7 @@ import Task exposing (Task, andThen)
 import Http
 
 port textListRunner : Task Http.Error ()
-port textListRunner = Http.getString (Server.serverUrl ++ "text") `andThen`
+port textListRunner = Http.get textPartListDecoder (Server.serverUrl ++ "text") `andThen`
                       (Signal.send textList.address)
 
 port textContentRunner : Signal (Task Http.Error ())
@@ -29,13 +29,6 @@ stringToTextState str viewDimensions =
                  , wordIndex = wordIndex
                  , pageWordCount = wc
                  , view = view
-                 }
-
-jsonToMenuState : String -> ViewDimensions -> Model
-jsonToMenuState json viewDimensions =
-    let texts = jsonToTextPartlist json
-    in MenuModel { texts = texts
-                 , view = menuScene texts viewDimensions
                  }
 
 updateView : Model -> ViewDimensions -> Model
@@ -88,8 +81,8 @@ updateState update (viewDimensions, modelState) =
                                                  , view <- view }
                     otherwise -> modelState
             in (viewDimensions, newModel)
-        Input (SummonMenu json) ->
-            let newState = jsonToMenuState json viewDimensions
+        Input (SummonMenu texts) ->
+            let newState = MenuModel { texts = texts , view = menuScene texts viewDimensions }
             in (viewDimensions, newState)
         otherwise -> (viewDimensions, modelState)
 

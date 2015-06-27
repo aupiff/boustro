@@ -11,17 +11,11 @@ type alias TextPart = { title : String
                       , path  : String
                       }
 
-jsonToTextPartlist : String -> List TextPart
-jsonToTextPartlist json =
-    let result = Json.Decode.decodeString textPartListDecoder json
-        tupleToTextPart (title, path) = { title = title
+textPartListDecoder : Json.Decode.Decoder (List TextPart)
+textPartListDecoder =
+    let tupleToTextPart (title, path) = { title = title
                                         , path  = path }
-    in case result of
-        Ok ts -> L.map tupleToTextPart ts
-        Err _ -> []
-
-textPartListDecoder : Json.Decode.Decoder (List (String, String))
-textPartListDecoder = Json.Decode.list textPartDecoder
+    in Json.Decode.map (L.map tupleToTextPart) <| Json.Decode.list textPartDecoder
 
 textPartDecoder : Json.Decode.Decoder (String, String)
 textPartDecoder = Json.Decode.object2 (,)

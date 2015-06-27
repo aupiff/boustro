@@ -72,9 +72,9 @@ currentViewDimensions =
 
 type UserInput = Gesture GestureType
                | SetText String
-               | SummonMenu String
+               | SummonMenu (List Model.TextPart)
 
-showMenu : Signal String
+showMenu : Signal (List Model.TextPart)
 showMenu = let menuKey = Utils.onTrueUpdate <| Keyboard.space
                menuCues = S.mergeMany [ menuKey, S.map Utils.toUnit textList.signal ]
            in S.sampleOn menuCues textList.signal
