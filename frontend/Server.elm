@@ -13,7 +13,7 @@ textList : S.Mailbox String
 textList = S.mailbox ""
 
 fileName : S.Mailbox String
-fileName = S.mailbox ""
+fileName = S.mailbox "my-lost-city-fitzgerald.txt"
 
 -- TODO do a drop updates thing so this doesn't happen twice
 textContent : S.Mailbox String

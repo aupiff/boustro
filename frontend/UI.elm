@@ -17,7 +17,7 @@ import Utils
 import Keyboard
 import Style
 import Model
-import Server exposing (fileName, textContent)
+import Server exposing (fileName, textList, textContent)
 import Debug exposing (log)
 
 type alias WindowDimensions = (Int, Int)
@@ -72,13 +72,12 @@ currentViewDimensions =
 
 type UserInput = Gesture GestureType
                | SetText String
-               | SummonMenu (Maybe String)
+               | SummonMenu String
 
-showMenu : Signal (Maybe String)
-showMenu = S.constant (Just "fuck")
-           -- let menuKey = Utils.onTrueUpdate <| Keyboard.space -- Keyboard.isDown <| Char.toCode 'm'
-           --     menuCues = S.mergeMany [ menuKey, S.map Utils.toUnit Server.textListM.signal ]
-           -- in S.sampleOn menuCues Server.textListM.signal
+showMenu : Signal String
+showMenu = let menuKey = Utils.onTrueUpdate <| Keyboard.space
+               menuCues = S.mergeMany [ menuKey, S.map Utils.toUnit textList.signal ]
+           in S.sampleOn menuCues textList.signal
 
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText textContent.signal

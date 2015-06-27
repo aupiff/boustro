@@ -16,7 +16,8 @@ port textListRunner = Http.getString (Server.serverUrl ++ "text") `andThen`
                       (Signal.send textList.address)
 
 port textContentRunner : Signal (Task Http.Error ())
-port textContentRunner = S.map (\x -> Http.getString (Server.serverUrl ++ "texts/"  ++ x) `andThen` (Signal.send textContent.address)) <| fileName.signal
+port textContentRunner = S.map (\x -> Http.getString (Server.serverUrl ++ "texts/"  ++ x)
+                                      `andThen` (Signal.send textContent.address)) <| fileName.signal
 
 stringToTextState : String -> ViewDimensions -> Model
 stringToTextState str viewDimensions =
@@ -87,11 +88,9 @@ updateState update (viewDimensions, modelState) =
                                                  , view <- view }
                     otherwise -> modelState
             in (viewDimensions, newModel)
-        Input (SummonMenu textListM) ->
-            case textListM of
-                Just json -> let newState = jsonToMenuState json viewDimensions
-                             in (viewDimensions, newState)
-                Nothing -> (viewDimensions, modelState)
+        Input (SummonMenu json) ->
+            let newState = jsonToMenuState json viewDimensions
+            in (viewDimensions, newState)
         otherwise -> (viewDimensions, modelState)
 
 main : Signal Element
