@@ -17,7 +17,7 @@ initialSetupSignal = S.map toUnit << S.dropRepeats
 secondSetupSignal : Signal ()
 secondSetupSignal = S.map toUnit << S.dropRepeats
                                  << S.foldp (\_ _ -> 1) 0
-                                 <| every (2500 * millisecond)
+                                 <| every (500 * millisecond)
 
 
 minWith : (a -> comparable) -> List a -> a
