@@ -21,7 +21,7 @@ executable boustro
                        xmlhtml,
                        text,
                        time,
-                       MonadCatchIO-transformers,
+                       transformers,
                        mtl,
                        lens,
                        servant-server,

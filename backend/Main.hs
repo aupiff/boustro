@@ -13,14 +13,15 @@ import           GHC.Generics
 import           Network.Wai
 import qualified Network.Wai.Handler.Warp as N
 import           Servant
+import           Control.Monad.IO.Class
 
-type API = "static" :> Raw
+type API = "app" :> Raw :<|> "texts" :> Raw
 
 api :: Proxy API
 api = Proxy
 
 server :: Server API
-server = serveDirectory "static"
+server = serveDirectory "static" :<|> serveDirectory "static/texts"
 
 app :: Application
 app = serve api server
