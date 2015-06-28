@@ -5,6 +5,7 @@ import Html
 import Graphics.Element exposing (Element, container, relative,
                                   absolute, midTopAt, heightOf, empty, flow, down)
 import Graphics.Element
+import Color exposing (red, lightOrange)
 import Graphics.Input
 import List as L
 import Touch
@@ -29,14 +30,13 @@ type alias ViewDimensions = { fullWidth    : Int
                             , linesPerPage : Int
                             }
 
-menuButton : String -> Element
-menuButton = let buttonContainer = container 400 80 Graphics.Element.middle
-             in buttonContainer << Graphics.Element.centered << Text.style Style.menuStyle << Text.fromString
-
+menuButton : Int -> Int -> String -> Element
+menuButton w h = let buttonContainer = Graphics.Element.color lightOrange << container w h Graphics.Element.middle
+               in buttonContainer << Graphics.Element.centered << Text.style Style.menuStyle << Text.fromString
 
 menuScene : List Model.TextPart -> ViewDimensions -> Element
 menuScene ts viewDimensions =
-    let toSelectionButton tp = Graphics.Input.clickable (S.message fileName.address (tp.path)) <| menuButton tp.title
+    let toSelectionButton tp = menuButton viewDimensions.textWidth (viewDimensions.fullHeight // L.length ts) tp.title
         textButtons = flow down <| L.map toSelectionButton ts
         fullContainer = container viewDimensions.fullWidth
                                   viewDimensions.fullHeight
