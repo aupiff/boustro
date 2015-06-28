@@ -13,6 +13,15 @@ menuStyle = { typeface = [ "Georgia", "serif" ]
             , height   = Just menuFontHeight
             , color    = Color.blue
             , bold     = False
+            , italic   = True
+            , line     = Nothing
+            }
+
+titleStyle : Text.Style
+titleStyle = { typeface = [ "Georgia", "serif" ]
+            , height   = Just menuFontHeight
+            , color    = Color.black
+            , bold     = False
             , italic   = False
             , line     = Nothing
             }
@@ -51,7 +60,8 @@ progressBarHeight = 8
 viewTopMargin = 10
 minBottomMargin = 8
 fontHeight = 17
-menuFontHeight = 30
+menuFontHeight = 25
+titleFontHeight = 30
 textMargins = 1
 
 linesPerPage : Int -> Int

@@ -35,13 +35,13 @@ menuButton w h = let buttonContainer = Graphics.Element.color white << container
                in buttonContainer << Graphics.Element.centered << Text.style Style.menuStyle << Text.fromString
 
 titleButton : Int -> Int -> String -> Element
-titleButton w h = let buttonContainer = Graphics.Element.color lightOrange << container w h Graphics.Element.middle
-                  in buttonContainer << Graphics.Element.centered << Text.style Style.menuStyle << Text.fromString
+titleButton w h = let buttonContainer = Graphics.Element.color white << container w h Graphics.Element.middle
+                  in buttonContainer << Graphics.Element.centered << Text.style Style.titleStyle << Text.fromString
 
 menuScene : List Model.TextPart -> ViewDimensions -> Element
 menuScene ts viewDimensions =
     let toSelectionButton tp = menuButton viewDimensions.textWidth (viewDimensions.fullHeight // 5) tp.title
-        textButtons = flow down <| (titleButton viewDimensions.textWidth (viewDimensions.fullHeight // 5) "Boustrophedon") :: L.map toSelectionButton ts
+        textButtons = flow down <| (titleButton viewDimensions.textWidth (viewDimensions.fullHeight // 5) "BOUSTROPHEDON") :: L.map toSelectionButton ts
         fullContainer = container viewDimensions.fullWidth
                                   viewDimensions.fullHeight
                                   Graphics.Element.middle
