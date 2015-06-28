@@ -14,10 +14,12 @@ import Touch
 
 stringToTextState : String -> ViewDimensions -> Model
 stringToTextState str viewDimensions =
+
     let text = strToWordArray str
         wordIndex = 0
         (page, wc) = Typography.typesetPage text wordIndex viewDimensions
         view = textScene page viewDimensions
+
     in TextModel { fullText  = text
                  , wordIndex = wordIndex
                  , pageWordCount = wc
@@ -26,11 +28,16 @@ stringToTextState str viewDimensions =
 
 updateView : Model -> ViewDimensions -> Model
 updateView modelState viewDimensions = case modelState of
+
     EmptyModel -> EmptyModel
+
     MenuModel menuModel ->
+
         let view = menuScene menuModel.texts viewDimensions
         in MenuModel { menuModel | view <- view }
+
     TextModel textModel ->
+
         let (page, wc) = Typography.typesetPage textModel.fullText textModel.wordIndex viewDimensions
             view = textScene page viewDimensions
         in TextModel { textModel | pageWordCount <- wc
@@ -44,16 +51,23 @@ appState = let input = (S.map Input userInput)
 
 updateState : Update -> (ViewDimensions, Model) -> (ViewDimensions, Model)
 updateState update (viewDimensions, modelState) =
+
     case update of
+
         ViewChange newViewDims ->
+
             (newViewDims, updateView modelState newViewDims)
+
         Input (SetText str) ->
+
             let newModel = case modelState of
                     MenuModel _ -> stringToTextState str viewDimensions
                     EmptyModel  -> stringToTextState str viewDimensions
                     otherwise   -> modelState
             in (viewDimensions, newModel)
+
         Input (Gesture Next) ->
+
             let newModel = case modelState of
                     TextModel textModel ->
                         let textLength = Array.length textModel.fullText
@@ -66,7 +80,9 @@ updateState update (viewDimensions, modelState) =
                                                  , view <- view }
                     otherwise -> modelState
             in (viewDimensions, newModel)
+
         Input (Gesture Prev) ->
+
             let newModel = case modelState of
                     TextModel textModel ->
                         let pwc = Typography.prevPageWordCount textModel.fullText textModel.wordIndex viewDimensions
@@ -78,9 +94,12 @@ updateState update (viewDimensions, modelState) =
                                                  , view <- view }
                     otherwise -> modelState
             in (viewDimensions, newModel)
+
         Input (SummonMenu texts) ->
+
             let newState = MenuModel { texts = texts , view = menuScene texts viewDimensions }
             in (viewDimensions, newState)
+
         otherwise -> (viewDimensions, modelState)
 
 main : Signal Element
