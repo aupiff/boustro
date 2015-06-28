@@ -48,7 +48,11 @@ updateState update (viewDimensions, modelState) =
         ViewChange newViewDims ->
             (newViewDims, updateView modelState newViewDims)
         Input (SetText str) ->
-            (viewDimensions, stringToTextState str viewDimensions)
+            let newModel = case modelState of
+                    MenuModel _ -> stringToTextState str viewDimensions
+                    EmptyModel  -> stringToTextState str viewDimensions
+                    otherwise   -> modelState
+            in (viewDimensions, newModel)
         Input (Gesture Next) ->
             let newModel = case modelState of
                     TextModel textModel ->
