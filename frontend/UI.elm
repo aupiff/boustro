@@ -76,8 +76,8 @@ type UserInput = Gesture GestureType
 
 showMenu : Signal (List Model.TextPart)
 showMenu = let menuKey = Utils.onTrueUpdate <| Keyboard.space
-               menuCues = S.mergeMany [ menuKey, S.map Utils.toUnit textList.signal ]
-           in S.sampleOn menuCues textList.signal
+               menuCues = menuKey
+           in S.sampleOn menuCues (S.constant textList)
 
 userInput : Signal UserInput
 userInput = S.mergeMany [ S.map SetText textContent.signal

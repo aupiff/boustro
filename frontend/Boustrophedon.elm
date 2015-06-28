@@ -10,6 +10,7 @@ import Server
 import Server exposing (textList, fileName, textContent)
 import Task exposing (Task, andThen)
 import Http
+import Touch
 
 stringToTextState : String -> ViewDimensions -> Model
 stringToTextState str viewDimensions =
@@ -83,10 +84,14 @@ main = S.map (modelToView << snd) appState
 
 -- PORTS
 
-port textListRunner : Task Http.Error ()
-port textListRunner = Http.get textPartListDecoder (Server.serverUrl ++ "text") `andThen`
-                      (Signal.send textList.address)
-
 port textContentRunner : Signal (Task Http.Error ())
 port textContentRunner = S.map (\x -> Http.getString (Server.serverUrl ++ "texts/"  ++ x)
                                       `andThen` (Signal.send textContent.address)) <| fileName.signal
+
+port menuAction : Signal (Task x ())
+port menuAction =
+    let toMenuAction tap viewDims =
+        if | tap.y < (viewDims.fullHeight // 3)     -> Signal.send fileName.address "my-lost-city-fitzgerald.txt"
+           | tap.y < (2 * viewDims.fullHeight // 3) -> Signal.send fileName.address "room-of-ones-own.txt"
+           | otherwise                              -> Signal.send fileName.address "trotsky.txt"
+    in S.map2 toMenuAction Touch.taps currentViewDimensions
