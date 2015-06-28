@@ -24,9 +24,7 @@ executable boustro
                        MonadCatchIO-transformers,
                        mtl,
                        lens,
-                       snap,
-                       snap-core,
-                       snap-server,
-                       snap-extras >= 0.7,
-                       heist
+                       servant-server,
+                       wai,
+                       warp
   default-language:    Haskell2010
