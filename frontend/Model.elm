@@ -7,21 +7,6 @@ import Graphics.Element exposing (Element, empty)
 import Json.Decode
 import Json.Decode exposing ((:=))
 
-type alias TextPart = { title : String
-                      , path  : String
-                      }
-
-textPartListDecoder : Json.Decode.Decoder (List TextPart)
-textPartListDecoder =
-    let tupleToTextPart (title, path) = { title = title
-                                        , path  = path }
-    in Json.Decode.map (L.map tupleToTextPart) <| Json.Decode.list textPartDecoder
-
-textPartDecoder : Json.Decode.Decoder (String, String)
-textPartDecoder = Json.Decode.object2 (,)
-                        ("title" := Json.Decode.string)
-                        ("path" := Json.Decode.string)
-
 type Model = EmptyModel
            | MenuModel MenuModelData
            | TextModel TextModelData
@@ -46,3 +31,18 @@ modelToView model = case model of
     EmptyModel -> empty
     MenuModel data -> data.view
     TextModel data -> data.view
+
+type alias TextPart = { title : String
+                      , path  : String
+                      }
+
+textPartListDecoder : Json.Decode.Decoder (List TextPart)
+textPartListDecoder =
+    let tupleToTextPart (title, path) = { title = title
+                                        , path  = path }
+    in Json.Decode.map (L.map tupleToTextPart) <| Json.Decode.list textPartDecoder
+
+textPartDecoder : Json.Decode.Decoder (String, String)
+textPartDecoder = Json.Decode.object2 (,)
+                        ("title" := Json.Decode.string)
+                        ("path" := Json.Decode.string)

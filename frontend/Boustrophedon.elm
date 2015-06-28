@@ -11,14 +11,6 @@ import Server exposing (textList, fileName, textContent)
 import Task exposing (Task, andThen)
 import Http
 
-port textListRunner : Task Http.Error ()
-port textListRunner = Http.get textPartListDecoder (Server.serverUrl ++ "text") `andThen`
-                      (Signal.send textList.address)
-
-port textContentRunner : Signal (Task Http.Error ())
-port textContentRunner = S.map (\x -> Http.getString (Server.serverUrl ++ "texts/"  ++ x)
-                                      `andThen` (Signal.send textContent.address)) <| fileName.signal
-
 stringToTextState : String -> ViewDimensions -> Model
 stringToTextState str viewDimensions =
     let text = strToWordArray str
@@ -88,3 +80,13 @@ updateState update (viewDimensions, modelState) =
 
 main : Signal Element
 main = S.map (modelToView << snd) appState
+
+-- PORTS
+
+port textListRunner : Task Http.Error ()
+port textListRunner = Http.get textPartListDecoder (Server.serverUrl ++ "text") `andThen`
+                      (Signal.send textList.address)
+
+port textContentRunner : Signal (Task Http.Error ())
+port textContentRunner = S.map (\x -> Http.getString (Server.serverUrl ++ "texts/"  ++ x)
+                                      `andThen` (Signal.send textContent.address)) <| fileName.signal
