@@ -91,7 +91,8 @@ port textContentRunner = S.map (\x -> Http.getString (Server.serverUrl ++ "texts
 port menuAction : Signal (Task x ())
 port menuAction =
     let toMenuAction tap viewDims =
-        if | tap.y < (viewDims.fullHeight // 3)     -> Signal.send fileName.address "my-lost-city-fitzgerald.txt"
-           | tap.y < (2 * viewDims.fullHeight // 3) -> Signal.send fileName.address "room-of-ones-own.txt"
+        if | tap.y < (viewDims.fullHeight // 4)     -> Signal.send fileName.address "my-lost-city-fitzgerald.txt"
+           | tap.y < (2 * viewDims.fullHeight // 4) -> Signal.send fileName.address "room-of-ones-own.txt"
+           | tap.y < (3 * viewDims.fullHeight // 4) -> Signal.send fileName.address "chants.txt"
            | otherwise                              -> Signal.send fileName.address "trotsky.txt"
     in S.map2 toMenuAction Touch.taps currentViewDimensions

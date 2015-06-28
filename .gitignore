@@ -1,7 +1,6 @@
 *.swp
 *.swo
 dist/
-texts/
 elm-stuff/
 .cabal-sandbox/
 snaplets/
