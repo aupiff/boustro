@@ -5,7 +5,7 @@ import Html
 import Graphics.Element exposing (Element, container, relative,
                                   absolute, midTopAt, heightOf, empty, flow, down)
 import Graphics.Element
-import Color exposing (red, lightOrange)
+import Color exposing (red, lightOrange, white)
 import Graphics.Input
 import List as L
 import Touch
@@ -31,7 +31,7 @@ type alias ViewDimensions = { fullWidth    : Int
                             }
 
 menuButton : Int -> Int -> String -> Element
-menuButton w h = let buttonContainer = Graphics.Element.color lightOrange << container w h Graphics.Element.middle
+menuButton w h = let buttonContainer = Graphics.Element.color white << container w h Graphics.Element.middle
                in buttonContainer << Graphics.Element.centered << Text.style Style.menuStyle << Text.fromString
 
 menuScene : List Model.TextPart -> ViewDimensions -> Element
@@ -66,8 +66,7 @@ viewHelper (w, h) = let linesPerPage = Style.linesPerPage h
 
 currentViewDimensions : Signal ViewDimensions
 currentViewDimensions =
-    let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions
-                           , Utils.initialSetupSignal ]
+    let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions , Utils.initialSetupSignal ]
     in S.sampleOn cues <| S.map viewHelper Window.dimensions
 
 type UserInput = Gesture GestureType
@@ -76,7 +75,7 @@ type UserInput = Gesture GestureType
 
 showMenu : Signal (List Model.TextPart)
 showMenu = let menuKey = Utils.onTrueUpdate <| Keyboard.space
-               menuCues = menuKey
+               menuCues = S.mergeMany [ menuKey, Utils.secondSetupSignal ]
            in S.sampleOn menuCues (S.constant textList)
 
 userInput : Signal UserInput

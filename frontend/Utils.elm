@@ -14,9 +14,11 @@ initialSetupSignal = S.map toUnit << S.dropRepeats
                                   << S.foldp (\_ _ -> 1) 0
                                   <| every (10 * millisecond)
 
--- listToMaybe : List a -> Maybe a
--- listToMaybe xs = if | L.isEmpty xs -> Nothing
---                     | otherwise    -> Just <| L.head xs
+secondSetupSignal : Signal ()
+secondSetupSignal = S.map toUnit << S.dropRepeats
+                                 << S.foldp (\_ _ -> 1) 0
+                                 <| every (2500 * millisecond)
+
 
 minWith : (a -> comparable) -> List a -> a
 minWith f (x :: xs) = L.foldl (\x p -> if | f x < f p -> x
