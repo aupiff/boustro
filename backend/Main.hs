@@ -13,6 +13,7 @@ import           Network.Wai
 import qualified Network.Wai.Handler.Warp as N
 import           Servant
 import           Control.Monad.IO.Class
+import           Text.Hyphenation.Hyphenator
 
 type API = "app" :> Raw :<|> "texts" :> Raw
 

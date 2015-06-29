@@ -17,6 +17,7 @@ executable boustro
   hs-source-dirs:      backend
   build-depends:       base >=4.7 && <5,
                        bytestring,
+                       hyphenation,
                        aeson,
                        xmlhtml,
                        text,
