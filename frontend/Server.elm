@@ -4,7 +4,7 @@ import Signal as S
 import Model exposing (TextPart)
 
 serverUrl : String
-serverUrl = "http://localhost:8000/"
+serverUrl = "http://boustro.com/"
 
 textList : List TextPart
 textList = [ { title = "The Roots of Honour", path = "ruskin.txt" }

@@ -5,7 +5,7 @@ import Html
 import Graphics.Element exposing (Element, container, relative,
                                   absolute, midTopAt, heightOf, empty, flow, down)
 import Graphics.Element
-import Color exposing (red, lightOrange)
+import Color exposing (red, lightOrange, white)
 import Graphics.Input
 import List as L
 import Touch
@@ -31,13 +31,17 @@ type alias ViewDimensions = { fullWidth    : Int
                             }
 
 menuButton : Int -> Int -> String -> Element
-menuButton w h = let buttonContainer = Graphics.Element.color lightOrange << container w h Graphics.Element.middle
+menuButton w h = let buttonContainer = Graphics.Element.color white << container w h Graphics.Element.middle
                in buttonContainer << Graphics.Element.centered << Text.style Style.menuStyle << Text.fromString
+
+titleButton : Int -> Int -> String -> Element
+titleButton w h = let buttonContainer = Graphics.Element.color white << container w h Graphics.Element.middle
+                  in buttonContainer << Graphics.Element.centered << Text.style Style.titleStyle << Text.fromString
 
 menuScene : List Model.TextPart -> ViewDimensions -> Element
 menuScene ts viewDimensions =
-    let toSelectionButton tp = menuButton viewDimensions.textWidth (viewDimensions.fullHeight // L.length ts) tp.title
-        textButtons = flow down <| L.map toSelectionButton ts
+    let toSelectionButton tp = menuButton viewDimensions.textWidth (viewDimensions.fullHeight // 5) tp.title
+        textButtons = flow down <| (titleButton viewDimensions.textWidth (viewDimensions.fullHeight // 5) "BOUSTROPHEDON") :: L.map toSelectionButton ts
         fullContainer = container viewDimensions.fullWidth
                                   viewDimensions.fullHeight
                                   Graphics.Element.middle
@@ -66,17 +70,25 @@ viewHelper (w, h) = let linesPerPage = Style.linesPerPage h
 
 currentViewDimensions : Signal ViewDimensions
 currentViewDimensions =
-    let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions
-                           , Utils.initialSetupSignal ]
+    let cues = S.mergeMany [ S.map Utils.toUnit Window.dimensions , Utils.initialSetupSignal ]
     in S.sampleOn cues <| S.map viewHelper Window.dimensions
 
 type UserInput = Gesture GestureType
                | SetText String
                | SummonMenu (List Model.TextPart)
 
+menuKey : Signal ()
+menuKey = let toMenuTouch tap viewDims =
+
+            if | tap.y > 0 && tap.y < (viewDims.fullHeight // 5) -> True
+               | otherwise                                       -> False
+
+           in S.mergeMany [ Utils.onTrueUpdate <| Keyboard.space
+                          , Utils.onTrueUpdate <| S.map2 toMenuTouch Touch.taps currentViewDimensions ]
+
+
 showMenu : Signal (List Model.TextPart)
-showMenu = let menuKey = Utils.onTrueUpdate <| Keyboard.space
-               menuCues = menuKey
+showMenu = let menuCues = S.mergeMany [ menuKey, Utils.secondSetupSignal ]
            in S.sampleOn menuCues (S.constant textList)
 
 userInput : Signal UserInput
