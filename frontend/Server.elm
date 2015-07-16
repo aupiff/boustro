@@ -7,10 +7,10 @@ serverUrl : String
 serverUrl = "http://localhost:8000/"
 
 textList : List TextPart
-textList = [ { title = "My Lost City", path = "my-lost-city-fitzgerald.txt" }
-           , { title = "A Room of one's own", path = "room-of-ones-own.txt" }
-           , { title = "Les Chants de Maldoror", path = "chants.txt" }
-           , { title = "История Русской Революции", path = "trotsky.txt" }
+textList = [ { title = "The Roots of Honour", path = "ruskin.txt" }
+           , { title = "The Veins of Wealth", path = "ruskin2.txt" }
+           , { title = "Qui Judicatis Terram", path = "ruskin3.txt" }
+           , { title = "Ad Valorem", path = "ruskin4.txt" }
            ]
 
 fileName : S.Mailbox String

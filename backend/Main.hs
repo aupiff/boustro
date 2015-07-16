@@ -26,4 +26,4 @@ app :: Application
 app = serve api server
 
 main :: IO ()
-main = N.run 8000 app
+main = N.run 80 app

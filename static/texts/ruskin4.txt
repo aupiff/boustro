@@ -1,0 +1,1480 @@
+Ad Valorem
+
+    We saw that just payment of labour consisted in a sum of
+money which would approximately obtain equivalent labour at a
+future time: we have now to examine the means of obtaining such
+equivalence. Which question involves the definition of Value,
+Wealth, Price, and Produce.
+    None of these terms are yet defined so as to be understood by
+the public. But the last, Produce, which one might have thought
+the clearest of all, is, in use, the most ambiguous; and the
+examination of the kind of ambiguity attendant on its present
+employment will best open the way to our work.
+    In his chapter on Capital,(14*) Mr J.S. Mill instances, as a
+capitalist, a hardware manufacturer, who, having intended to
+spend a certain portion of the proceeds of his business in buying
+plate and jewels, changes his mind, and, 'pays it as wages to
+additional workpeople." The effect is stated by Mr Mill to be,
+that "more food is appropriated to the consumption of productive
+labourers."
+    Now I do not ask, though, had I written this paragraph, it
+would surely have been asked of me, What is to become of the
+silversmiths? If they are truly unproductive persons, we will
+acquiesce in their extinction. And though in another part of the
+same passage, the hardware merchant is supposed also to dispense
+with a number of servants, whose "food is thus set free for
+productive purposes," I do not inquire what will be the effect,
+painful or otherwise, upon the servants, of this emancipation of
+their food. But I very seriously inquire why ironware is produce,
+and silverware is not? That the merchant consumes the one, and
+sells the other, certainly does not constitute the difference,
+unless it can be shown (which, indeed, I perceive it to be
+becoming daily more and more the aim of tradesmen to show) that
+commodities are made to be sold, and not to be consumed. The
+merchant is an agent of conveyance to the consumer in one case,
+and is himself the consumer in the other:(15*) but the labourers
+are in either case equally productive, since they have produced
+goods to the same value, if the hardware and the plate are both
+goods.
+    And what distinction separates them? It is indeed possible
+that in the "comparative estimate of the moralist," with which Mr
+Mill says political economy has nothing to do (III. i. 2), a
+steel fork might appear a more substantial production than a
+silver one: we may grant also that knives, no less than forks,
+are good produce; and scythes and ploughshares serviceable
+articles. But, how of bayonets? Supposing the hardware merchant
+to effect large sales of these, by help of the "setting free" of
+the food of his servants and his silversmith, -- is he still
+employing productive labourers, or, in Mr Mill's words, labourers
+who increase "the stock of permanent means of enjoyment" (I. iii.
+4)? Or if, instead of bayonets, he supply bombs, will not the
+absolute and final "enjoyment" of even these energetically
+productive articles (each of which costs ten pounds(16*)) be
+dependent on a proper choice of time and place for their
+enfantement; choice, that is to say, depending on those
+philosophical considerations with which political economy has
+nothing to do?(17*)
+    I should have regretted the need of pointing out
+inconsistency in any portion of Mr Mill's work, had not the value
+of his work proceeded from its inconsistencies. He deserves
+honour among economists by inadvertently disclaiming the
+principles which he states, and tacitly introducing the moral
+considerations with which he declares his science has no
+connection. Many of his chapters are, therefore, true and
+valuable; and the only conclusions of his which I have to dispute
+are those which follow from his premises.
+    Thus, the idea which lies at the root of the passage we have
+just been examining, namely, that labour applied to produce
+luxuries will not support so many persons as labour applied to
+produce useful articles, is entirely true; but the instance given
+fails -- and in four directions of failure at once-because Mr
+Mill has not defined the real meaning of usefulness. The
+definition which he has given-" capacity to satisfy a desire, or
+serve a purpose" (III. i. 2) -- applies equally to the iron and
+silver. while the true definition which he has not given, but
+which nevertheless underlies the false verbal definition in his
+mind, and comes out once or twice by accident (as in the words
+"any support to life or strength" in I. iii. 5) -- applies to
+some articles of iron, but not to others, and to some articles of
+silver, but not to others. It applies to ploughs, but not to
+bayonets; and to forks, but not to filigree.(18*)
+    The eliciting of the true definitions will give us the reply
+to our first question, "What is value?" respecting which,
+however, we must first hear the popular statements.
+    "The word 'value,' when used without adjunct, always means,
+in political economy, value in exchange" (Mill, III. i. 2). So
+that, if two ships cannot exchange their rudders, their rudders
+are, in politico-economic language, of no value to either.
+    But "the subject of political economy is wealth." --
+(Preliminary remarks, page 1)
+    And wealth "consists of all useful and agreeable objects
+which possess exchangeable value." -- (Preliminary remarks, page
+10.)
+    It appears, then, according to Mr Mill, that usefulness and
+agreeableness underlie the exchange value, and must be
+ascertained to exist in the thing, before we can esteem it an
+object of wealth.
+    Now, the economical usefulness of a thing depends not merely
+on its own nature, but on the number of people who can and will
+use it. A horse is useless, and therefore unsaleable, if no one
+can ride, -- a sword, if no one can strike, and meat, if no one
+can eat. Thus every material utility depends on its relative
+human capacity.
+    Similarly: The agreeableness of a thing depends not merely on
+its own likeableness, but on the number of people who can be got
+to like it. The relative agreeableness, and therefore
+saleableness, of "a pot of the smallest ale," and of "Adonis
+painted by a running brook," depends virtually on the opinion of
+Demos, in the shape of Christopher Sly. That is to say, the
+agreeableness of a thing depends on its relatively human
+disposition.(19*) Therefore, political economy, being a science
+of wealth, must be a science respecting human capacities and
+dispositions. But moral considerations have nothing to do with
+political economy (III. i. 2). Therefore, moral considerations
+have nothing to do with human capacities and dispositions.
+    I do not wholly like the look of this conclusion from Mr
+Mill's statements: -- let us try Mr Ricardo's.
+    "Utility is not the measure of exchangeable value, though it
+is absolutely essential to it." -- (Chap. I. sect. i) essential
+in what degree, Mr Ricardo? There may be greater and less degrees
+of utility. Meat, for instance, may be so good as to be fit for
+any one to eat, or so bad as to be fit for no one to eat. What is
+the exact degree of goodness which is "essential" to its
+exchangeable value, but not "the measure" of it? How good must
+the meat be, in order to possess any exchangeable value; and how
+bad must it be -- (I wish this were a settled question in London
+markets) -- in order to possess none?
+    There appears to be some hitch, I think, in the working even
+of Mr. Ricardo's principles; but let him take his own example.
+"Suppose that in the early stages of society the bows and arrows
+of the hunter were of equal value with the implements of the
+fisherman. Under such circumstances the value of the deer, the
+produce of the hunter's day's labour, would be exactly equal to
+the value of the fish, the product of the fisherman's day's
+labour, The comparative value of the fish and game would be
+entirely regulated by the quantity of labour realized in each."
+(Ricardo, chap. iii. On Value).
+    Indeed! Therefore, if the fisherman catches one sprat. and
+the huntsman one deer, one sprat will be equal in value to one
+deer but if the fisherman catches no sprat, and the huntsman two
+deer, no sprat will be equal in value to two deer?
+    Nay but -- Mr Ricardo's supporters may say -- he means, on an
+average, -if the average product of a day's work of fisher and
+hunter be one fish and one deer, the one fish will always be
+equal in value to the one deer.
+    Might I inquire the species of fish? Whale? or
+white-bait?(20*)
+    It would be waste of time to purpose these fallacies farther;
+we will seek for a true definition.
+    Much store has been set for centuries upon the use of our
+English classical education. It were to be wished that our
+well-educated merchants recalled to mind always this much of
+their latin schooling, -- that the nominative of valorem (a word
+already sufficiently familiar to them) is valor; a word which,
+therefore, ought to be familiar to them. Valor, from valere, to
+be well or strong; -- strong, life (if a man), or valiant;
+strong, for life (if a thing), or valuable. To be "valuable,"
+therefore, is to "avail towards life." A truly valuable or
+availing thing is that which leads to life with its whole
+strength. In proportion as it does not lead to life, or as its
+strength is broken, it is less valuable; in proportion as it
+leads away from life, it is unvaluable or malignant.
+    The value of a thing, therefore, is independent of opinion,
+and of quantity. Think what you will of it, gain how much you may
+of it, the value of the thing itself is neither greater nor less.
+For ever it avails, or avails not; no estimate can raise, no
+disdain repress, the power which it holds from the Maker of
+things and of men.
+    The real science of political economy, which has yet to be
+distinguished from the bastard science, as medicine from
+witchcraft, and astronomy from astrology, is that which teaches
+nations to desire and labour for the things that lead to life:
+and which teaches them to scorn and destroy the things that lead
+to destruction. And if, in a state of infancy, they supposed
+indifferent things, such as excrescences of shell-fish, and
+pieces of blue and red stone, to be valuable, and spent large
+measures of the labour which ought to be employed for the
+extension and ennobling of life, in diving or digging for them,
+and cutting them into various shapes,or if, in the same state of
+infancy, they imagine precious and beneficent things, such as
+air, light, and cleanliness, to be valueless,-or if, finally,
+they imagine the conditions of their own existence, by which
+alone they can truly possess or use anything, such, for instance,
+as peace, trust, and love, to be prudently exchangeable, when the
+markets offer, for gold, iron, or excresrences of shells -- the
+great and only science of Political Economy teaches them, in all
+these cases, what is vanity, and what substance; and how the
+service of Death, the lord of Waste, and of eternal emptiness,
+differs from the service of Wisdom, the lady of Saving, and of
+eternal fulness; she who has said, "I will cause those that love
+me to inherit SUBSTANCE; and I will FILL their treasures."
+    The "Lady of Saving," in a profounder sense than that of the
+savings bank, though that is a good one: Madonna della Salute, --
+Lady of Health, -- which, though commonly spoken of as if
+separate from wealth, is indeed a part of wealth. This word,
+"wealth," it will be remembered, is the next we have to define.
+    "To be wealthy" says Mr Mill, "is to have a large stock of
+useful articles." I accept this definition. Only let us perfectly
+understand it. My opponents often lament my not giving them
+enough logic: I fear I must at present use a little more than
+they will like: but this business of Political Economy is no
+light one, and we must allow no loose terms in it.
+    We have, therefore, to ascertain in the above definition,
+first, what is the meaning of "having," or the nature of
+Possession. Then what is the meaning of "useful," or the nature
+of Utility.
+    And first of possession. At the crossing of the transepts of
+Milan Cathedral has lain, for three hundred years, the embalmed
+body of St. Carlo Borromeo. It holds a golden crosier, and has a
+cross of emeralds on its breast. Admitting the crosier and
+emeralds to be useful articles, is the body to be considered as
+"having" them? Do they, in the politico-economical sense of
+property, belong to it? If not, and if we may, therefore,
+conclude generally that a dead body cannot possess property, what
+degree and period of animation in the body will render possession
+possible?
+    As thus: lately in a wreck of a Californian ship, one of the
+passengers fastened a belt about him with two hundred pounds of
+gold in it, with which he was found afterwards at the bottom.
+Now, as he was sinking -- had he the gold? or had the gold
+him?(21*)
+    And if, instead of sinking him in the sea by its weight, the
+gold had struck him on the forehead, and thereby caused incurable
+disease -- suppose palsy or insanity, -- would the gold in that
+case have been more a "possession" than in the first? Without
+pressing the inquiry up through instances of gradually increasing
+vital power over the gold (which I will, however, give, if they
+are asked for), I presume the reader will see that possession, or
+"having," is not an absolute, but a gradated, power; and consists
+not only in the quantity or nature of the thing possessed, but
+also (and in a greater degree) in its suitableness to the person
+possessing it and in his vital power to use it.
+    And our definition of Wealth, expanded, becomes: "The
+possession of useful articles, which we can use." This is a very
+serious change. For wealth, instead of depending merely on a
+"have," is thus seen to depend on a "can." Gladiator's death, on
+a "habet"; but soldier's victory, and State's salvation, on a
+"quo plurimum posset." (liv. VII. 6.) And what we reasoned of
+only as accumulation of material, is seen to demand also
+accumulation of capacity.
+    So much for our verb. Next for our adjective. What is the
+meaning of "useful"?
+    The inquiry is closely connected with the last. For what is
+capable of use in the hands of some persons, is capable, in the
+hands of others, of the opposite of use, called commonly
+"from-use," or "ab-use." And it depends on the person, much more
+than on the article, whether its usefulness or ab-usefulness will
+be the quality developed in it. Thus, wine, which the Greeks, in
+their Bacchus, made rightly the type of all passion, and which,
+when used, "cheereth god and man" (that is to say, strengthens
+both the divine life, or reasoning power, and the earthy, or
+carnal power, of man); yet, when abused, becomes "Dionysos,"
+hurtful especially to the divine part of man, or reason. And
+again, the body itself, being equally liable to use and to abuse,
+and, when rightly disciplined, serviceable to the State, both for
+war and labour, -- but when not disciplined, or abused, valueless
+to the State, and capable only of continuing the private or
+single existence of the individual (and that but feebly) -- the
+Greeks called such a body an "idiotic" or "private" body, from
+their word signifying a person employed in no way directly useful
+to the State; whence finally, our "idiot," meaning a person
+entirely occupied with his own concerns.
+    Hence, it follows that if a thing is to be useful, it must be
+not only of an availing nature, but in availing hands. Or, in
+accurate terms, usefulness is value in the hands of the valiant;
+so that this science of wealth being, as we have just seen, when
+regarded as the science of Accumulation, accumulative of capacity
+as well as of material, -- when regarded as the Science of
+Distribution, is distribution not absolute, but discriminate; not
+of every thing to every man, but of the right thing to the right
+man. A difficult science, dependent on more than arithmetic.
+    Wealth, therefore, is "THE POSSESSION OF THE VALUABLE BY THE
+VALIANT"; and in considering it as a power existing in a nation,
+the two elements, the value of the thing, and the valour of its
+possessor, must be estimated together. Whence it appears that
+many of the persons commonly considered wealthy, are in reality
+no more wealthy than the locks of their own strong boxes are,
+they being inherently and eternally incapable of wealth; and
+operating for the nation, in an economical point of view, either
+as pools of dead water, and eddies in a stream (which, so long as
+the stream flows, are useless, or serve only to drown people, but
+may become of importance in a state of stagnation should the
+stream dry); or else, as dams in a river, of which the ultimate
+service depends not on the dam, but the miller; or else, as mere
+accidental stays and impediments, acting not as wealth, but (for
+we ought to have a correspondent term) as "illth," causing
+various devastation and trouble around them in all directions; or
+lastly, act not at all, but are merely animated conditions of
+delay, (no use being possible of anything they have until they
+are dead,) in which last condition they are nevertheless often
+useful as delays, and "impedimenta," if a nation is apt to move
+too fast.
+    This being so, the difficulty of the true science of
+Political Economy lies not merely in the need of developing manly
+character to deal with material value, but in the fact, that
+while the manly character and material value only form wealth by
+their conjunction, they have nevertheless a mutually destructive
+operation on each other. For the manly character is apt to
+ignore, or even cast away, the material value: -- whence that of
+Pope: --
+    "Sure, of qualities demanding praise,
+    More go to ruin fortunes, than to raise."
+
+And on the other hand, the material value is apt to undermine the
+manly character; so that it must be our work, in the issue, to
+examine what evidence there is of the effect of wealth on the
+minds of its possessors; also, what kind of person it is who
+usually sets himself to obtain wealth, and succeeds in doing so;
+and whether the world owes more gratitude to rich or to poor men,
+either for their moral influence upon it, or for chief goods,
+discoveries, and practical advancements. I may, however,
+anticipate future conclusions, so far as to state that in a
+community regulated only by laws of demand and supply, but
+protected from open violence, the persons who become rich are,
+generally speaking, industrious, resolute, proud, covetous,
+prompt, methodical, sensible, unimaginative, insensitive, and
+ignorant. The persons who remain poor are the entirely foolish,
+the entirely wise,(22*) the idle, the reckless, the humble, the
+thoughtful, the dull, the imaginative, the sensitive, the
+well-informed, the improvident, the irregularly and impulsively
+wicked, the clumsy knave, the open thief, and the entirely
+merciful, just, and godly person.
+    Thus far, then, of wealth. Next, we have to ascertain the
+nature of PRICE; that is to say, of exchange value, and its
+expression by currencies.
+    Note first, of exchange, there can be no profit in it. It is
+only in labour there can be profit -- that is to say, a "making
+in advance," or "making in favour of" (from proficio). In
+exchange, there is only advantage, i.e., a bringing of vantage or
+power to the exchanging persons. Thus, one man, by sowing and
+reaping, turns one measure of corn into two measures. That is
+Profit. Another, by digging and forging, turns one spade into two
+spades. That is Profit. But the man who has two measures of corn
+wants sometimes to dig; and the man who has two spades wants
+sometimes to eat:They exchange the gained grain for the gained
+tool; and both are the better for the exchange; but though there
+is much advantage in the transaction, there is no profit. Nothing
+is constructed or produced. Only that which had been before
+constructed is given to the person by whom it can be used. If
+labour is necessary to effect the exchange, that labour is in
+reality involved in the production, and, like all other labour,
+bears profit. Whatever number of men are concerned in the
+manufacture, or in the conveyance, have share in the profit; but
+neither the manufacture nor the conveyance are the exchange, and
+in the exchange itself there is no profit.
+    There may, however, be acquisition, which is a very different
+thing. If, in the exchange, one man is able to give what cost him
+little labour for what has cost the other much, he "acquires" a
+certain quantity of the produce of the other's labour. And
+precisely what he acquires, the other loses. In mercantile
+language, the person who thus acquires is commonly said to have
+"made a profit"; and I believe that many of our merchants are
+seriously under the impression that it is possible for everybody,
+somehow, to make a profit in this manner. Whereas, by the
+unfortunate constitution of the world we live in, the laws both
+of matter and motion have quite rigorously forbidden universal
+acquisition of this kind. Profit, or material gain, is attainable
+only by construction or by discovery; not by exchange. Whenever
+material gain follows exchange, for every plus there is a
+precisely equal minus.
+    Unhappily for the progress of the science of Political
+Economy, the plus quantities, or, -- if I may be allowed to coin
+an awkward plural -- the pluses, make a very positive and
+venerable appearance in the world, so that every one is eager to
+learn the science which produces results so magnificent; whereas
+the minuses have, on the other hand, a tendency to retire into
+back streets, and other places of shade, -- or even to get
+themselves wholly and finally put out of sight in graves: which
+renders the algebra of this science peculiar, and difficultly
+legible; a large number of its negative signs being written by
+the account-keeper in a kind of red ink, which starvation thins,
+and makes strangely pale, or even quite invisible ink, for the
+present.
+    The Science of Exchange, or, as I hear it has been proposed
+to call it, of "Catallactics," considered as one of gain, is,
+therefore, simply nugatory; but considered as one of acquisition,
+it is a very curious science, differing in its data and basis
+from every other science known. Thus: -- if I can exchange a
+needle with a savage for a diamond, my power of doing so depends
+either on the savage's ignorance of social arrangements in
+Europe, or on his want of power to take advantage of them, by
+selling the diamond to any one else for more needles. If,
+farther, I make the bargain as completely advantageous to myself
+as possible, by giving to the savage a needle with no eye in it
+(reaching, thus a sufficiently satisfactory type of the perfect
+operation of catallactic science), the advantage to me in the
+entire transaction depends wholly upon the ignorance,
+powerlessness, or heedlessness of the person dealt with. Do away
+with these, and catallactic advantage becomes impossible. So far,
+therefore, as the science of exchange relates to the advantage of
+one of the exchanging persons only, it is founded on the
+ignorance or incapacity of the opposite person. Where these
+vanish, it also vanishes. It is therefore a science founded on
+nescience, and an art founded on artlessness. But all other
+sciences and arts, except this, have for their object the doing
+away with their opposite nescience and artlessness. This science,
+alone of sciences, must, by all available means, promulgate and
+prolong its opposite nescience; otherwise the science itself is
+impossible. It is, therefore, peculiarly and alone the science of
+darkness; probably a bastard science -- not by any means a divina
+scientia, but one begotten of another father, that father who,
+advising his children to turn stones into bread, is himself
+employed in turning bread into stones, and who, if you ask a fish
+of him (fish not being producible on his estate), can but give
+you a serpent.
+    The general law, then, respecting just or economical
+exchange, is simply this: -- There must be advantage on both
+sides (or if only advantage on one, at least no disadvantage on
+the other) to the persons exchanging; and just payment for his
+time, intelligence, and labour, to any intermediate person
+effecting the transaction (commonly called a merchant); and
+whatever advantage there is on either side, and whatever pay is
+given to the intermediate person, should be thoroughly known to
+all concerned. All attempt at concealment implies some practice
+of the opposite, or undivine science, founded on nescience.
+Whence another saying of the Jew merchant's -- "As a nail between
+the stone joints, so doth sin stick fast between buying and
+selling." Which peculiar riveting of stone and timber, in men's
+dealings with each other, is again set forth in the house which
+was to be destroyed -- timber and stones together -- when
+Zechariah's roll (more probably "curved sword") flew over it:
+"the curse that goeth forth over all the earth upon every one
+that stealeth and holdeth himself guiltless," instantly followed
+by the vision of the Great Measure; -- the measure "of the
+injustice of them in all the earth" (auti i adikia auton en pase
+te ge), with the weight of lead for its lid, and the woman, the
+spirit of wickedness, within it; -- that is to say, Wickedness
+hidden by Dulness, and formalized, outwardly, into ponderously
+established cruelty. " It shall be set upon its own base in the
+land of Babel." (23*)
+    I have hitherto carefully restricted myself, in speaking of
+exchange, to the use of the term "advantage"; but that term
+includes two ideas; the advantage, namely, of getting what we
+need, and that of getting what we wish for. Three-fourths of the
+demands existing in the world are romantic; founded on visions,
+idealisms, hopes, and affections; and the regulation of the purse
+is, in its essence, regulation of the imagination and the heart.
+Hence, the right discussion of the nature of price is a very high
+metaphysical and psychical problem; sometimes to be solved only
+in a passionate manner, as by David in his counting the price of
+the water of the well by the gate of Bethlehem; but its first
+conditions are the following: -- The price of anything is the
+quantity of labour given by the person desiring it, in order to
+obtain possession of it. This price depends on four variable
+quantities. A. The quantity of wish the purchaser has for the
+thing; opposed to a, the quantity of wish the seller has to keep
+it. B. The quantity of labour the purchaser can afford, to obtain
+the thing opposed to B, the quantity of labour the seller can
+afford, to keep it. These quantities are operative only in
+excess; i.e. the quantity of wish (A) means the quantity of wish
+for this thing, above wish for other things; and the quantity of
+work (B) means the quantity which can be spared to get this thing
+from the quantity needed to get other things.
+    Phenomena of price, therefore, are intensely complex,
+curious, and interesting -- too complex, however, to be examined
+yet; every one of them, when traced far enough, showing itself at
+last as a part of the bargain of the Poor of the Flock (or "flock
+of slaughter"), "If ye think good, give ME my price, and if not,
+forbear" Zech. xi. 12; but as the price of everything is to be
+calculated finally in labour, it is necessary to define the
+nature of that standard.
+    Labour is the contest of the life of man with an opposite; --
+the term "life" including his intellect, soul, and physical
+power, contending with question, difficulty, trial, or material
+force.
+    Labour is of a higher or lower order, as it includes more or
+fewer of the elements of life: and labour of good quality, in any
+kind, includes always as much intellect and feeling as will fully
+and harmoniously regulate the physical force.
+    In speaking of the value and price of labour, it is necessary
+always to understand labour of a given rank and quality, as we
+should speak of gold or silver of a given standard. Bad (that is,
+heartless, inexperienced, or senseless) labour cannot be valued;
+it is like gold of uncertain alloy, or flawed iron.(24*)
+    The quality and kind of labour being given, its value, like
+that of all other valuable things, is invariable. But the
+quantity of it which must be given for other things is variable:
+and in estimating this variation, the price of other things must
+always be counted by the quantity of labour; not the price of
+labour by the quantity of other things.
+    Thus, if we want to plant an apple sapling in rocky ground,
+it may take two hours' work; in soft ground, perhaps only half an
+hour. Grant the soil equally good for the tree in each case. Then
+the value of the sapling planted by two hours' work is nowise
+greater than that of the sapling planted in half an hour. One
+will bear no more fruit than the other. Also, one half-hour of
+work is as valuable as another half-hour; nevertheless the one
+sapling has cost four such pieces of work, the other only one.
+Now the proper statement of this fact is, not that the labour on
+the hard ground is cheaper than on the soft; but that the tree is
+dearer. The exchange value may, or may not, afterwards depend on
+this fact. If other people have plenty of soft ground to plant
+in, they will take no cognizance of our two hours' labour, in the
+price they will offer for the plant on the rock. And if, through
+want of sufficient botanical science, we have planted an upas
+tree instead of an apple, the exchange-value will be a negative
+quantity; still less proportionate to the labour expended.
+    What is commonly called cheapness of labour, signifies,
+therefore, in reality, that many obstacles have to be overcome by
+it; so that much labour is required to produce a small result.
+But this should never be spoken of as cheapness of labour, but as
+dearness of the object wrought for. It would be just as rational
+to say that walking was cheap, because we had ten miles to walk
+home to our dinner, as that labour was cheap, because we had to
+work ten hours to earn it.
+    The last word which we have to define is "Production."
+    I have hitherto spoken of all labour as profitable; because
+it is impossible to consider under one head the quality or value
+of labour, and its aim. But labour of the best quality may be
+various in aim. It may be either constructive ("gathering" from
+con and struo), as agriculture; nugatory, as jewel-cutting; or
+destructive ("scattering," from de and struo), as war. It is not,
+however, always easy to prove labour, apparently nugatory, to be
+actually so;(25*) generally, the formula holds good: "he that
+gathereth not, scattereth"; thus, the jeweller's art is probably
+very harmful in its ministering to a clumsy and inelegant pride.
+So that, finally, I believe nearly all labour may be shortly
+divided into positive and negative labour: positive, that which
+produces life; negative, that which produces death; the most
+directly negative labour being murder, and the most directly
+positive, the bearing and rearing of children; so that in the
+precise degree in which murder is hateful, on the negative side
+of idleness, in the exact degree child-rearing is admirable, on
+the positive side of idleness. For which reason, and because of
+the honour that there is in rearing children,(26*) while the wife
+is said to be as the vine (for cheering), the children are as the
+olive branch, for praise: nor for praise only, but for peace
+(because large families can only be reared in times of peace):
+though since, in their spreading and voyaging in various
+directions, they distribute strength, they are, to the home
+strength, as arrives in the hand of the giant -- striking here,
+and there far away.
+    Labour being thus various in its result, the prosperity of
+any nation is in exact proportion to the quantity of labour which
+it spends in obtaining and employing means of life. Observe, -- I
+say, obtaining and employing; that is to say, not merely wisely
+producing, but wisely distributing and consuming. Economists
+usually speak as if there were no good in consumption
+absolute.(27*) So far from this being so, consumption absolute is
+the end, crown, and perfection of production; and wise
+consumption is a far more difficult art than wise production.
+Twenty people can gain money for one who can use it; and the
+vital question, for individual and for nation, is, never "how
+much do they make?" but "to what purpose do they spend?"
+    The reader may, perhaps, have been surprised at the slight
+reference I have hitherto made to "capital," and its functions.
+It is here the place to define them.
+    Capital signifies "head, or source, or root material" -- it
+is material by which some derivative or secondary good is
+produced. It is only capital proper (caput vivum, not caput
+mortuum) when it is thus producing something different from
+itself. It is a root, which does not enter into vital function
+till it produces something else than a root: namely, fruit. That
+fruit will in time again produce roots; and so all living capital
+issues in reproduction of capital; but capital which produces
+nothing but capital is only root producing root; bulb issuing in
+bulb, never in tulip; seed issuing in seed, never in bread. The
+Political Economy of Europe has hitherto devoted itself wholly to
+the multiplication, or (less even) the aggregation, of bulbs. It
+never saw, nor conceived, such a thing as a tulip. Nay, boiled
+bulbs they might have been -- glass bulbs -- Prince Rupert's
+drops, consummated in powder (well, if it were glass-powder and
+not gunpowder), for any end or meaning the economists had in
+defining the laws of aggregation. We will try and get a clearer
+notion of them.
+    The best and simplest general type of capital is a well-made
+ploughshare. Now, if that ploughshare did nothing but beget other
+ploughshares, in a polypous manner, -- however the great cluster
+of polypous plough might glitter in the sun, it would have lost
+its function of capital. It becomes true capital only by another
+kind of splendour, -- when it is seen "splendescere sulco," to
+grow bright in the furrow; rather with diminution of its
+substance, than addition, by the noble friction. And the true
+home question, to every capitalist and to every nation, is not,
+"how many ploughs have you?" but, "where are your furrows?" not
+-- "how quickly will this capital reproduce itself?" -- but,
+"what will it do during reproduction?" What substance will it
+furnish, good for life? what work construct, protective of life?
+if none, its own reproduction is useless -- if worse than none,
+(for capital may destroy life as well as support it), its own
+reproduction is worse than useless; it is merely an advance from
+Tisiphone, on mortgage -- not a profit by any means.
+    Not a profit, as the ancients truly saw, and showed in the
+type of Ixion; -- for capital is the head, or fountain head of
+wealth -- the "well-head" of wealth, as the clouds are the
+well-heads of rain; but when clouds are without water, and only
+beget clouds, they issue in wrath at last, instead of rain, and
+in lightning instead of harvest; whence Ixion is said first to
+have invited his guests to a banquet, and then made them fall
+into a pit, (as also Demas' silver mine,) after which, to show
+the rage of riches passing from lust of pleasure to lust of
+power, yet power not truly understood, Ixion is said to have
+desired Juno, and instead, embracing a cloud (or phantasm), to
+have begotten the Centaurs; the power of mere wealth being, in
+itself, as the embrace of a shadow, -- comfortless, (so also
+"Ephraim feedeth on wind and followth after the east wind;" or
+"that which is not" -- Prov. xxiii. 5; and again Dante's Geryon,
+the type of avaricious fraud, as he flies, gathers the air up
+with retractile claws, -- "l'aer a se raccolse"(28*)) but in its
+offspring, a mingling of the brutal with the human nature; human
+in sagacity -- using both intellect and arrow; but brutal in its
+body and hoof, for consuming, and trampling down. For which sin
+Ixion is at last bound upon a wheel -- fiery and toothed, and
+rolling perpetually in the air: -- the type of human labour when
+selfish and fruitless (kept far into the Middle Ages in their
+wheels of fortune); the wheel which has in it no breath or
+spirit, but is whirled by chance only; whereas of all true work
+the Ezekiel vision is true, that the Spirit of the living
+creature is in the wheels, and where the angels go, the wheels go
+by them; but move no otherwise.
+    This being the real nature of capital, it follows that there
+are two kinds of true production, always going on in an active
+State: one of seed, and one of food; or production for the
+Ground, and for the Mouth; both of which are by covetous persons
+thought to be production only for the granary; whereas the
+function of the granary is but intermediate and conservative,
+fulfilled in distribution; else it ends in nothing but mildew,
+and nourishment of rats and worms. And since production for the
+Ground is only useful with future hope of harvest, all essential
+production is for the Mouth; and is finally measured by the
+mouth; hence, as I said above, consumption is the crown of
+production; and the wealth of a nation is only to be estimated by
+what it consumes.
+    The want of any clear sight of this fact is the capital
+error, issuing in rich interest and revenue of error among the
+political economists. Their minds are continually set on
+money-gain, not on mouth-gain; and they fall into every sort of
+net and snare, dazzled by the coin-glitter as birds by the
+fowler's glass; or rather (for there is not much else like birds
+in them) they are like children trying to jump on the heads of
+their own shadows; the money-gain being only the shadow of the
+true gain, which is humanity.
+    The final object of political economy, therefore, is to get
+good method of consumption, and great quantity of consumption: in
+other words, to use everything, and to use it nobly. whether it
+be substance, service, or service perfecting substance. The most
+curious error in Mr Mill's entire work, (provided for him
+originally by Ricardo,) is his endeavour to distinguish between
+direct and indirect service, and consequent assertion that a
+demand for commodities is not demand for labour (I. v. 9, et
+seq.). He distinguishes between labourers employed to lay out
+pleasure grounds, and to manufacture velvet; declaring that it
+makes material difference to the labouring classes in which of
+these two ways a capitalist spends his money; because the
+employment of the gardeners is a demand for labour, but the
+purchase of velvet is not.(29*) Error colossal, as well as
+strange. It will, indeed, make a difference to the labourer
+whether we bid him swing his scythe in the spring winds, or drive
+the loom in pestilential air. but, so far as his pocket is
+concerned, it makes, to him absolutely no difference whether we
+order him to make green velvet, with seed and a scythe, or red
+velvet, with silk and scissors. Neither does it anywise concern
+him whether, when the velvet is made, we consume it by walking on
+it, or wearing it, so long as our consumption of it is wholly
+selfish. But if our consumption is to be in anywise unselfish,
+not only our mode of consuming the articles we require interests
+him, but also the kind of article we require with a view to
+consumption. As thus (returning for a moment to Mr Mill's great
+hardware theory(30*)): it matters, so far as the labourer's
+immediate profit is concerned, not an iron filing whether I
+employ him in growing a peach, or forging a bombshell; but my
+probable mode of consumption of those articles matters seriously.
+Admit that it is to be in both cases "unselfish," and the
+difference, to him, is final, whether when his child is ill, I
+walk into his cottage and give it the peach, or drop the shell
+down his chimney, and blow his roof off.
+    The worst of it, for the peasant, is, that the capitalist's
+consumption of the peach is apt to be selfish, and of the shell,
+distributive;(31*) but, in all cases, this is the broad and
+general fact, that on due catallactic commercial principles,
+somebody's roof must go off in fulfilment of the bomb's destiny.
+You may grow for your neighbour, at your liking, grapes or
+grape-shot; he will also, catallactically, grow grapes or
+grape-shot for you, and you will each reap what you have sown.
+    It is, therefore, the manner and issue of consumption which
+are the real tests of production. Production does not consist in
+things laboriously made, but in things serviceably consumable;
+and the question for the nation is not how much labour it
+employs, but how much life it produces. For as consumption is the
+end and aim of production, so life is the end and aim of
+consumption.
+    I left this question to the reader's thought two months ago,
+choosing rather that he should work it out for himself than have
+it sharply stated to him. But now, the ground being sufficiently
+broken (and the details into which the several questions, here
+opened, must lead us, being too complex for discussion in the
+pages of a periodical, so that I must pursue them elsewhere), I
+desire, in closing the series of introductory papers, to leave
+this one great fact clearly stated. THERE IS NO WEALTH BUT LIFE.
+Life, including all its powers of love, of joy, and of
+admiration. That country is the richest which nourishes the
+greatest number of noble and happy human beings; that man is
+richest who, having perfected the functions of his own life to
+the utmost, has also the widest helpful influence, both personal,
+and by means of his possessions, over the lives of others.
+    A strange political economy; the only one, nevertheless, that
+ever was or can be: all political economy founded on
+self-interest(32*) being but the fulfilment of that which once
+brought schism into the Policy of angels, and ruin into the
+Economy of Heaven.
+    "The greatest number of human beings noble and happy." But is
+the nobleness consistent with the number? Yes, not only
+consistent with it, but essential to it. The maximum of life can
+only be reached by the maximum of virtue. In this respect the law
+of human population differs wholly from that of animal life. The
+multiplication of animals is checked only by want of food, and by
+the hostility of races; the population of the gnat is restrained
+by the hunger of the swallow, and that of the swallow by the
+scarcity of gnats. Man, considered as an animal, is indeed
+limited by the same laws: hunger, or plague, or war, are the
+necessary and only restraints upon his increase, -- effectual
+restraints hitherto, -- his principal study having been how most
+swiftly to destroy himself, or ravage his dwelling-places, and
+his highest skill directed to give range to the famine, seed to
+the plague, and sway to the sword. But, considered as other than
+an animal, his increase is not limited by these laws. It is
+limited only by the limits of his courage and his love. Both of
+these have their bounds; and ought to have; his race has its
+bounds also; but these have not yet been reached, nor will be
+reached for ages.
+    In all the ranges of human thought I know none so melancholy
+as the speculations of political economists on the population
+question. It is proposed to better the condition of the labourer
+by giving him higher wages. "Nay," says the economist, -- "if you
+raise his wages, he will either people down to the same point of
+misery at which you found him, or drink your wages away." He
+will. I know it. Who gave him this will? Suppose it were your own
+son of whom you spoke, declaring to me that you dared not take
+him into your firm, nor even give him his just labourer's wages,
+because if you did he would die of drunkenness, and leave half a
+score of children to the parish. "Who gave your son these
+dispositions?" -- I should enquire. Has he them by inheritance or
+by education? By one or other they must come; and as in him, so
+also in the poor. Either these poor are of a race essentially
+different from ours, and unredeemable (which, however, often
+implied, I have heard none yet openly say), or else by such care
+as we have ourselves received, we may make them continent and
+sober as ourselves-wise and dispassionate as we are models
+arduous of imitation. "But," it is answered, "they cannot receive
+education." Why not? That is precisely the point at issue.
+Charitable persons suppose the worst fault of the rich is to
+refuse the people meat; and the people cry for their meat, kept
+back by fraud, to the Lord of Multitudes.(33*) Alas! it is not
+meat of which the refusal is cruelest, or to which the claim is
+validest. The life is more than the meat. The rich not only
+refuse food to the poor; they refuse wisdom; they refuse virtue;
+they refuse salvation. Ye sheep without shepherd, it is not the
+pasture that has been shut from you, but the Presence. Meat!
+perhaps your right to that may be pleadable; but other rights
+have to be pleaded first. Claim your crumbs from the table, if
+you will; but claim them as children, not as dogs; claim your
+right to be fed, but claim more loudly your right to be holy,
+perfect, and pure.
+    Strange words to be used of working people: "What! holy;
+without any long robes nor anointing oils; these rough-jacketed,
+rough-worded persons; set to nameless and dishonoured service?
+Perfect! -- these, with dim eyes and cramped limbs, and slowly
+wakening minds? Pure -- these, with sensual desire and grovelling
+thought; foul of body, and coarse of soul?" It may be so;
+nevertheless, such as they are, they are the holiest, perfectest,
+purest persons the earth can at present show. They may be what
+you have said; but if so, they yet are holier than we, who have
+left them thus.
+    But what can be done for them? Who can clothe -- who teach --
+who restrain their multitudes? What end can there he for them at
+last, but to consume one another?
+    I hope for another end, though not, indeed, from any of the
+three remedies for over-population commonly suggested by
+economists.
+    These three are, in brief -- Colonization; Bringing in of
+waste lands; or Discouragement of Marriage.
+    The first and second of these expedients merely evade or
+delay the question. It will, indeed, be long before the world has
+been all colonized, and its deserts all brought under
+cultivation. But the radical question is not how much habitable
+land is in the world, but how many human beings ought to be
+maintained on a given space of habitable land.
+    Observe, I say, ought to be, not how many can be. Ricardo,
+with his usual inaccuracy, defines what he calls the "natural
+rate of wages" as "that which will maintain the labourer."
+Maintain him! yes; but how? -- the question was instantly thus
+asked of me by a working girl, to whom I read the passage. I will
+amplify her question for her. "Maintain him, how?" As, first, to
+what length of life? Out of a given number of fed persons how
+many are to be old -- how many young; that is to say, will you
+arrange their maintenance so as to kill them early -- say at
+thirty or thirty-five on the average, including deaths of weakly
+or ill-fed children? -- or so as to enable them to live out a
+natural life? You will feed a greater number, in the first
+case,(34*) by rapidity of succession; probably a happier number
+in the second: which does Mr Ricardo mean to be their natural
+state, and to which state belongs the natural rate of wages?
+    Again: A piece of land which will only support ten idle,
+ignorant, and improvident persons, will support thirty or forty
+intelligent and industrious ones. Which of these is their natural
+state, and to which of them belongs the natural rate of wages?
+    Again: If a piece of land support forty persons in
+industrious ignorance; and if, tired of this ignorance, they set
+apart ten of their number to study the properties of cones, and
+the sizes of stars; the labour of these ten, being withdrawn from
+the ground, must either tend to the increase of food in some
+transitional manner, or the persons set apart for sidereal and
+conic purposes must starve, or some one else starve instead of
+them. What is, therefore, the natural rate of wages of the
+scientific persons, and how does this rate relate to, or measure,
+their reverted or transitional productiveness?
+    Again: If the ground maintains, at first, forty labourers in
+a peaceable and pious state of mind, but they become in a few
+years so quarrelsome and impious that they have to set apart
+five, to meditate upon and settle their disputes; -- ten, armed
+to the teeth with costly instruments, to enforce the decisions;
+and five to remind everybody in an eloquent manner of the
+existence of a God; what will be the result upon the general
+power of production, and what is the "natural rate of wages" of
+the meditative, muscular, and oracular labourers?
+    Leaving these questions to be discussed, or waived, at their
+pleasure, by Mr Ricardo's followers, I proceed to state the main
+facts bearing on that probable future of the labouring classes
+which has been partially glanced at by Mr Mill. That chapter and
+the preceding one differ from the common writing of political
+economists in admitting some value in the aspect of nature, and
+expressing regret at the probability of the destruction of
+natural scenery. But we may spare our anxieties, on this head.
+Men can neither drink steam, nor eat stone. The maximum of
+population on a given space of land implies also the relative
+maximum of edible vegetable, whether for men or cattle; it
+implies a maximum of pure air; and of pure water. Therefore: a
+maximum of wood, to transmute the air, and of sloping ground,
+protected by herbage from the extreme heat of the sun, to feed
+the streams. All England may, if it so chooses, become one
+manufacturing town; and Englishmen, sacrificing themselves to the
+good of general humanity, may live diminished lives in the midst
+of noise, of darkness, and of deadly exhalation. But the world
+cannot become a factory, nor a mine. No amount of ingenuity will
+ever make iron digestible by the million, nor substitute hydrogen
+for wine. Neither the avarice nor the rage of men will ever feed
+them, and however the apple of Sodom and the grape of Gomorrah
+may spread their table for a time with dainties of ashes, and
+nectar of asps, -- so long as men live by bread, the far away
+valleys must laugh as they are covered with the gold of God, and
+the shouts of His happy multitudes ring round the wine-press and
+the well.
+    Nor need our more sentimental economists fear the too wide
+spread of the formalities of a mechanical agriculture. The
+presence of a wise population implies the search for felicity as
+well as for food; nor can any population reach its maximum but
+through that wisdom which "rejoices" in the habitable parts of
+the earth. The desert has its appointed place and work; the
+eternal engine, whose beam is the earth's axle, whose beat is its
+year, and whose breath is its ocean, will still divide
+imperiously to their desert kingdoms, bound with unfurrowable
+rock, and swept by unarrested sand, their powers of frost and
+fire: but the zones and lands between, habitable, will be
+loveliest in habitation. The desire of the heart is also the
+light of the eyes. No scene is continually and untiringly loved,
+but one rich by joyful human labour; smooth in field; fair in
+garden; full in orchard; trim, sweet, and frequent in homestead;
+ringing with voices of vivid existence. No air is sweet that is
+silent; it is only sweet when full of low currents of under
+sound-triplets of birds, and murmur and chirp of insects, and
+deep-toned words of men, and wayward trebles of childhood. As the
+art of life is learned, it will be found at last that all lovely
+things are also necessary: -- the wild flower by the wayside, as
+well as the tended corn; and the wild birds and creatures of the
+by every wondrous word and unknowable work of God. Happy, in that
+he knew them not, nor did his fathers know; and that round about
+him reaches yet into the infinite, the amazement of his
+existence.
+    Note, finally, that all effectual advancement towards this
+true felicity of the human race must be by individual, not public
+effort. Certain general measures may aid, certain revised laws
+guide, such advancement; but the measure and law which have first
+to be determined are those of each man's home. We continually
+hear it recommended by sagacious people to complaining neighbours
+(usually less well placed in the world than themselves), that
+they should "remain content in the station in which Providence
+has placed them." There are perhaps some circumstances of life in
+which Providence has no intention that people should be content.
+Nevertheless, the maxim is on the whole a good one; but it is
+peculiarly for home use. That your neighbour should, or should
+not, remain content with his position, is not your business; but
+it is very much your business to remain content with your own.
+What is chiefly needed in England at the present day is to show
+the quantity of pleasure that may be obtained by a consistent,
+well-administered competence, modest, confessed, and laborious.
+We need examples of people who, leaving Heaven to decide whether
+they are to rise in the world, decide for them selves that they
+will be happy in it, and have resolved to seek-not greater
+wealth, but simpler pleasure; not higher fortune, but deeper
+felicity; making the first of possessions, self-possession; and
+honouring themselves in the harmless pride and calm pursuits of
+piece.
+    Of which lowly peace it is written that "justice" and peace
+have kissed each other;" and that the fruit of justice is " sown
+in peace of them that make peace;" not "peace-makers" in the
+common understanding -- reconcilers of quarrels; (though that
+function also follows on the greater one;) but peace-Creators;
+Givers of Calm. Which you cannot give, unless you first gain; nor
+is this gain one which will follow assuredly on any course of
+business, commonly so called. No form of gain is less probable,
+business being (as is shown in the language of all nations --
+polein from pelo, prasis from perao, venire, vendre, and venal,
+from venio, &c.) essentially restless -- and probably
+contentious; -- having a raven-like mind to the motion to and
+fro, as to the carrion food; whereas the olive-feeding and
+bearing birds look for rest for their feet: thus it is said of
+Wisdom that she "hath builded her house, and hewn out her seven
+pillars;" and even when, though apt to wait long at the
+door-posts, she has to leave her house and go abroad, her paths
+are peace also.
+    For us, at all events, her work must begin at the entry of
+the doors: all true economy is "Law of the house." Strive to make
+that law strict, simple, generous: waste nothing, and grudge
+nothing. Care in nowise to make more of money, but care to make
+much of it; remembering always the great, palpable, inevitable
+fact -- the rule and root of all economy -- that what one person
+has, another cannot have; and that every atom of substance, of
+whatever kind, used or consumed, is so much human life spent;
+which, if it issue in the saving present life, or gaining more,
+is well spent, but if not, is either so much life prevented, or
+so much slain. In all buying, consider, first, what condition of
+existence you cause in the producers of what you buy; secondly,
+whether the sum you have paid is just to the producer, and in due
+proportion, lodged in his hands;(35*) thirdly, to how much clear
+use, for food, knowledge, or joy, this that you have bought can
+be put; and fourthly, to whom and in what way it can be most
+speedily and serviceably distributed: in all dealings whatsoever
+insisting on entire openness and stern fulfilment; and in all
+doings, on perfection and loveliness of accomplishment;
+especially on fineness and purity of all marketable commodity:
+watching at the same time for all ways of gaining, or teaching,
+powers of simple pleasure, and of showing oson en asphodelps geg
+oneiar -- the sum of enjoyment depending not on the quantity of
+things tasted, but on the vivacity and patience of taste.
+    And if, on due and honest thought over these things, it seems
+that the kind of existence to which men are now summoned by every
+plea of pity and claim of right, may, for some time at least, not
+be a luxurious one; -- consider whether, even supposing it
+guiltless, luxury would be desired by any of us, if we saw
+clearly at our sides the suffering which accompanies it in the
+world. Luxury is indeed possible in the future -- innocent and
+exquisite; luxury for all, and by the help of all; but luxury at
+present can only be enjoyed by the ignorant; the cruelest man
+living could not sit at his feast, unless he sat blindfold. Raise
+the veil boldly; face the light; and if, as yet, the light of the
+eye can only be through tears, and the light of the body through
+sackcloth, go thou forth weeping, bearing precious seed, until
+the time come, and the kingdom, when Christ's gift of bread, and
+bequest of peace, shall be "Unto this last as unto thee"; and
+when, for earth's severed multitudes of the wicked and the weary,
+there shall be holier reconciliation than that of the narrow
+home, and calm economy, where the Wicked cease -- not from
+trouble, but from troubling -- and the Weary are at rest.
+
+
+NOTES:
+
+1. The difference between the two modes of treatment, and between
+their effective material results, may be seen very accurately by
+a comparison of the relations of Esther and Charlie in Bleak
+House, with those of Miss Brass and the Marchioness in Master
+Humphrey's Clock.
+    The essential value and truth of Dickens's writings have been
+unwisely lost sight of by many thoughtful persons, merely because
+he presents his truth with some colour of caricature. Unwisely,
+because Dickens's caricature, though often gross, is never
+mistaken. Allowing for his manner of telling them, the things he
+tells us are always true. I wish that he could think it right to
+limit his brilliant exaggeration to works written only for public
+amusement; and when he takes up a subject of high national
+importance, such as that which he handled in Hard Times, that he
+would use severer and more accurate analysis. The usefulness of
+that work (to my mind, in several respects, the greatest he has
+written) is with many persons seriously diminished because Mr
+Bounderby is a dramatic monster, instead of a characteristic
+example of a worldly master; and Stephen Blackpool a dramatic
+perfection, instead of a characteristic example of an honest
+workman. But let us not lose the use of Dickens's wit and
+insight, because he chooses to speak in a circle of stage fire.
+He is entirely right in his main drift and purpose in every book
+he has written; and all of them, but especially Hard Times,
+should be studied with close and earnest care by persons
+interested in social questions. They will find much that is
+partial, and, because partial, apparently unjust; but if they
+examine all the evidence on the other side, which Dickens seems
+to overlook, it will appear, after all their trouble, that his
+view was the finally right one, grossly and sharply told.
+
+2. I have been naturally asked several times, with respect to the
+sentence in the first of these papers, "the bad workmen
+unemployed," "But what are you to do with your bad unemployed
+workmen?" Well, it seems to me the question might have occurred
+to you before. Your housemaid's place is vacant -- you give
+twenty pounds a year-two girls come for it, one neatly dressed,
+the other dirtily; one with good recommendations, the other with
+none. You do not, under these circumstances, usually ask the
+dirty one if she will come for fifteen pounds, or twelve; and, on
+her consenting, take her instead of the well-recommended one.
+Still less do you try to beat both down by making them bid
+against each other, till you can hire both, one at twelve pounds
+a year, and the other at eight. You simply take the one fittest
+for the place, and send away the other, not perhaps concerning
+yourself quite as much as you should with the question which you
+now impatiently put to me, "What is to become of her?" For all
+that I advise you to do, is to deal with workmen as with
+servants; and verily the question is of weight: "Your bad
+workman, idler, and rogue -- what are you to do with him?"
+    We will consider of this presently: remember that the
+administration of a complete system of national commerce and
+industry cannot be explained in full detail within the space of
+twelve pages. Meantime, consider whether, there being confessedly
+some difficulty in dealing with rogues and idlers, it may not be
+advisable to produce as few of them as possible. If you examine
+into the history of rogues, you will find they are as truly
+manufactured articles as anything else, and it is just because
+our present system of political economy gives so large a stimulus
+to that manufacture that you may know it to be a false one. We
+had better seek for a system which will develop honest men, than
+for one which will deal cunningly with vagabonds. Let us reform
+our schools, and we shall find little reform needed in our
+prisons. 
+
+3. The disputes which exist respecting the real nature of money
+arise more from the disputants examining its functions on
+different sides, than from any real dissent in their opinions.
+All money, properly so called, is an acknowledgment of debt; but
+as such, it may either be considered to represent the labour and
+property of the creditor, or the idleness and penury of the
+debtor. The intricacy of the question has been much increased by
+the (hitherto necessary) use of marketable commodities, such as
+gold, silver, salt, shells, &c., to give intrinsic value or
+security to currency; but the final and best definition of money
+is that it is a documentary promise ratified and guaranteed by
+the nation to give or find a certain quantity of labour on
+demand. A man's labour for a day is a better standard of value
+than a measure of any produce, because no produce ever maintains
+a consistent rate of productibility. 
+
+4. More accurately, Sun of Justness; but, instead of the harsh
+word "Justness," the old English "Righteousness" being commonly
+employed, has, by getting confused with "godliness," or
+attracting about it various vague and broken meanings. prevented
+most persons from receiving the force of the passages in which it
+occurs. The word "righteousness" properly refers to the justice
+of rule, or right, as distinguished from "equity," which refers
+to the justice of balance. More broadly, Righteousness is King's
+justice; and Equity, Judge's justice; the King guiding or ruling
+all, the Judge dividing or discerning between opposites
+(therefore the double question, "Man, who made me a ruler --
+dikastes -- or a dividermeristes -- over you?") Thus, with
+respect to the Justice of Choice (selection, the feebler and
+passive justice), we have from lego, -- lex, legal, loi, and
+loyal; and with respect to the Justice of Rule (direction, the
+stronger and active justice), we have from rego, -- rex, regal,
+roi, and royal.
+
+5. In another place written with the same meaning, "Just, and
+having salvation."
+
+6. "Length of days in her right hand; in her left, riches and
+honour."
+
+7. I hear that several of our lawyers have been greatly amused by
+the statement in the first of these papers that a lawyer's
+function was to do justice. I did not intend it for a jest;
+nevertheless it will be seen that in the above passage neither
+the determination nor doing of justice are contemplated as
+functions wholly peculiar to the lawyer. Possibly, the more our
+standing armies, whether of soldiers, pastors, or legislators
+(the generic term "pastor" including all teachers, and the
+generic term "lawyer" including makers as well as interpreters of
+law), can be superseded by the force of national heroism, wisdom,
+and honesty, the better it may be for the nation. 
+
+8. It being the privilege of the fishes, as it is of rats and
+wolves, to live by the laws of demand and supply; but the
+distinction of humanity, to live by those of right. 
+
+9. It might appear at first that the market price of labour
+expressed such an exchange: but this is a fallacy, for the market
+price is the momentary price of the kind of labour required, but
+the just price is its equivalent of the productive labour of
+mankind. This difference will be analyzed in its place. It must
+be noted also that I speak here only of the exchangeable value of
+labour, not of that of commodities. The exchangeable value of a
+commodity is that of the labour required to produce it,
+multiplied into the force of the demand for it. If the value of
+the labour = x and the force of demand = y, the exchangeable
+value of the commodity is xy, in which if either x = 0, or y = 0,
+xy = 0.
+
+10. Under the term "skill" I mean to include the united force of
+experience, intellect, and passion in their operation on manual
+labour: and under the term "passion," to include the entire range
+and agency of the moral feelings; from the simple patience and
+gentleness of mind which will give continuity and fineness to the
+touch, or enable one person to work without fatigue, and with
+good effect, twice as long as another, up to the qualities of
+character which renders science possible -- (the retardation of
+science by envy is one of the most tremendous losses in the
+economy of the present century) -- and to the incommunicable
+emotion and imagination which are the first and mightiest sources
+of all value in art.
+    It is highly singular that political economists should not
+yet have perceived, if not the moral, at least the passionate
+element, to be an inextricable quantity in every calculation. I
+cannot conceive, for instance, how it was possible that Mr Mill
+should have followed the true clue so far as to write, -- "No
+limit can be set to the importance -- even in a purely productive
+and material point of view -- of mere thought," without seeing
+that it was logically necessary to add also, "and of mere
+feeling." And this the more, because in his first definition of
+labour he includes in the idea of it "all feelings of a
+disagreeable kind connected with the employment of one's thoughts
+in a particular occupation." True; but why not also, "feelings of
+an agreeable kind?" It can hardly be supposed that the feelings
+which retard labour are more essentially a part of the labour
+than those which accelerate it. The first are paid for as pain,
+the second as power. The workman is merely indemified for the
+first; but the second both produce a part of the exchangeable
+value of the work, and materially increase its actual quantity.
+    "Fritz is with us. He is worth fifty thousand men." Truly, a
+large addition to the material force; -- consisting, however, be
+it observed, not more in operations carried on in Fritz's head,
+than in operations carried on in his armies' heart. "No limit can
+be set to the importance of mere thought." Perhaps not! Nay,
+suppose some day it should turn out that "mere" thought was in
+itself a recommendable object of production, and that all
+Material production was only a step towards this more precious
+Immaterial one?
+
+11. I am sorry to lose time by answering, however curtly, the
+equivocations of the writers who sought to obscure the instances
+given of regulated labour in the first of these papers, by
+confusing kinds, ranks, and quantities of labour with its
+qualities. I never said that a colonel should have the same pay
+as a private, nor a bishop the same pay as a curate. Neither did
+I say that more work ought to be paid as less work (so that the
+curate of a parish of two thousand souls should have no more than
+the curate of a parish of five hundred). But I said that, so far
+as you employ it at all, bad work should be paid no less than
+good work; as a bad clergyman yet takes his tithes, a bad
+physician takes bis fee, and a bad lawyer his costs. And this, as
+will be farther shown in the conclusion, I said, and say, partly
+because the best work never was, nor ever will be, done for money
+at all; but chiefly because, the moment people know they have to
+pay the bad and good alike, they will try to discern the one from
+the other, and not use the bad. A sagacious writer in the
+Scotsman asks me if I should like any common scribbler to be paid
+by Messrs Smith, Elder and Co. as their good authors are. I
+should, if they employed him-but would seriously recommend them,
+for the scribbler's sake, as well as their own, not to employ
+him. The quantity of its money which the country at present
+invests in scribbling is not, in the outcome of it, economically
+spent; and even the highly ingenious person to whom this question
+occurred, might perhaps have been more beneficially employed than
+in printing it. 
+
+12. I have to acknowledge an interesting communication on the
+subject of free trade from Paisley (for a short letter from "A
+Well-wisher" at my thanks are yet more due). But the Scottish
+writer will, I fear, be disagreeably surprised to hear, that I
+am, and always have been, an utterly fearless and unscrupulous
+free-trader. Seven years ago, speaking of the various signs of
+infancy in the European mind (Stones of Venice, vol. iii. p.
+168), I wrote: "The first principles of commerce were
+acknowledged by the English parliament only a few months ago, in
+its free-trade measures, and are still so little understood by
+the million, that no nation dares to abolish its custom-houses."
+    It will be observed that I do not admit even the idea of
+reciprocity. Let other nations, if they like, keep their ports
+shut; every wise nation will throw its own open. It is not the
+opening them, but a sudden, inconsiderate, and blunderingly
+experimental manner of opening them, which does the harm. If you
+have been protecting a manufacture for a long series of years,
+you must not take the protection off in a moment, so as to throw
+every one of its operatives at once out of employ, any more than
+you must take all its wrappings off a feeble child at once in
+cold weather, though the cumber of them may have been radically
+injuring its health. Little by little, you must restore it to
+freedom and to air.
+    Most people's minds are in curious confusion on the subject
+of free trade, because they suppose it to imply enlarged
+competition. On the contrary, free trade puts an end to all
+competition. "Protection" (among various other mischievous
+functions,) endeavours to enable one country to compete with
+another in the production of an article at a disadvantage. When
+trade is entirely free, no country can be competed with in the
+articles for the production of which it is naturally calculated;
+nor can it compete with any other, in the production of articles
+for which it is not naturally calculated. Tuscany, for instance,
+cannot compete with England in steel, nor England with Tuscany in
+oil. They must exchange their steel and oil. Which exchange
+should be as frank and free as honesty and the sea-winds can make
+it. Competition, indeed, arises at first, and sharply, in order
+to prove which is strongest in any given manufacture possible to
+both; this point once ascertained, competition is at an end. 
+
+13. I should be glad if the reader would first clear the ground
+for himself so far as to determine whether the difficulty lies in
+getting the work or getting the pay for it. Does he consider
+occupation itself to be an expensive luxury, difficult of
+attainment, of which too little is to be found in the world? or
+is it rather that, while in the enjoyment even of the most
+athletic delight, men must nevertheless be maintained, and this
+maintenance is not always forthcoming? We must be clear on this
+head before going farther, as most people are loosely in the
+habit of talking of the difficulty of "finding employment." Is it
+employment that we want to find, or support during employment? Is
+it idleness we wish to put an end to, or hunger? We have to take
+up both questions in succession, only not both at the same time.
+No doubt that work is a luxury, and a very great one. It is,
+indeed, at once a luxury and a necessity; no man can retain
+either health of mind or body without it. So profoundly do I feel
+this, that, as will be seen in the sequel, one of the principal
+objects I would recommend to benevolent and practical persons, is
+to induce rich people to seek for a larger quantity of this
+luxury than they at present possess. Nevertheless, it appears by
+experience that even this healthiest of pleasures may be indulged
+in to excess, and that human beings are just as liable to surfeit
+of labour as to surfeit of meat; so that, as on the one hand, it
+may be charitable to provide, for some people, lighter dinner,
+and more work, for others, it may be equally expedient to provide
+lighter work, and more dinner. 
+
+14. Book I. chap. iv. s. 1. To save space, my future references
+to Mr Mill's work will be by numerals only, as in this instance,
+I. iv. I. Ed. in 2 vols. 8vo. Parker, 1848.
+
+15. If Mr Mill had wished to show the difference in result
+between consumption and sale, he should have represented the
+hardware merchant as consuming his own goods instead of selling
+them; similarly, the silver merchant as consuming his own goods
+instead of welling them. Had he done this, he would have made his
+position clearer, though less tenable; and perhaps this was the
+position he really intended to take, tacitly involving his
+theory, elsewhere stated, and shown in the sequel of this paper
+to be false, that demand for commodities is not demand for
+labour. But by the most diligent scrutiny of the paragraph now
+under examination, I cannot determine whether it is a fallacy
+pure and simple, or the half of one fallacy supported by the
+whole of a greater one; so that I treat it here on the kinder
+assumption that it is one fallacy only.
+
+16. I take Mr Helps' estimate in his essay on War.
+
+17. Also when the wrought silver vases of Spain were dashed to
+fragments by our custom-house officers, because bullion might be
+imported free of duty, but not brains, was the axe that broke
+them productive? -- the artist who wrought them unproductive? Or
+again. If the woodman's axe is productive, is the executioner's?
+as also, if the hemp of a cable be productive, does not the
+productiveness of hemp in a halter depend on its moral more than
+on its material application?
+
+18. Filigree: that is to say, generally, ornament dependent on
+complexity, not on art.
+
+19. These statements sound crude in their brevity; but will be
+found of the utmost importance when they are developed. Thus, in
+the above instance, economists have never perceived that
+disposition to buy is a wholly moral element in demand: that is
+to say, when you give a man half-a-crown, it depends on his
+disposition whether he is rich or poor with it -- whether he will
+buy disease, ruin, and hatred, or buy health, advancement, and
+domestic love. And thus the agreeableness or exchange value of
+every offered commodity depends on production, not merely of the
+commodity, but of buyers of it; therefore on the education of
+buyers, and on all the moral elements by which their disposition
+to buy this, or that, is formed. I will illustrate and expand
+into final consequences every one of these definitions in its
+place: at present they can only be given with extremest brevity;
+for in order to put the subject at once in a connected form
+before the reader, I have thrown into one, the opening
+definitions of four chapters; namely, of that on Value ("Ad
+Valorem"); on Price ("Thirty Pieces"); on Production ("Demeter");
+and on Economy ("The Law of the House").
+
+20. Perhaps it may be said, in farther support of Mr Ricardo,
+that he meant, "when the utility is constant or given, the price
+varies as the quantity of labour." If he meant this, he should
+have said it; but, had he meant it, he could have hardly missed
+the necessary result, that utility would be one measure of price
+(which he expressly denies it to be); and that, to prove
+saleableness, he had to prove a given quantity of utility, as
+well as a given quantity of labour: to wit, in his own instance,
+that the deer and fish would each feed the same number of men,
+for the same number of days, with equal pleasure to their
+palates. The fact is, he did not know what he meant himself. The
+general idea which he had derived from commercial experience,
+without being able to analyze it, was, that when the demand is
+constant, the price varies as the quantity of labour required for
+production; or, -- using the formula I gave in last paper -- when
+y is constant, x y varies as x. But demand never is, nor can be,
+ultimately constant, if x varies distinctly; for, as price rises,
+consumers fall away; and as soon as there is a monopoly (and all
+scarcity is a form of monopoly; so that every commodity is
+affected occasionally by some colour of monopoly), y becomes the
+most influential condition of the price. Thus the price of a
+painting depends less on its merits than on the interest taken in
+it by the public; the price of singing less on the labour of the
+singer than the number of persons who desire to hear him; and the
+price of gold less on the scarcity which affects it in common
+with cerium or iridium, than on the sunlight colour and
+unalterable purity by which it attracts the admiration and
+answers the trust of mankind.
+    It must be kept in mind, however, that I use the word
+"demand" in a somewhat different sense from economists usually.
+They mean by it "the quantity of a thing sold." I mean by it "the
+force of the buyer's capable intention to buy." In good English,
+a person's "demand" signifies, not what he gets, but what he asks
+for.
+    Economists also do not notice that objects are not valued by
+absolute bulk or weight, but by such bulk and weight as is
+necessary to bring them into use. They say, for instance, that
+water bears no price in the market. It is true that a cupful does
+not, but a lake does; just as a handful of dust does not, but an
+acre does. And were it possible to make even the possession of
+the cupful or handful permanent, (i.e. to find a place for them,)
+the earth and sea would be bought up for handfuls and cupfuls.
+
+21. Compare George Herbert, The Church Porch, Staza 28.
+
+22. "O Zeus dipou penetai" -- Arist. Plut. 582. It would but
+weaken the grad words to lean on the preceding ones: -- "Oti tou
+Platon parecho Beltionas, andpas, kai tin gnomen, kai ten idean."
+
+23. Zech. v. ii.
+
+24. Labour which is entirely good of its kind, that is to say,
+effective, or efficient, the Greeks called "weighable," or axios,
+translated usually "worthy," and because thus substantial and
+true, they called its price time, the "honourable estimate" of it
+(honorarium): this word being founded on their conception of true
+labour as a divine thing, to be honoured with the kind of honour
+given to the gods; whereas the price of false labour, or of that
+which led away from life, was to be, not honour, but vengeance;
+for which they reserved another word, attributing the exaction of
+such price to a peculiar goddess, called Tisiphone, the "requiter
+(or quittance-taker) of death"; a person versed in the highest
+branches of arithmetic, and punctual in her habits; with whom
+accounts current have been opened also in modern days. 
+
+25. The most accurately nugatory labour is, perhaps, that of
+which not enough is given to answer a purpose effectually, and
+which, therefore, has all to be done over again. Also, labour
+which fails of effect through non-co-operation. The cure of a
+little village near Bellinzona, to whom I had expressed wonder
+that the peasants allowed the Ticino to flood their fields, told
+me that they would not join to build an effectual embankment high
+up the valley, because everybody said "that would help his
+neighbours as much as himself." So every proprietor built a bit
+of low embankment about his own field; and the Ticino, as soon as
+it had a mind, swept away and swallowed all up together. 
+
+26. Observe, I say,  rearing," not "begetting." The praise is in
+the seventh season, not in sporitos, nor in phutalia, but in
+opora. It is strange that men always praise enthusiastically any
+person who, by a momentary exertion, saves a life; but praise
+very hesitatingly a person who, by exertion and self-denial
+prolonged through years, creates one. We give the crown "ob civem
+servatum"; -- why not "ob civem natum?" Born, I mean, to the
+full, in soul as well as body. England has oak enough, I think,
+for both chaplets. 
+
+27. When Mr Mill speaks of productive consumption, he only means
+consumption which results in increase of capital, or material
+wealth. See I. iii. 4, and I. iii. 5. 
+
+28. So also in the vision of the women bearing the ephah, before
+quoted, "the wind was in their wings," not wings "of a stork," as
+in our version; but "miivi," of a kite, in the Vulgate, or
+perhaps more accurately still in the Septuagint, "hoopoe," a bird
+connected typically with the power of riches by many traditions,
+of which that of its petition for a crest of gold is perhaps the
+most interesting. The "Birds" of Aristophanes, in which its part
+is principal, are full of them; note especially the
+"fortification of the air with baked bricks, like Babylon," I.
+550; and, again, compare the Plutus of Dante, who (to show the
+influence of riches in destroying the reason) is the only one of
+the powers of the Inferno who cannot speak intelligibly and also
+the cowardliest; he is not merely quelled or restrained, but
+literally "collapses" at a word; the sudden and helpless
+operation of mercantile panic being all told in the brief
+metaphor, "as the sails, swollen with the wind, fall, when the
+mast breaks."
+
+29. The value of raw material, which has, indeed, to be deducted
+from the price of the labour, is not contemplated in the passages
+referred to, Mr. Mill having fallen into the mistake solely by
+pursuing the collateral results of the payment of wages to
+middlemen. He says" The consumer does not, with his own funds,
+pay the weaver for his day's work. "Pardon me; the consumer of
+the velvet pays the weaver with his own funds as much as he pays
+the gardener. He pays, probably, an intermediate ship-owner,
+velvet merchant, and shopman; pays carriage money, shop rent,
+damage money, time money, and care money; all these are above and
+beside the velvet price, (just as the wages of a head gardener
+would be above the grass price). but the velvet is as much
+produced by the consumer's capital, though he does not pay for it
+till six months after production, as the grass is produced by his
+capital, though he does not pay the man who mowed and rolled it
+on Monday, till Saturday afternoon. I do not know if Mr. Mill's
+conclusion, -- "the capital cannot be dispensed with, the
+purchasers can " (p. 98), has yet been reduced to practice in the
+City on any large scale.
+
+30. Which, observe, is the precise opposite of the one under
+examination. The hardware theory required us to discharge our
+gardeners and engage manufacturers; the velvet theory requires us
+to discharge our manufacturers and engage gardeners.
+
+31. It is one very awful form of the operation of wealth in
+Europe that it is entirely capitalists' wealth which supports
+unjust wars. Just wars do not need so much money to support them;
+for most of the men who wage such, wage them gratis; but for an
+unjust war, men's bodies and souls have both to be bought; and
+the best tools of war for them besides; which makes such war
+costly to the maximum; not to speak of the cost of base fear, and
+angry suspicion, between nations which have not grace nor honesty
+enough in all their multitudes to buy an hour's peace of mind
+with: as, at present, France and England, purchasing of each
+other ten millions sterling worth of consternation annually, (a
+remarkably light crop, half thorns and half aspen leaves, --
+sown, reaped, and granaried by the "science" of the modern
+political economist, teaching covetousness instead of truth.) And
+all unjust war being supportable, if not by pillage of the enemy,
+only by loans from capitalists, these loans are repaid by
+subsequent taxation of the people, who appear to have no will in
+the matter, the capitalists' will being the primary root of the
+war; but its real root is the covetousness of the whole nation,
+rendering it incapable of faith, frankness, or justice, and
+bringing about, therefore, in due time, his own separate loss and
+punishment to each person.
+
+32. "In all reasoning about prices, the proviso must be
+understood, 'supposing all parties to take care of their own
+interest.'" -- Mill, III. i. 5.
+
+33. James v. 4. Observe, in these statements I am not talking up,
+nor countenancing one whit, the common socialist idea of division
+of property; division of property is its destruction; and with it
+the destruction of all hope, all industry, and all justice: it is
+simply chaos a chaos towards which the believers in modern
+political economy are fast tending, and from which I am striving
+to save them. The rich man does not keep back meat from the poor
+by retaining his riches; but by basely using them. Riches are a
+form of strength; and a strong man does not injure others by
+keeping his strength, but by using it injuriously. The socialist,
+seeing a strong man oppress a weak one, cries out. -- "Break the
+strong man's arms." but I say, "Teach him to use them to better
+purpose." The fortitude and intelligence which acquire riches are
+intended, by the Giver of both, not to scatter, nor to give away,
+but to employ those riches in the service of mankind; in other
+words, in the redemption of the erring and aid of the weak --
+that is to say, there is first to be the work to gain money; then
+the Sabbath of use for it -- the Sabbath, whose law is, not to
+lose life, but to save. It is continually the fault or the folly
+of the poor that they are poor, as it is usually a child's fault
+if it falls into a pond, and a cripple's weakness that slips at a
+crossing; nevertheless, most passers -- by would pull the child
+out, or help up the cripple. Put it at the worst, that all the
+poor of the world are but disobedient children, or careless
+cripples, and that all rich people are wise and strong, and you
+will see at once that neither is the socialist right in desiring
+to make everybody poor, powerless, and foolish as he is himself,
+nor the rich man right in leaving the children in the mire.
+
+34. The quantity of life is the same in both cases; but it is
+differently allotted.
+
+35. The proper offices of middle-men, namely, overseers (or
+authoritative workmen), conveyancers (merchants, sailors, retail
+dealers, &c.), and order-takers (persons employed to receive
+directions from the consumer), must, of course, be examined
+before I can enter farther into the question of just payment of
+the first producer. But I have not spoken of them in these
+introductory papers, because the evils attendant on the abuse of
+such intermediate functions result not from any alleged principle
+of modern political economy, but from private carelessness or
+iniquity.
