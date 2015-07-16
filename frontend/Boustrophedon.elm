@@ -116,12 +116,12 @@ port menuAction =
     let toMenuAction tap viewDims =
         if | tap.y == 0                             -> Task.fail ()
            | tap.y > (1 * viewDims.fullHeight // 5) &&
-             tap.y < (2 * viewDims.fullHeight // 5) -> Signal.send fileName.address "my-lost-city-fitzgerald.txt"
+             tap.y < (2 * viewDims.fullHeight // 5) -> Signal.send fileName.address "ruskin.txt"
            | tap.y > (2 * viewDims.fullHeight // 5) &&
-             tap.y < (3 * viewDims.fullHeight // 5) -> Signal.send fileName.address "room-of-ones-own.txt"
+             tap.y < (3 * viewDims.fullHeight // 5) -> Signal.send fileName.address "ruskin2.txt"
            | tap.y > (3 * viewDims.fullHeight // 5) &&
-             tap.y < (4 * viewDims.fullHeight // 5) -> Signal.send fileName.address "chants.txt"
+             tap.y < (4 * viewDims.fullHeight // 5) -> Signal.send fileName.address "ruskin3.txt"
            | tap.y > (4 * viewDims.fullHeight // 5) &&
-             tap.y < (5 * viewDims.fullHeight // 5) -> Signal.send fileName.address "trotsky.txt"
+             tap.y < (5 * viewDims.fullHeight // 5) -> Signal.send fileName.address "ruskin4.txt"
            | otherwise                              -> Task.fail ()
     in S.map2 toMenuAction Touch.taps currentViewDimensions

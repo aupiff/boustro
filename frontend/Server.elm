@@ -14,7 +14,7 @@ textList = [ { title = "The Roots of Honour", path = "ruskin.txt" }
            ]
 
 fileName : S.Mailbox String
-fileName = S.mailbox "my-lost-city-fitzgerald.txt"
+fileName = S.mailbox "ruskin.txt"
 
 textContent : S.Mailbox String
 textContent = S.mailbox ""
