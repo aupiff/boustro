@@ -41,7 +41,7 @@ titleButton w h = let buttonContainer = Graphics.Element.color white << containe
 menuScene : List Model.TextPart -> ViewDimensions -> Element
 menuScene ts viewDimensions =
     let toSelectionButton tp = menuButton viewDimensions.textWidth (viewDimensions.fullHeight // 5) tp.title
-        textButtons = flow down <| (titleButton viewDimensions.textWidth (viewDimensions.fullHeight // 5) "BOUSTROPHEDON") :: L.map toSelectionButton ts
+        textButtons = flow down <| (titleButton viewDimensions.textWidth (viewDimensions.fullHeight // 5) "Unto this last") :: L.map toSelectionButton ts
         fullContainer = container viewDimensions.fullWidth
                                   viewDimensions.fullHeight
                                   Graphics.Element.middle
