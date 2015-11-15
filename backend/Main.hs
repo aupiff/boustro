@@ -14,14 +14,27 @@ import qualified Network.Wai.Handler.Warp as N
 import           Servant
 import           Control.Monad.IO.Class
 import           Text.Hyphenation.Hyphenator
+import           Lucid
+import           Servant.HTML.Lucid
 
-type API = "app" :> Raw :<|> "texts" :> Raw
+type API = "app"         :> Raw
+      :<|> "texts"       :> Raw
+      :<|> "/"           :> Get '[HTML] WelcomePage
+
+data WelcomePage = WelcomePage { message :: String }
+
+page = WelcomePage "hi"
+
+instance ToHtml WelcomePage where
+  toHtml person = toHtml $ message page
 
 api :: Proxy API
 api = Proxy
 
 server :: Server API
-server = serveDirectory "static" :<|> serveDirectory "static/texts"
+server = serveDirectory "static"
+    :<|> serveDirectory "static/texts"
+    :<|> return page
 
 app :: Application
 app = serve api server
