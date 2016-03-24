@@ -16,25 +16,32 @@ import           Control.Monad.IO.Class
 import           Text.Hyphenation.Hyphenator
 import           Lucid
 import           Servant.HTML.Lucid
+import           Data.Monoid ((<>))
 
-type API = "app"         :> Raw
-      :<|> "texts"       :> Raw
-      :<|> "/"           :> Get '[HTML] WelcomePage
+type API = Get '[HTML] WelcomePage
+      :<|> "app"   :> Raw
+      :<|> "texts" :> Raw
 
-data WelcomePage = WelcomePage { message :: String }
-
-page = WelcomePage "hi"
+data WelcomePage = WelcomePage
 
 instance ToHtml WelcomePage where
-  toHtml person = toHtml $ message page
+  toHtml p = html_ $ do
+
+    head_ $ title_ "Boustro"
+
+    body_ $ do
+        h1_ "Boustrophedon Syndicate"
+        p_ "hello" <> p_ "sup"
+        a_ [href_ "/app"] "boustrophedon reading application"
+
 
 api :: Proxy API
 api = Proxy
 
 server :: Server API
-server = serveDirectory "static"
+server = return WelcomePage
     :<|> serveDirectory "static/texts"
-    :<|> return page
+    :<|> serveDirectory "static"
 
 app :: Application
 app = serve api server

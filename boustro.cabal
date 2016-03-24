@@ -26,6 +26,7 @@ executable boustro
                      , mtl
                      , lens
                      , lucid
+                     , servant
                      , servant-lucid
                      , servant-server
                      , wai
