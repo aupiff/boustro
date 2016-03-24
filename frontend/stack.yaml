@@ -1,0 +1,25 @@
+resolver: nightly-2016-03-24
+compiler: ghcjs-0.2.0.20151230.3_ghc-7.10.2
+compiler-check: match-exact
+setup-info:
+     ghcjs:
+           source:
+                  ghcjs-0.2.0.20151230.3_ghc-7.10.2:
+                          url: "https://github.com/nrolland/ghcjs/releases/download/v.0.2.0.20151230.3/ghcjs-0.2.0.20151230.3.tar.gz"
+
+packages:
+- '.'
+- location:
+    git: git@github.com:aupiff/hyphenation.git
+    commit: 6371bdc3446e7eb6fe74e24922e812f41af2a8e1
+- location:
+    git: git@github.com:ghcjs/ghcjs-jquery.git
+    commit: 6e8023229342eaf78204cde3189865be891e5aa4
+
+extra-deps:
+  - ghcjs-dom-0.2.3.0
+  - hyphenation-0.6.1
+  - ghcjs-jquery-0.1.0.0
+
+flags: {}
+extra-package-dbs: []
