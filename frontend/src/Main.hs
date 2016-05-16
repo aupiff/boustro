@@ -93,7 +93,7 @@ renderLine :: [Item JQuery Double] -> IO JQuery
 renderLine ls = do lineDiv <- select "<div></div>" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
                                                    >>= setCss "white-space" "nowrap"
                    nls <- mapM convertSpace ls
-                   mapM_ (`appendJQuery` lineDiv) $ fmap itemElement nls
+                   mapM_ (\i -> (`appendJQuery` lineDiv) <=< styleSpace (itemWidth i) $ itemElement i) nls
                    return lineDiv
     where
       filteredLs = filter (not . itemIsSpring) ls
