@@ -16,9 +16,9 @@ import           Text.Hyphenation
 data Item a b = Box b a             -- Box w_i
               | Spring b b b a      -- Spring w_i y_i z_i
               | Penalty b b Bool a  -- Penalty w_i p_i f_i
+
 -- all hypens are flagged penality items because we don't want two hyphens in
 -- a row
---
 
 itemIsSpring :: Item a b -> Bool
 itemIsSpring Spring{} = True
@@ -67,12 +67,24 @@ main = ready $ do
           scratchArea <- select "#scratch-area" >>= setCss "width" (textToJSString . T.pack $ show 0)
           mapM_ (`appendJQuery` scratchArea) $ fmap itemElement words
 
-          boxes <- mapM (\i -> (\w -> return $ setItemWidth w i) =<< getInnerWidth (itemElement i)) words
-          lines <- mapM renderLine (foldr accumLines [[]] boxes)
+          boxes <- reverse <$> foldM func [] words
+          lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
           textArea <- select "#text-area" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
           mapM_ (`appendJQuery` textArea) =<< boustro lines
           return ()
+    where func p@(Penalty w _ flag a : ls) i = do
+               width <- getInnerWidth (itemElement i)
+               return $ setItemWidth width i : Penalty w width flag a : ls
+          func p i = do n <- (\w -> return $ setItemWidth w i) =<< getInnerWidth (itemElement i)
+                        return $ n : p
 
+-- removeSpacesFromEnds :: [Item _ _] -> [Item _ _]
+removeSpacesFromEnds (h : t)
+    | itemIsSpring h = removeLastP t
+    | otherwise    = h : removeLastP t
+    where removeLastP r
+               | itemIsSpring (Prelude.last r) = init r
+               | otherwise             = r
 
 boustro :: [JQuery] -> IO [JQuery]
 boustro [] = return []
@@ -83,6 +95,10 @@ boustro (l:l2:ls) = do ho <- reverseLine l2
 
 
 accumLines :: (Ord b, Num b) => Item a b -> [[Item a b]] -> [[Item a b]]
+accumLines i@(Penalty w nextWidth flag _) p@(l:_)
+    | (lineLength l + nextWidth) > fromIntegral textWidth = [ i ] : p
+    | otherwise                                           = p
+  where lineLength = sum . fmap itemWidth
 accumLines item p@(l:ls)
     | (lineLength l + itemWidth item) > fromIntegral textWidth = [ item ] : p
     | otherwise                                                = (item : l) : ls
