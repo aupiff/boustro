@@ -4,8 +4,8 @@ compiler-check: match-exact
 setup-info:
      ghcjs:
            source:
-                  ghcjs-0.2.0.20151230.3_ghc-7.10.2:
-                          url: "https://github.com/nrolland/ghcjs/releases/download/v.0.2.0.20151230.3/ghcjs-0.2.0.20151230.3.tar.gz"
+                  ghcjs-0.2.0.20160315_ghc-7.10.2:
+                          url: "https://github.com/nrolland/ghcjs/releases/download/v.0.2.0.20160315/ghcjs-0.2.0.20160315.tar.gz"
 
 packages:
 - '.'
@@ -15,11 +15,15 @@ packages:
 - location:
     git: git@github.com:ghcjs/ghcjs-jquery.git
     commit: 6e8023229342eaf78204cde3189865be891e5aa4
+- location:
+    git: git@github.com:fpco/ghcjs-react.git
+    commit: 373020165f30ffdf7fa8652d6a0d8c05569da34f
 
 extra-deps:
   - ghcjs-dom-0.2.3.0
   - hyphenation-0.6.1
   - ghcjs-jquery-0.1.0.0
+  - ghcjs-react-0.0.0
 
 flags: {}
 extra-package-dbs: []
