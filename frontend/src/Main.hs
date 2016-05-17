@@ -12,6 +12,10 @@ import           Data.JSString.Text as S (textToJSString, textFromJSString)
 import           JavaScript.JQuery hiding (filter, not)
 import           Text.Hyphenation
 
+-- import           Reflex
+-- import           Reflex.Dom
+
+
 -- can this be a monoid?
 data Item a b = Box b a             -- Box w_i
               | Spring b b b a      -- Spring w_i y_i z_i
