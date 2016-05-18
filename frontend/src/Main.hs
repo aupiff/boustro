@@ -6,6 +6,7 @@ import           Data.IORef
 import           Data.JSString.Text
 import           Data.List (intersperse)
 import           Data.Monoid ((<>))
+import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import qualified Data.JSString as S
 import           Data.JSString.Text as S (textToJSString, textFromJSString)
@@ -58,27 +59,31 @@ textWidth :: Int
 textWidth = 600
 
 main :: IO ()
-main = do
+main = RD.mainWidget $ do
 
-    ready $ do
+     -- RD.elAttr "div" (Map.singleton "id" "#scratch-area") $ ready $ do
 
-        words <- mapM toItem processedWords
+     --    words <- mapM toItem processedWords
 
-        -- creating a temporary div specifically to measure the width of every element
-        scratchArea <- select "#scratch-area" >>= setCss "width" (textToJSString . T.pack $ show 0)
-        mapM_ (`appendJQuery` scratchArea) $ fmap itemElement words
-        boxes <- reverse <$> foldM func [] words
-        remove scratchArea
+     --    -- creating a temporary div specifically to measure the width of every element
+     --    scratchArea <- select "#scratch-area" >>= setCss "width" (textToJSString . T.pack $ show 0)
+     --    mapM_ (`appendJQuery` scratchArea) $ fmap itemElement words
+     --    boxes <- reverse <$> foldM func [] words
+     --    remove scratchArea
 
-        lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
-        textArea <- select "#text-area" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
-        mapM_ (`appendJQuery` textArea) =<< boustro lines
+     --    lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
+     --    textArea <- select "#text-area" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
+     --    mapM_ (`appendJQuery` textArea) =<< boustro lines
 
+     RD.el "div" $ do
 
-
-    RD.mainWidget $ RD.el "div" $ do
         t <- RD.textInput def
         RD.dynText $ RD._textInput_value t
+
+        RD.elAttr "div" (Map.singleton "id" "#scratch-area") $ do
+            t <- RD.textInput def
+            RD.dynText $ RD._textInput_value t
+
 
 
      where func p@(Penalty w _ flag a : ls) i = do
