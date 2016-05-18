@@ -78,7 +78,7 @@ main = ready $ do
           lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
           textArea <- select "#text-area" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
           mapM_ (`appendJQuery` textArea) =<< boustro lines
-          return ()
+
     where func p@(Penalty w _ flag a : ls) i = do
                width <- getInnerWidth (itemElement i)
                return $ setItemWidth width i : Penalty w width flag a : ls
