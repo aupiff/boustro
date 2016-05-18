@@ -1,0 +1,9 @@
+#boustro {
+  width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#scratch-area {
+  visibility: hidden;
+}

@@ -37,5 +37,23 @@ in reflex-platform.ghcjs.override {
       }
 
     ) {};
+
+    #    file-embed = self.callPackage ({ mkDerivation }:
+    #      mkDerivation {
+    #        pname = "file-embed";
+    #        version = "0.0.10";
+    #        src = nixpkgs.fetchgit {
+    #         url = "https://github.com/snoyberg/file-embed";
+    #         rev = "abcf9018bd8b10f7147e8a7383faf2872b0e3051";
+    #         sha256 = "139npi667vfn06q01bmj3x37pxv00xhwjs7dxvkc8y3dmblffk4s";
+    #        };
+    #
+    #        buildDepends = [ ];
+    #
+    #        license = null;
+    #      }
+    #
+    #    ) {};
+
   };
 }
