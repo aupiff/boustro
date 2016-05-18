@@ -45,7 +45,7 @@ getWordLengths inputWords = do
                          return $ n : p
 
 main :: IO ()
-main = ready $ RD.mainWidget $ do
+main = ready $ RD.mainWidget $ RD.el "div" $ do
 
      -- RD.el "style" $ RD.text $ $(embedStringFile "Boustro.css")
 
