@@ -1,10 +1,12 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecursiveDo #-}
 -- {-# LANGUAGE TemplateHaskell #-}
 
 import           Data.FileEmbed
 import           Control.Monad
+import           Control.Monad.IO.Class
 import           Data.Default
 import           Data.IORef
 import           Data.JSString.Text
@@ -17,23 +19,46 @@ import           Data.JSString.Text as S (textToJSString, textFromJSString)
 import           JavaScript.JQuery hiding (filter, not)
 import           Text.Hyphenation
 
+import           System.IO.Unsafe
 import qualified Reflex as R
 import qualified Reflex.Dom as RD
 
+getWordLengths :: [String] -> IO [Double]
+getWordLengths inputWords = do
+
+     ws <- mapM (toItem . T.pack) inputWords
+
+     -- creating a temporary div specifically to measure the width of every element
+     scratchArea <- select "#scratch-area"
+     mapM_ (`appendJQuery` scratchArea) $ fmap itemElement ws
+     fmap itemWidth . reverse <$> foldM func [] ws
+
+     where toItem :: T.Text -> IO (Item JQuery Double)
+           toItem "-" = hyphen 0 <$> select "<span>-</span>"
+           toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< select "<span>&nbsp;</span>")
+           toItem str = Box 0 <$> select ("<span>" <> textToJSString str <> "</span>")
+
+           func p@(Penalty w _ flag a : ls) i = do
+                width <- getInnerWidth (itemElement i)
+                return $ setItemWidth width i : Penalty w width flag a : ls
+           func p i = do n <- (\w -> return $ setItemWidth w i) =<< getInnerWidth (itemElement i)
+                         return $ n : p
 
 main :: IO ()
-main = RD.mainWidget $ do
+main = ready $ RD.mainWidget $ do
 
      -- RD.el "style" $ RD.text $ $(embedStringFile "Boustro.css")
 
+     RD.elAttr "div" (Map.singleton "id" "scratch-area") $ RD.text "nothing"
 
-     tweetBox <- RD.textArea $
-        RD.def RD.& RD.attributes RD..~ RD.constDyn ("maxlength" RD.=: "140")
-     RD.el "div" $ do
-        numChars <- RD.mapDyn length $ RD.value tweetBox
-        RD.display numChars
-        RD.text " characters"
-     -- RD.elAttr "div" (Map.singleton "id" "scratch-area") $ RD.text "hello"
+     pb <- RD.getPostBuild
+     numChars <- RD.performEvent $ RD.ffor pb (\_ -> liftIO $ getWordLengths processedWords )
+     fool <- RD.holdDyn [] numChars
+
+     RD.elAttr "div" (Map.singleton "id" "boustro") $ do
+        RD.text $ unwords processedWords
+
+        RD.display fool
 
      -- boxes <- RD.elAttr "div" (Map.singleton "id" "#scratch-area") $ ready $ do
 
@@ -45,24 +70,12 @@ main = RD.mainWidget $ do
      --    reverse <$> foldM func [] words
      --    -- remove scratchArea
 
-     RD.elAttr "div" (Map.singleton "id" "boustro") $ RD.text $ unwords processedWords
 
      --    lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
      --    textArea <- select "#text-area" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
      --    mapM_ (`appendJQuery` textArea) =<< boustro lines
 
-     where func p@(Penalty w _ flag a : ls) i = do
-                width <- getInnerWidth (itemElement i)
-                return $ setItemWidth width i : Penalty w width flag a : ls
-           func p i = do n <- (\w -> return $ setItemWidth w i) =<< getInnerWidth (itemElement i)
-                         return $ n : p
-
-           processedWords = preprocess text
-
-           toItem :: T.Text -> IO (Item JQuery Double)
-           toItem "-" = hyphen 0 <$> select "<span>-</span>"
-           toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< select "<span>&nbsp;</span>")
-           toItem str = Box 0 <$> select ("<span>" <> textToJSString str <> "</span>")
+     where processedWords = preprocess text
 
 -- can this be a monoid?
 data Item a b = Box b a             -- Box w_i

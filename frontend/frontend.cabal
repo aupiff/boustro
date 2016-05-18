@@ -30,4 +30,5 @@ executable boustro
                   , reflex
                   , reflex-dom
                   , text
+                  , transformers
   default-language:  Haskell2010
