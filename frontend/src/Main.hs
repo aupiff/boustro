@@ -58,32 +58,43 @@ textWidth :: Int
 textWidth = 600
 
 main :: IO ()
-main = ready $ do
+main = do
 
-          let processedWords = preprocess text
-              processedText = textToJSString $ T.unwords processedWords
-              toItem :: T.Text -> IO (Item JQuery Double)
-              toItem "-" = hyphen 0 <$> select "<span>-</span>"
-              toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< select "<span>&nbsp;</span>")
-              toItem str = Box 0 <$> select ("<span>" <> textToJSString str <> "</span>")
+    ready $ do
 
-          words <- mapM toItem processedWords
+        words <- mapM toItem processedWords
 
-          -- creating a temporary div specifically to measure the width of every element
-          scratchArea <- select "#scratch-area" >>= setCss "width" (textToJSString . T.pack $ show 0)
-          mapM_ (`appendJQuery` scratchArea) $ fmap itemElement words
-          boxes <- reverse <$> foldM func [] words
-          remove scratchArea
+        -- creating a temporary div specifically to measure the width of every element
+        scratchArea <- select "#scratch-area" >>= setCss "width" (textToJSString . T.pack $ show 0)
+        mapM_ (`appendJQuery` scratchArea) $ fmap itemElement words
+        boxes <- reverse <$> foldM func [] words
+        remove scratchArea
 
-          lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
-          textArea <- select "#text-area" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
-          mapM_ (`appendJQuery` textArea) =<< boustro lines
+        lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
+        textArea <- select "#text-area" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
+        mapM_ (`appendJQuery` textArea) =<< boustro lines
 
-    where func p@(Penalty w _ flag a : ls) i = do
-               width <- getInnerWidth (itemElement i)
-               return $ setItemWidth width i : Penalty w width flag a : ls
-          func p i = do n <- (\w -> return $ setItemWidth w i) =<< getInnerWidth (itemElement i)
-                        return $ n : p
+
+
+    RD.mainWidget $ RD.el "div" $ do
+        t <- RD.textInput def
+        RD.dynText $ RD._textInput_value t
+
+
+     where func p@(Penalty w _ flag a : ls) i = do
+                width <- getInnerWidth (itemElement i)
+                return $ setItemWidth width i : Penalty w width flag a : ls
+           func p i = do n <- (\w -> return $ setItemWidth w i) =<< getInnerWidth (itemElement i)
+                         return $ n : p
+
+           processedWords = preprocess text
+           processedText = textToJSString $ T.unwords processedWords
+
+           toItem :: T.Text -> IO (Item JQuery Double)
+           toItem "-" = hyphen 0 <$> select "<span>-</span>"
+           toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< select "<span>&nbsp;</span>")
+           toItem str = Box 0 <$> select ("<span>" <> textToJSString str <> "</span>")
+
 
 -- removeSpacesFromEnds :: [Item _ _] -> [Item _ _]
 removeSpacesFromEnds (h : t)

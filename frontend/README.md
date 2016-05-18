@@ -3,5 +3,10 @@ boustro frontend
 
 ```
 ~/reflex-platform/work-on ghcjs ./. --run "ghcid -c'cabal repl'"
-./reflex-platform/work-on ghcjs ./.
+```
+
+using current submodule scheme:
+
+```
+./reflex-platform/work-on ./ghcjs-packages.nix ./.
 ```
