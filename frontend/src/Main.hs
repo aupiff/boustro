@@ -12,8 +12,8 @@ import           Data.JSString.Text as S (textToJSString, textFromJSString)
 import           JavaScript.JQuery hiding (filter, not)
 import           Text.Hyphenation
 
--- import           Reflex
--- import           Reflex.Dom
+import qualified Reflex as R
+import qualified Reflex.Dom as RD
 
 
 -- can this be a monoid?
