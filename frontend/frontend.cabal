@@ -5,6 +5,12 @@ name:                frontend
 version:             0.1.0.1
 category:            Web
 build-type:          Simple
+license:             MIT
+license-file:        LICENSE
+synopsis:            A boustrophedon reading frontend
+description:         A ghcjs/reflex reading application
+                     which renders text boustrophedonically
+maintainer:          riblankman@gmail.com
 cabal-version:       >=1.10
 
 executable boustro
@@ -19,7 +25,7 @@ executable boustro
                   ,  ghcjs-jquery
                   ,  ghcjs-dom > 0.2
                   ,  hyphenation
-  --                 ,  reflex
-  --                 ,  reflex-dom
+                  -- ,  reflex
+                  -- ,  reflex-dom
                   ,  text
   default-language:  Haskell2010
