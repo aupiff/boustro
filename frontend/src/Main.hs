@@ -1,40 +1,29 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ExistentialQuantification #-}
 -- {-# LANGUAGE RecursiveDo #-}
 -- {-# LANGUAGE TemplateHaskell #-}
 
-import           Data.FileEmbed
+-- import           Data.FileEmbed
+
 import           Control.Monad
 import           Control.Monad.IO.Class
-import           Data.Default
-import           Data.IORef
-import           Data.Maybe (fromJust)
 import           Data.JSString.Text
 import           Data.List (intersperse)
 import           Data.Monoid ((<>))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
-import qualified Data.JSString as S
-import           Data.JSString.Text as S (textToJSString, textFromJSString)
 import qualified JavaScript.JQuery as JQ hiding (filter, not)
 import           Text.Hyphenation
-import qualified GHCJS.DOM.Window as DOM ( getWindow
-                                         , resize
-                                         , getOuterWidth )
 import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
-import           GHCJS.DOM.KeyboardEvent (getKeyIdentifier)
 
 import GHCJS.DOM (webViewGetDomDocument)
 import GHCJS.DOM.Document (getBody)
 
 import Reflex.Dom.Class
-import Reflex.Host.Class
 
-import GHCJS.DOM.Types hiding (Event)
-
-import qualified Reflex as R
 import qualified Reflex.Dom as RD
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
@@ -52,7 +41,7 @@ wordsWithWidths inputWords = do
            toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< JQ.select "<span>&nbsp;</span>")
            toItem str = Box 0 <$> JQ.select ("<span>" <> textToJSString str <> "</span>")
 
-           func p@(Penalty w _ flag a : ls) i = do
+           func (Penalty w _ flag a : ls) i = do
                 width <- JQ.getInnerWidth (itemElement i)
                 return $ setItemWidth width i : Penalty w width flag a : ls
            func p i = do n <- (\w -> return $ setItemWidth w i) =<< JQ.getInnerWidth (itemElement i)
@@ -60,11 +49,19 @@ wordsWithWidths inputWords = do
 
 arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
 arrangeBoustro boxes = do
-    lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
+    ls <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
     textArea <- JQ.select "#boustro" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
-    mapM_ (`JQ.appendJQuery` textArea) =<< boustro lines
+    mapM_ (`JQ.appendJQuery` textArea) =<< boustro ls
 
 data PageEvent = NextPage | PrevPage | Start deriving Show
+
+data TextViewModel = TextViewModel { fullText :: String
+                                   , wordIndex :: Int
+                                   , pageWordCount :: Int
+                                   }
+
+initialModel :: TextViewModel
+initialModel = TextViewModel text 0 0
 
 pageDynamic = do
      wv <- askWebView
@@ -74,10 +71,10 @@ pageDynamic = do
        i <- RD.getKeyEvent
        preventDefault
        return i
-     RD.foldDynMaybe toEvent Start kp
-  where toEvent 37 _ = Just PrevPage
-        toEvent 39 _ = Just NextPage
-        toEvent _  _ = Nothing
+     RD.foldDynMaybe toPageEvent Start kp
+  where toPageEvent 37 _ = Just PrevPage
+        toPageEvent 39 _ = Just NextPage
+        toPageEvent _  _ = Nothing
 
 main :: IO ()
 main = JQ.ready $ RD.mainWidget $ RD.el "div" $ do
@@ -93,21 +90,7 @@ main = JQ.ready $ RD.mainWidget $ RD.el "div" $ do
 
      RD.display =<< pageDynamic
 
-
      where processedWords = preprocess text
-
-
--- wrapDomEvent' onEvent getResult e = RD.wrapDomEvent e onEvent getResult
--- 
--- 
--- askWindow :: (MonadIO m, RD.HasDocument m) => m Window
--- askWindow =  do
---   (Just window) <- RD.askDocument >>= liftIO . getDefaultView
---   return window
--- 
--- 
--- windowKeydown_ :: (RD.MonadWidget t m) => m (RD.Event t Int)
--- windowKeydown_ = askWindow >>= wrapDomEvent' (RD.domEvent keyDown) (liftIO . getKeyIdentifier =<< event)
 
 
 -- can this be a monoid?
@@ -137,6 +120,7 @@ itemElement (Box _ e) = e
 itemElement (Spring _ _ _ e) = e
 itemElement (Penalty _ _ _ e) = e
 
+spaceWidth :: Double
 spaceWidth = 5
 
 space :: Double -> JQ.JQuery -> Item JQ.JQuery Double
@@ -152,7 +136,8 @@ textWidth :: Int
 textWidth = 600 -- TODO this will eventually have to be dynamic
 
 
--- removeSpacesFromEnds :: [Item _ _] -> [Item _ _]
+removeSpacesFromEnds :: forall a b. [Item a b] -> [Item a b]
+removeSpacesFromEnds [] = []
 removeSpacesFromEnds (h : t)
     | itemIsSpring h = removeLastP t
     | otherwise    = h : removeLastP t
@@ -169,7 +154,7 @@ boustro (l:l2:ls) = do ho <- reverseLine l2
 
 
 accumLines :: (Ord b, Num b) => Item a b -> [[Item a b]] -> [[Item a b]]
-accumLines i@(Penalty w nextWidth flag _) p@(l:_)
+accumLines i@(Penalty _ nextWidth _ _) p@(l:_)
     | (lineLength l + nextWidth) > fromIntegral textWidth = [ i ] : p
     | otherwise                                           = p
   where lineLength = sum . fmap itemWidth
@@ -177,6 +162,7 @@ accumLines item p@(l:ls)
     | (lineLength l + itemWidth item) > fromIntegral textWidth = [ item ] : p
     | otherwise                                                = (item : l) : ls
   where lineLength = sum . fmap itemWidth
+accumLines _ [] = []
 
 
 renderLine :: [Item JQ.JQuery Double] -> IO JQ.JQuery
@@ -196,6 +182,7 @@ renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (tex
         | otherwise      = return e
 
 
+reverseLine :: JQ.JQuery -> IO JQ.JQuery
 reverseLine = JQ.setCss "-moz-transform" "scaleX(-1)" <=<
               JQ.setCss "-o-transform"  "scaleX(-1)" <=<
               JQ.setCss "-webkit-transform" "scaleX(-1)" <=<
