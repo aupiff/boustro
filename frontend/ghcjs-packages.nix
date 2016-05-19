@@ -38,6 +38,25 @@ in reflex-platform.ghcjs.override {
 
     ) {};
 
+    # webkit = self.callPackage ({ mkDerivation }:
+    #   mkDerivation {
+    #     pname = "webkitgtk3";
+    #     version = "0.14.1.2";
+    #     src = nixpkgs.fetchgit {
+    #       url = "https://github.com/gtk2hs/webkit";
+    #       rev = "03f58e1e9a53d98a587023b3359bfd8da3b3c7ab";
+    #       sha256 = "0qb8cra8q5lhp6pd3dll0i4waza36kk5hig6jf36iyiqsls93bcj";
+    #     };
+
+    #     buildDepends = [
+    #     ];
+
+    #     license = null;
+    #   }
+
+    # ) {};
+
+
     #    file-embed = self.callPackage ({ mkDerivation }:
     #      mkDerivation {
     #        pname = "file-embed";

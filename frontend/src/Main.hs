@@ -22,15 +22,19 @@ import           Text.Hyphenation
 import qualified GHCJS.DOM.Window as DOM ( getWindow
                                          , resize
                                          , getOuterWidth )
-import           GHCJS.DOM.EventM
+import           GHCJS.DOM.EventM (on, preventDefault)
+import           GHCJS.DOM.Element (keyDown)
 import           GHCJS.DOM (currentWindow)
 
+import           GHCJS.DOM.KeyboardEvent (getKeyIdentifier)
+
+import GHCJS.DOM (webViewGetDomDocument)
+import GHCJS.DOM.Document (getBody)
 
 import Reflex.Dom.Class
 import Reflex.Host.Class
 
 import GHCJS.DOM.Types hiding (Event)
-import GHCJS.DOM.Document
 
 import qualified Reflex as R
 import qualified Reflex.Dom as RD
@@ -72,21 +76,32 @@ main = JQ.ready $ RD.mainWidget $ RD.el "div" $ do
 
      RD.elAttr "div" (Map.singleton "id" "boustro") $ RD.blank
 
+     -- RD.getKeyEvent
+
+     wv <- askWebView
+     Just doc <- liftIO $ webViewGetDomDocument wv
+     Just body <- liftIO $ getBody doc
+     kp <- RD.wrapDomEvent body (`on` keyDown) $ do
+       i <- RD.getKeyEvent
+       preventDefault
+       return i
+     RD.display =<< RD.holdDyn Nothing (fmap Just kp)
+
 
      where processedWords = preprocess text
 
 
-wrapDomEvent' onEvent getResult e = RD.wrapDomEvent e onEvent getResult
-
-
-askWindow :: (MonadIO m, RD.HasDocument m) => m Window
-askWindow =  do
-  (Just window) <- RD.askDocument >>= liftIO . getDefaultView
-  return window
-
-
+-- wrapDomEvent' onEvent getResult e = RD.wrapDomEvent e onEvent getResult
+-- 
+-- 
+-- askWindow :: (MonadIO m, RD.HasDocument m) => m Window
+-- askWindow =  do
+--   (Just window) <- RD.askDocument >>= liftIO . getDefaultView
+--   return window
+-- 
+-- 
 -- windowKeydown_ :: (RD.MonadWidget t m) => m (RD.Event t Int)
--- windowKeydown_ = askWindow >>= wrapDomEvent' domWindowOnkeydown  (liftIO . uiEventGetKeyCode =<< event)
+-- windowKeydown_ = askWindow >>= wrapDomEvent' (RD.domEvent keyDown) (liftIO . getKeyIdentifier =<< event)
 
 
 -- can this be a monoid?
