@@ -9,6 +9,7 @@ import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Default
 import           Data.IORef
+import           Data.Maybe (fromJust)
 import           Data.JSString.Text
 import           Data.List (intersperse)
 import           Data.Monoid ((<>))
@@ -16,66 +17,77 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import qualified Data.JSString as S
 import           Data.JSString.Text as S (textToJSString, textFromJSString)
-import           JavaScript.JQuery hiding (filter, not)
+import qualified JavaScript.JQuery as JQ hiding (filter, not)
 import           Text.Hyphenation
+import qualified GHCJS.DOM.Window as DOM ( getWindow
+                                         , resize
+                                         , getOuterWidth )
+import           GHCJS.DOM.EventM
+import           GHCJS.DOM (currentWindow)
 
-import           System.IO.Unsafe
+
+import Reflex.Dom.Class
+import Reflex.Host.Class
+
+import GHCJS.DOM.Types hiding (Event)
+import GHCJS.DOM.Document
+
 import qualified Reflex as R
 import qualified Reflex.Dom as RD
 
-getWordLengths :: [String] -> IO [Double]
-getWordLengths inputWords = do
+wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
+wordsWithWidths inputWords = do
 
      ws <- mapM (toItem . T.pack) inputWords
 
      -- creating a temporary div specifically to measure the width of every element
-     scratchArea <- select "#scratch-area"
-     mapM_ (`appendJQuery` scratchArea) $ fmap itemElement ws
-     fmap itemWidth . reverse <$> foldM func [] ws
+     scratchArea <- JQ.select "#scratch-area"
+     mapM_ (`JQ.appendJQuery` scratchArea) $ fmap itemElement ws
+     reverse <$> foldM func [] ws
 
-     where toItem :: T.Text -> IO (Item JQuery Double)
-           toItem "-" = hyphen 0 <$> select "<span>-</span>"
-           toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< select "<span>&nbsp;</span>")
-           toItem str = Box 0 <$> select ("<span>" <> textToJSString str <> "</span>")
+     where toItem :: T.Text -> IO (Item JQ.JQuery Double)
+           toItem "-" = hyphen 0 <$> JQ.select "<span>-</span>"
+           toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< JQ.select "<span>&nbsp;</span>")
+           toItem str = Box 0 <$> JQ.select ("<span>" <> textToJSString str <> "</span>")
 
            func p@(Penalty w _ flag a : ls) i = do
-                width <- getInnerWidth (itemElement i)
+                width <- JQ.getInnerWidth (itemElement i)
                 return $ setItemWidth width i : Penalty w width flag a : ls
-           func p i = do n <- (\w -> return $ setItemWidth w i) =<< getInnerWidth (itemElement i)
+           func p i = do n <- (\w -> return $ setItemWidth w i) =<< JQ.getInnerWidth (itemElement i)
                          return $ n : p
 
+arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
+arrangeBoustro boxes = do
+    lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
+    textArea <- JQ.select "#boustro" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+    mapM_ (`JQ.appendJQuery` textArea) =<< boustro lines
+
 main :: IO ()
-main = ready $ RD.mainWidget $ RD.el "div" $ do
+main = JQ.ready $ RD.mainWidget $ RD.el "div" $ do
 
-     -- RD.el "style" $ RD.text $ $(embedStringFile "Boustro.css")
-
-     RD.elAttr "div" (Map.singleton "id" "scratch-area") $ RD.text "nothing"
+     RD.elAttr "div" (Map.singleton "id" "scratch-area") $ RD.blank
 
      pb <- RD.getPostBuild
-     numChars <- RD.performEvent $ RD.ffor pb (\_ -> liftIO $ getWordLengths processedWords )
-     fool <- RD.holdDyn [] numChars
+     RD.performEvent_ $ RD.ffor pb (const . liftIO $ wordsWithWidths processedWords >>= arrangeBoustro )
 
-     RD.elAttr "div" (Map.singleton "id" "boustro") $ do
-        RD.text $ unwords processedWords
+     RD.elAttr "div" (Map.singleton "id" "boustro") $ RD.blank
 
-        RD.display fool
-
-     -- boxes <- RD.elAttr "div" (Map.singleton "id" "#scratch-area") $ ready $ do
-
-     --    words <- mapM (toItem . T.pack) processedWords
-
-     --    -- creating a temporary div specifically to measure the width of every element
-     --    scratchArea <- select "#scratch-area"
-     --    mapM_ (`appendJQuery` scratchArea) $ fmap itemElement words
-     --    reverse <$> foldM func [] words
-     --    -- remove scratchArea
-
-
-     --    lines <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
-     --    textArea <- select "#text-area" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
-     --    mapM_ (`appendJQuery` textArea) =<< boustro lines
 
      where processedWords = preprocess text
+
+
+wrapDomEvent' onEvent getResult e = RD.wrapDomEvent e onEvent getResult
+
+
+askWindow :: (MonadIO m, RD.HasDocument m) => m Window
+askWindow =  do
+  (Just window) <- RD.askDocument >>= liftIO . getDefaultView
+  return window
+
+
+-- windowKeydown_ :: (RD.MonadWidget t m) => m (RD.Event t Int)
+-- windowKeydown_ = askWindow >>= wrapDomEvent' domWindowOnkeydown  (liftIO . uiEventGetKeyCode =<< event)
+
 
 -- can this be a monoid?
 data Item a b = Box b a             -- Box w_i
@@ -106,17 +118,17 @@ itemElement (Penalty _ _ _ e) = e
 
 spaceWidth = 5
 
-space :: Double -> JQuery -> Item JQuery Double
+space :: Double -> JQ.JQuery -> Item JQ.JQuery Double
 space w = Spring w 3 2
 
-styleSpace :: Double -> JQuery -> IO JQuery
-styleSpace width = setCss "display" "inline-block" <=< setCss "width" (textToJSString . T.pack $ show width)
+styleSpace :: Double -> JQ.JQuery -> IO JQ.JQuery
+styleSpace width = JQ.setCss "display" "inline-block" <=< JQ.setCss "width" (textToJSString . T.pack $ show width)
 
-hyphen :: Double -> JQuery -> Item JQuery Double
+hyphen :: Double -> JQ.JQuery -> Item JQ.JQuery Double
 hyphen hyphenWidth = Penalty hyphenWidth 2 True
 
 textWidth :: Int
-textWidth = 600
+textWidth = 600 -- TODO this will eventually have to be dynamic
 
 
 -- removeSpacesFromEnds :: [Item _ _] -> [Item _ _]
@@ -127,7 +139,7 @@ removeSpacesFromEnds (h : t)
                | itemIsSpring (Prelude.last r) = init r
                | otherwise             = r
 
-boustro :: [JQuery] -> IO [JQuery]
+boustro :: [JQ.JQuery] -> IO [JQ.JQuery]
 boustro [] = return []
 boustro [l] = return [l]
 boustro (l:l2:ls) = do ho <- reverseLine l2
@@ -146,29 +158,29 @@ accumLines item p@(l:ls)
   where lineLength = sum . fmap itemWidth
 
 
-renderLine :: [Item JQuery Double] -> IO JQuery
-renderLine ls = do lineDiv <- select "<div></div>" >>= setCss "width" (textToJSString . T.pack $ show textWidth)
-                                                   >>= setCss "white-space" "nowrap"
+renderLine :: [Item JQ.JQuery Double] -> IO JQ.JQuery
+renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+                                                   >>= JQ.setCss "white-space" "nowrap"
                    nls <- mapM convertSpace ls
-                   mapM_ (\i -> (`appendJQuery` lineDiv) <=< styleSpace (itemWidth i) $ itemElement i) nls
+                   mapM_ (\i -> (`JQ.appendJQuery` lineDiv) <=< styleSpace (itemWidth i) $ itemElement i) nls
                    return lineDiv
     where
       filteredLs = filter (not . itemIsSpring) ls
       totalLength = sum . fmap itemWidth $ filteredLs
       spaceSize :: Double
       spaceSize = realToFrac $ (fromIntegral textWidth - totalLength) / (fromIntegral . length $ filter itemIsSpring ls)
-      convertSpace :: Item JQuery Double -> IO (Item JQuery Double)
+      convertSpace :: Item JQ.JQuery Double -> IO (Item JQ.JQuery Double)
       convertSpace e
-        | itemIsSpring e = space spaceSize <$> select "<span>&nbsp;</span>"
+        | itemIsSpring e = space spaceSize <$> JQ.select "<span>&nbsp;</span>"
         | otherwise      = return e
 
 
-reverseLine = setCss "-moz-transform" "scaleX(-1)" <=<
-              setCss "-o-transform"  "scaleX(-1)" <=<
-              setCss "-webkit-transform" "scaleX(-1)" <=<
-              setCss "transform" "scaleX(-1)" <=<
-              setCss "filter" "FlipH" <=<
-              setCss "-ms-filter" "\"FlipH\""
+reverseLine = JQ.setCss "-moz-transform" "scaleX(-1)" <=<
+              JQ.setCss "-o-transform"  "scaleX(-1)" <=<
+              JQ.setCss "-webkit-transform" "scaleX(-1)" <=<
+              JQ.setCss "transform" "scaleX(-1)" <=<
+              JQ.setCss "filter" "FlipH" <=<
+              JQ.setCss "-ms-filter" "\"FlipH\""
 
 hyphenString :: String
 hyphenString = "-"
