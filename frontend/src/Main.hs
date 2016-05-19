@@ -64,6 +64,21 @@ arrangeBoustro boxes = do
     textArea <- JQ.select "#boustro" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
     mapM_ (`JQ.appendJQuery` textArea) =<< boustro lines
 
+data PageEvent = NextPage | PrevPage | Start deriving Show
+
+pageDynamic = do
+     wv <- askWebView
+     Just doc <- liftIO $ webViewGetDomDocument wv
+     Just body <- liftIO $ getBody doc
+     kp <- RD.wrapDomEvent body (`on` keyDown) $ do
+       i <- RD.getKeyEvent
+       preventDefault
+       return i
+     RD.foldDynMaybe toEvent Start kp
+  where toEvent 37 _ = Just PrevPage
+        toEvent 39 _ = Just NextPage
+        toEvent _  _ = Nothing
+
 main :: IO ()
 main = JQ.ready $ RD.mainWidget $ RD.el "div" $ do
 
@@ -76,14 +91,7 @@ main = JQ.ready $ RD.mainWidget $ RD.el "div" $ do
 
      -- RD.getKeyEvent
 
-     wv <- askWebView
-     Just doc <- liftIO $ webViewGetDomDocument wv
-     Just body <- liftIO $ getBody doc
-     kp <- RD.wrapDomEvent body (`on` keyDown) $ do
-       i <- RD.getKeyEvent
-       preventDefault
-       return i
-     RD.display =<< RD.holdDyn Nothing (fmap Just kp)
+     RD.display =<< pageDynamic
 
 
      where processedWords = preprocess text
