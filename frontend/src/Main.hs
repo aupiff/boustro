@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecursiveDo #-}
+-- {-# LANGUAGE RecursiveDo #-}
 -- {-# LANGUAGE TemplateHaskell #-}
 
 import           Data.FileEmbed
@@ -24,8 +24,6 @@ import qualified GHCJS.DOM.Window as DOM ( getWindow
                                          , getOuterWidth )
 import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
-import           GHCJS.DOM (currentWindow)
-
 import           GHCJS.DOM.KeyboardEvent (getKeyIdentifier)
 
 import GHCJS.DOM (webViewGetDomDocument)
@@ -69,12 +67,12 @@ arrangeBoustro boxes = do
 main :: IO ()
 main = JQ.ready $ RD.mainWidget $ RD.el "div" $ do
 
-     RD.elAttr "div" (Map.singleton "id" "scratch-area") $ RD.blank
+     RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
 
      pb <- RD.getPostBuild
      RD.performEvent_ $ RD.ffor pb (const . liftIO $ wordsWithWidths processedWords >>= arrangeBoustro )
 
-     RD.elAttr "div" (Map.singleton "id" "boustro") $ RD.blank
+     RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
 
      -- RD.getKeyEvent
 
