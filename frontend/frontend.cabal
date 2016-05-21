@@ -17,8 +17,6 @@ executable boustro
   hs-source-dirs: src
   main-is: Main.hs
   ghcjs-options: -O2 -Wall
-  if impl(ghcjs)
-    cpp-options: -DGHCJS_BROWSER
   build-depends:    base >= 4.7 && < 4.9
                   , containers
                   , data-default
