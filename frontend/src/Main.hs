@@ -24,6 +24,7 @@ import GHCJS.DOM.Document (getBody)
 
 import Reflex.Dom.Class
 
+import qualified Reflex as R
 import qualified Reflex.Dom as RD
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
@@ -63,7 +64,8 @@ data TextViewModel = TextViewModel { fullText :: String
 initialModel :: TextViewModel
 initialModel = TextViewModel text 0 0
 
-pageDynamic = do
+pagingD :: MonadWidget t m => m (RD.Dynamic t PageEvent)
+pagingD = do
      wv <- askWebView
      Just doc <- liftIO $ webViewGetDomDocument wv
      Just body <- liftIO $ getBody doc
@@ -79,18 +81,37 @@ pageDynamic = do
 main :: IO ()
 main = JQ.ready $ RD.mainWidget $ RD.el "div" $ do
 
+     r <- RD.workflow titlePage
+
      RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
 
-     pb <- RD.getPostBuild
+     pb <- R.updated <$> pagingD
+
      RD.performEvent_ $ RD.ffor pb (const . liftIO $ wordsWithWidths processedWords >>= arrangeBoustro )
 
-     RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
-
-     -- RD.getKeyEvent
-
-     RD.display =<< pageDynamic
-
      where processedWords = preprocess text
+
+titlePage = RD.Workflow . RD.el "div" $ do
+  RD.el "div" $ RD.text "This is a boustrophedon re"
+  pg2 <- RD.button "Start reading \"Middlemarch\" by George Elliot"
+  return ("Page 1", textView <$ pg2)
+
+textView = RD.Workflow . RD.el "div" $ do
+  RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
+  home <- RD.button "back home"
+  return ("Page 2", titlePage <$ home)
+
+-- page3 = Workflow . el "div" $ do
+--   el "div" $ text "You have arrived on page 3"
+--   pg1 <- button "Start over"
+--   return ("Page 3", page1 <$ pg1)
+
+-- main = mainWidget $ do
+--   r <- workflow page1
+--   el "div" $ do
+--     text "Current page is: "
+--     dynText r
+--   el "pre" $ text $(embedStringFile "workflowExample.hs")
 
 
 -- can this be a monoid?
