@@ -81,37 +81,23 @@ pagingD = do
 main :: IO ()
 main = JQ.ready $ RD.mainWidget $ RD.el "div" $ do
 
-     r <- RD.workflow titlePage
+     pagingDyn <- R.updated <$> pagingD
+
+     _ <- RD.workflow (titlePage pagingDyn)
 
      RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
 
-     pb <- R.updated <$> pagingD
-
-     RD.performEvent_ $ RD.ffor pb (const . liftIO $ wordsWithWidths processedWords >>= arrangeBoustro )
-
-     where processedWords = preprocess text
-
-titlePage = RD.Workflow . RD.el "div" $ do
+titlePage pagingDyn = RD.Workflow . RD.el "div" $ do
   RD.el "div" $ RD.text "This is a boustrophedon re"
   pg2 <- RD.button "Start reading \"Middlemarch\" by George Elliot"
-  return ("Page 1", textView <$ pg2)
+  return ("Page 1", textView pagingDyn <$ pg2)
 
-textView = RD.Workflow . RD.el "div" $ do
+textView pagingDyn = RD.Workflow . RD.el "div" $ do
   RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
+  RD.performEvent_ $ RD.ffor pagingDyn (const . liftIO $ wordsWithWidths processedWords >>= arrangeBoustro )
   home <- RD.button "back home"
-  return ("Page 2", titlePage <$ home)
-
--- page3 = Workflow . el "div" $ do
---   el "div" $ text "You have arrived on page 3"
---   pg1 <- button "Start over"
---   return ("Page 3", page1 <$ pg1)
-
--- main = mainWidget $ do
---   r <- workflow page1
---   el "div" $ do
---     text "Current page is: "
---     dynText r
---   el "pre" $ text $(embedStringFile "workflowExample.hs")
+  return ("Page 2", titlePage pagingDyn <$ home)
+     where processedWords = preprocess text
 
 
 -- can this be a monoid?
