@@ -5,6 +5,7 @@
 module Typography where
 
 import           Control.Monad
+import           Control.Monad.IO.Class
 import           Data.FileEmbed
 import           Data.JSString.Text
 import           Data.List (intersperse)
@@ -74,6 +75,9 @@ pars = fold1 nextWord lastWord
 par0 :: Txt -> Paragraph
 par0 = minWith waste . filter (all fits) . pars
 
+typesetPage p = do
+            wordBoxes <- liftIO . wordsWithWidths . take 500 . drop (500 * p) $ processedWords
+            liftIO $ arrangeBoustro wordBoxes
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
 wordsWithWidths inputWords = do
