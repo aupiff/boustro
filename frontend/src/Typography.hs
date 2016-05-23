@@ -34,57 +34,39 @@ minWith f = fold1 choice id
              | otherwise = b
 
 
-textWidth :: Int
+textWidth :: Double
 textWidth = 600 -- TODO this will eventually have to be dynamic
 
 
-optTextWidth :: Int
+optTextWidth :: Double
 optTextWidth = 550
 
 
 -- TODO Should I keep this 'Int'?
-width :: Line -> Int
-width = sum . map (round . itemWidth)
+width :: Line -> Double
+width = sum . map itemWidth
 
 
-fits :: Line -> Bool
-fits xs = width xs <= textWidth
+-- par1 :: Txt -> Paragraph
+-- par1 = minWith waste . fold1 step start
+--     where step w ps = filter fitH (new w (minWith waste ps) : map (glue w) ps)
+--           start w   = filter fitH [ [[w]] ]
 
-
-waste :: Paragraph -> Int
-waste = fold1 plus (const 0)
-    where plus :: Line -> Int -> Int
-          plus l n = linw l + n
-          linw :: Line -> Int
-          linw l = (optTextWidth - width l) ^ (2 :: Int)
-
-
-new :: Word -> [Line] -> [Line]
-new w ls = [w] : ls
-
-
-glue :: Word -> [Line] -> [Line]
-glue w (l:ls) = (w:l):ls
-
-
-pars :: Txt -> [Paragraph]
-pars = fold1 nextWord lastWord
-    where lastWord w = [ [[w]] ]
-          nextWord w ps = fmap (new w) ps ++ map (glue w) ps
-
-
-par0 :: Txt -> Paragraph
-par0 = minWith waste . filter (all fits) . pars
-
-
-par1 :: Txt -> Paragraph
-par1 = minWith waste . fold1 step start
-    where step w ps = filter fitH (new w (minWith waste ps) : map (glue w) ps)
-          start w   = filter fitH [ [[w]] ]
-
-
-fitH :: Paragraph -> Bool
-fitH = fits . head
+par1' :: Txt -> Paragraph
+par1' = parLines . minWith waste . fold1 step start
+    where
+        step w ps = filter fitH (new w (minWith waste ps) : map (glue w) ps)
+        start w   = filter fitH [([[w]], itemWidth w, 0)]
+        new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0)
+        new w p@(ls, _, _) = ([w]:ls, itemWidth w, waste p)
+        glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + 1 + n, m) -- TODO what is this 1 about? space width? change this
+        parLines (ls, _, _) = ls
+        widthHead (_, n, _) = n
+        wasteTail (_, _, m) = m
+        linwHead p = (optTextWidth - widthHead p) ^ (2 :: Int)
+        waste ([_], _, _) = 0
+        waste p = linwHead p + wasteTail p
+        fitH p = widthHead p <= textWidth
 
 
 typesetPage :: forall (m :: * -> *). MonadIO m => Int -> m ()
@@ -112,7 +94,7 @@ wordsWithWidths inputWords = do
 
 arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
 arrangeBoustro boxes = do
-    ls <- mapM renderLine (removeSpacesFromEnds <$> par1 boxes)
+    ls <- mapM renderLine (removeSpacesFromEnds <$> par1' boxes)
     -- Should I be applying this style every time? Definitely on window change
     -- dim, so maybe it's not so bad.
     textArea <- JQ.select "#boustro" >>= (JQ.empty >=> widthCss)
@@ -138,16 +120,16 @@ removeSpacesFromEnds (h : t)
                | otherwise             = r
 
 
-accumLines :: (Ord b, Num b) => Item a b -> [[Item a b]] -> [[Item a b]]
-accumLines i@(Penalty _ nextWidth _ _) p@(l:_)
-    | (lineLength l + nextWidth) > fromIntegral textWidth = [ i ] : p
-    | otherwise                                           = p
-  where lineLength = sum . fmap itemWidth
-accumLines item p@(l:ls)
-    | (lineLength l + itemWidth item) > fromIntegral textWidth = [ item ] : p
-    | otherwise                                                = (item : l) : ls
-  where lineLength = sum . fmap itemWidth
-accumLines _ [] = []
+-- accumLines :: (Ord b, Num b) => Item a b -> [[Item a b]] -> [[Item a b]]
+-- accumLines i@(Penalty _ nextWidth _ _) p@(l:_)
+--     | (lineLength l + nextWidth) > fromIntegral textWidth = [ i ] : p
+--     | otherwise                                           = p
+--   where lineLength = sum . fmap itemWidth
+-- accumLines item p@(l:ls)
+--     | (lineLength l + itemWidth item) > fromIntegral textWidth = [ item ] : p
+--     | otherwise                                                = (item : l) : ls
+--   where lineLength = sum . fmap itemWidth
+-- accumLines _ [] = []
 
 
 toItem :: T.Text -> IO (Item JQ.JQuery Double)
@@ -214,7 +196,7 @@ renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (tex
       filteredLs = filter (not . itemIsSpring) ls
       totalLength = sum . fmap itemWidth $ filteredLs
       spaceSize :: Double
-      spaceSize = realToFrac $ (fromIntegral textWidth - totalLength) / (fromIntegral . length $ filter itemIsSpring ls)
+      spaceSize = realToFrac $ (textWidth - totalLength) / (fromIntegral . length $ filter itemIsSpring ls)
       convertSpace :: Item JQ.JQuery Double -> IO (Item JQ.JQuery Double)
       convertSpace e
         | itemIsSpring e = space spaceSize <$> JQ.select "<span>&nbsp;</span>"
