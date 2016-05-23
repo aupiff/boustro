@@ -46,11 +46,11 @@ optTextWidth = 550
 width :: Line -> Double
 width = sum . map itemWidth
 
+lineWaste :: Line -> Double
+lineWaste l = numSpaces * (spaceSize / numSpaces - spaceWidth) ^ 2
+    where spaceSize = textWidth - width l
+          numSpaces = fromIntegral $ length l - 1
 
--- par1 :: Txt -> Paragraph
--- par1 = minWith waste . fold1 step start
---     where step w ps = filter fitH (new w (minWith waste ps) : map (glue w) ps)
---           start w   = filter fitH [ [[w]] ]
 
 par1' :: Txt -> Paragraph
 par1' = parLines . minWith waste . fold1 step start
@@ -59,11 +59,11 @@ par1' = parLines . minWith waste . fold1 step start
         start w   = filter fitH [([[w]], itemWidth w, 0)]
         new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0)
         new w p@(ls, _, _) = ([w]:ls, itemWidth w, waste p)
-        glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + 1 + n, m) -- TODO what is this 1 about? space width? change this
+        glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + n, m) -- TODO what is this 1 about? space width? change this
         parLines (ls, _, _) = ls
         widthHead (_, n, _) = n
         wasteTail (_, _, m) = m
-        linwHead p = (optTextWidth - widthHead p) ^ (2 :: Int)
+        linwHead p@(l:ls, _, _) = lineWaste l ^ (2 :: Int)
         waste ([_], _, _) = 0
         waste p = linwHead p + wasteTail p
         fitH p = widthHead p <= textWidth
@@ -94,7 +94,7 @@ wordsWithWidths inputWords = do
 
 arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
 arrangeBoustro boxes = do
-    ls <- mapM renderLine (removeSpacesFromEnds <$> par1' boxes)
+    ls <- mapM renderLine $ par1' boxes
     -- Should I be applying this style every time? Definitely on window change
     -- dim, so maybe it's not so bad.
     textArea <- JQ.select "#boustro" >>= (JQ.empty >=> widthCss)
@@ -108,28 +108,6 @@ boustro [l] = return [l]
 boustro (l:l2:ls) = do ho <- reverseLine l2
                        fi <- boustro ls
                        return (l : ho : fi)
-
-
-removeSpacesFromEnds :: forall a b. [Item a b] -> [Item a b]
-removeSpacesFromEnds [] = []
-removeSpacesFromEnds (h : t)
-    | itemIsSpring h = removeLastP t
-    | otherwise    = h : removeLastP t
-    where removeLastP r
-               | not (null r) && itemIsSpring (Prelude.last r) = init r
-               | otherwise             = r
-
-
--- accumLines :: (Ord b, Num b) => Item a b -> [[Item a b]] -> [[Item a b]]
--- accumLines i@(Penalty _ nextWidth _ _) p@(l:_)
---     | (lineLength l + nextWidth) > fromIntegral textWidth = [ i ] : p
---     | otherwise                                           = p
---   where lineLength = sum . fmap itemWidth
--- accumLines item p@(l:ls)
---     | (lineLength l + itemWidth item) > fromIntegral textWidth = [ item ] : p
---     | otherwise                                                = (item : l) : ls
---   where lineLength = sum . fmap itemWidth
--- accumLines _ [] = []
 
 
 toItem :: T.Text -> IO (Item JQ.JQuery Double)
@@ -175,7 +153,7 @@ spaceWidth = 5
 space :: Double -> JQ.JQuery -> Item JQ.JQuery Double
 space w = Spring w 3 2
 
-
+--TODO rename this
 styleSpace :: Double -> JQ.JQuery -> IO JQ.JQuery
 styleSpace txtWidth =
         JQ.setCss "display" "inline-block"
@@ -188,20 +166,13 @@ hyphen hyphenWidth = Penalty hyphenWidth 2 True
 
 renderLine :: [Item JQ.JQuery Double] -> IO JQ.JQuery
 renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
-                                                   >>= JQ.setCss "white-space" "nowrap"
-                   nls <- mapM convertSpace ls
+                                                      >>= JQ.setCss "white-space" "nowrap"
+                   nls <- sequence . intersperse (space spaceSize <$> JQ.select "<span>&nbsp;</span>") $ map return ls
                    mapM_ (\i -> (`JQ.appendJQuery` lineDiv) <=< styleSpace (itemWidth i) $ itemElement i) nls
                    return lineDiv
     where
-      filteredLs = filter (not . itemIsSpring) ls
-      totalLength = sum . fmap itemWidth $ filteredLs
       spaceSize :: Double
-      spaceSize = realToFrac $ (textWidth - totalLength) / (fromIntegral . length $ filter itemIsSpring ls)
-      convertSpace :: Item JQ.JQuery Double -> IO (Item JQ.JQuery Double)
-      convertSpace e
-        | itemIsSpring e = space spaceSize <$> JQ.select "<span>&nbsp;</span>"
-        | otherwise      = return e
-
+      spaceSize = realToFrac $ (textWidth - width ls) / fromIntegral (length ls - 1)
 
 reverseLine :: JQ.JQuery -> IO JQ.JQuery
 reverseLine = JQ.setCss "-moz-transform" "scaleX(-1)" <=<
@@ -222,7 +193,7 @@ nonBreakingHypenString = "‑"
 preprocess :: String -> [String]
 preprocess = prepareText
   where
-    insertHyphens = concatMap ((++ [" "]) . intersperse hyphenString . hyphenate english_US)
+    insertHyphens = concatMap (intersperse hyphenString . hyphenate english_US)
     insertPilcrows = concatMap (\x -> if x == '\n' then " ¶ " else [x])
     prepareText = insertHyphens . words . replace . insertPilcrows
     replace = concatMap (\x -> if x == '-' then nonBreakingHypenString else [x])
