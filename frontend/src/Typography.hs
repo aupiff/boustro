@@ -10,8 +10,69 @@ import           Data.JSString.Text
 import           Data.List (intersperse)
 import           Data.Monoid ((<>))
 import qualified Data.Text as T
-import           Text.Hyphenation
 import qualified JavaScript.JQuery as JQ hiding (filter, not)
+import           Prelude hiding (Word)
+import           Text.Hyphenation
+
+type Word = Item JQ.JQuery Double
+type Txt = [Word]
+type Line = [Word]
+type Paragraph = [Line]
+
+
+fold1 :: forall a b. (a -> b -> b) -> (a -> b) -> [a] -> b
+fold1 _ g [x] = g x
+fold1 f g (x:xs) = f x (fold1 f g xs)
+
+
+minWith :: Ord b => (a -> b) -> [a] -> a
+minWith f = fold1 choice id
+    where choice a b
+             | f a < f b = a
+             | otherwise = b
+
+
+textWidth :: Int
+textWidth = 600 -- TODO this will eventually have to be dynamic
+
+
+optTextWidth :: Int
+optTextWidth = 550
+
+
+-- TODO Should I keep this 'Int'?
+width :: Line -> Int
+width = sum . map (round . itemWidth)
+
+
+fits :: Line -> Bool
+fits xs = width xs <= textWidth
+
+
+waste :: Paragraph -> Int
+waste = fold1 plus (const 0)
+    where plus :: Line -> Int -> Int
+          plus l n = linw l + n
+          linw :: Line -> Int
+          linw l = (optTextWidth - width l) ^ (2 :: Int)
+
+
+new :: Word -> [Line] -> [Line]
+new w ls = [w] : ls
+
+
+glue :: Word -> [Line] -> [Line]
+glue w (l:ls) = (w:l):ls
+
+
+pars :: Txt -> [Paragraph]
+pars = fold1 nextWord lastWord
+    where lastWord w = [ [[w]] ]
+          nextWord w ps = fmap (new w) ps ++ map (glue w) ps
+
+
+par0 :: Txt -> Paragraph
+par0 = minWith waste . filter (all fits) . pars
 
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
@@ -25,10 +86,10 @@ wordsWithWidths inputWords = do
      reverse <$> foldM func [] ws
 
      where func (Penalty w _ flag a : ls) i = do
-                width <- JQ.getInnerWidth (itemElement i)
-                return $ setItemWidth width i : Penalty w width flag a : ls
-           func p i = do n <- (\w -> return $ setItemWidth w i) =<< JQ.getInnerWidth (itemElement i)
-                         return $ n : p
+                iWidth <- JQ.getInnerWidth (itemElement i)
+                return $ setItemWidth iWidth i : Penalty w iWidth flag a : ls
+           func p i = (:) <$> ((`setItemWidth` i) <$> JQ.getInnerWidth (itemElement i))
+                          <*> return p
 
 
 arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
@@ -58,35 +119,41 @@ itemIsSpring :: Item a b -> Bool
 itemIsSpring Spring{} = True
 itemIsSpring _ = False
 
+
 itemWidth :: Item a b -> b
 itemWidth (Box w _) = w
 itemWidth (Spring w _ _ _) = w
 itemWidth (Penalty w _ _ _) = w
+
 
 setItemWidth :: b -> Item a b -> Item a b
 setItemWidth w (Box _ a) = Box w a
 setItemWidth w (Spring _ a b c) = Spring w a b c
 setItemWidth w (Penalty _ a b c) = Penalty w a b c
 
+
 itemElement :: Item a b -> a
 itemElement (Box _ e) = e
 itemElement (Spring _ _ _ e) = e
 itemElement (Penalty _ _ _ e) = e
 
+
 spaceWidth :: Double
 spaceWidth = 5
+
 
 space :: Double -> JQ.JQuery -> Item JQ.JQuery Double
 space w = Spring w 3 2
 
+
 styleSpace :: Double -> JQ.JQuery -> IO JQ.JQuery
-styleSpace width = JQ.setCss "display" "inline-block" <=< JQ.setCss "width" (textToJSString . T.pack $ show width)
+styleSpace txtWidth =
+        JQ.setCss "display" "inline-block"
+    <=< JQ.setCss "width" (textToJSString . T.pack $ show txtWidth)
+
 
 hyphen :: Double -> JQ.JQuery -> Item JQ.JQuery Double
 hyphen hyphenWidth = Penalty hyphenWidth 2 True
-
-textWidth :: Int
-textWidth = 600 -- TODO this will eventually have to be dynamic
 
 
 removeSpacesFromEnds :: forall a b. [Item a b] -> [Item a b]
@@ -97,6 +164,7 @@ removeSpacesFromEnds (h : t)
     where removeLastP r
                | not (null r) && itemIsSpring (Prelude.last r) = init r
                | otherwise             = r
+
 
 boustro :: [JQ.JQuery] -> IO [JQ.JQuery]
 boustro [] = return []
@@ -146,8 +214,10 @@ reverseLine = JQ.setCss "-moz-transform" "scaleX(-1)" <=<
 hyphenString :: String
 hyphenString = "-"
 
+
 nonBreakingHypenString :: String
 nonBreakingHypenString = "‑"
+
 
 preprocess :: String -> [String]
 preprocess = prepareText
@@ -157,8 +227,10 @@ preprocess = prepareText
     prepareText = insertHyphens . words . replace . insertPilcrows
     replace = concatMap (\x -> if x == '-' then nonBreakingHypenString else [x])
 
+
 processedWords :: [String]
 processedWords = preprocess contextText
+
 
 contextText :: String
 contextText = $(embedStringFile "texts/middlemarch.txt")

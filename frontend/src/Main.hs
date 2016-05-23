@@ -55,7 +55,8 @@ titlePage :: forall t (m :: * -> *).  MonadWidget t m
           => RD.Event t PageEvent -> RD.Workflow t m String
 titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
     RD.el "div" $ RD.text "This is a boustrophedon reading application"
-    showTextView <- RD.button "Start reading \"Middlemarch\" by George Elliot"
+    showTextView <-
+        RD.button "Start reading \"Tess of the D'Urbervilles\" by Thomas Hardy"
     return ("Page 1", textView pagingEvent <$ showTextView)
 
 
