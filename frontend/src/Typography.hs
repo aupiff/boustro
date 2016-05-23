@@ -1,5 +1,6 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Typography where
@@ -75,8 +76,10 @@ pars = fold1 nextWord lastWord
 par0 :: Txt -> Paragraph
 par0 = minWith waste . filter (all fits) . pars
 
+
+typesetPage :: forall (m :: * -> *). MonadIO m => Int -> m ()
 typesetPage p = do
-            wordBoxes <- liftIO . wordsWithWidths . take 500 . drop (500 * p) $ processedWords
+            wordBoxes <- liftIO . wordsWithWidths . take 10 . drop (10 * p) $ processedWords
             liftIO $ arrangeBoustro wordBoxes
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
@@ -98,12 +101,42 @@ wordsWithWidths inputWords = do
 
 arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
 arrangeBoustro boxes = do
-    ls <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
+    ls <- mapM renderLine (removeSpacesFromEnds <$> par0 boxes)
     -- Should I be applying this style every time? Definitely on window change
     -- dim, so maybe it's not so bad.
     textArea <- JQ.select "#boustro" >>= (JQ.empty >=> widthCss)
     mapM_ (`JQ.appendJQuery` textArea) =<< boustro ls
     where widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+
+
+boustro :: [JQ.JQuery] -> IO [JQ.JQuery]
+boustro [] = return []
+boustro [l] = return [l]
+boustro (l:l2:ls) = do ho <- reverseLine l2
+                       fi <- boustro ls
+                       return (l : ho : fi)
+
+
+removeSpacesFromEnds :: forall a b. [Item a b] -> [Item a b]
+removeSpacesFromEnds [] = []
+removeSpacesFromEnds (h : t)
+    | itemIsSpring h = removeLastP t
+    | otherwise    = h : removeLastP t
+    where removeLastP r
+               | not (null r) && itemIsSpring (Prelude.last r) = init r
+               | otherwise             = r
+
+
+accumLines :: (Ord b, Num b) => Item a b -> [[Item a b]] -> [[Item a b]]
+accumLines i@(Penalty _ nextWidth _ _) p@(l:_)
+    | (lineLength l + nextWidth) > fromIntegral textWidth = [ i ] : p
+    | otherwise                                           = p
+  where lineLength = sum . fmap itemWidth
+accumLines item p@(l:ls)
+    | (lineLength l + itemWidth item) > fromIntegral textWidth = [ item ] : p
+    | otherwise                                                = (item : l) : ls
+  where lineLength = sum . fmap itemWidth
+accumLines _ [] = []
 
 
 toItem :: T.Text -> IO (Item JQ.JQuery Double)
@@ -158,36 +191,6 @@ styleSpace txtWidth =
 
 hyphen :: Double -> JQ.JQuery -> Item JQ.JQuery Double
 hyphen hyphenWidth = Penalty hyphenWidth 2 True
-
-
-removeSpacesFromEnds :: forall a b. [Item a b] -> [Item a b]
-removeSpacesFromEnds [] = []
-removeSpacesFromEnds (h : t)
-    | itemIsSpring h = removeLastP t
-    | otherwise    = h : removeLastP t
-    where removeLastP r
-               | not (null r) && itemIsSpring (Prelude.last r) = init r
-               | otherwise             = r
-
-
-boustro :: [JQ.JQuery] -> IO [JQ.JQuery]
-boustro [] = return []
-boustro [l] = return [l]
-boustro (l:l2:ls) = do ho <- reverseLine l2
-                       fi <- boustro ls
-                       return (l : ho : fi)
-
-
-accumLines :: (Ord b, Num b) => Item a b -> [[Item a b]] -> [[Item a b]]
-accumLines i@(Penalty _ nextWidth _ _) p@(l:_)
-    | (lineLength l + nextWidth) > fromIntegral textWidth = [ i ] : p
-    | otherwise                                           = p
-  where lineLength = sum . fmap itemWidth
-accumLines item p@(l:ls)
-    | (lineLength l + itemWidth item) > fromIntegral textWidth = [ item ] : p
-    | otherwise                                                = (item : l) : ls
-  where lineLength = sum . fmap itemWidth
-accumLines _ [] = []
 
 
 renderLine :: [Item JQ.JQuery Double] -> IO JQ.JQuery
