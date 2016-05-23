@@ -53,15 +53,13 @@ wordsWithWidths inputWords = do
 arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
 arrangeBoustro boxes = do
     ls <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
+    -- Should I be applying this style every time? Definitely on window change
+    -- dim, so maybe it's not so bad.
     textArea <- JQ.select "#boustro" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+    JQ.empty textArea
     mapM_ (`JQ.appendJQuery` textArea) =<< boustro ls
 
 data PageEvent = NextPage | PrevPage | Start deriving Show
-
-data TextViewModel = TextViewModel { fullText :: String
-                                   , wordIndex :: Int
-                                   , pageWordCount :: Int
-                                   }
 
 pagingD :: MonadWidget t m => m (RD.Dynamic t PageEvent)
 pagingD = do
@@ -97,7 +95,7 @@ titlePage pagingDyn = RD.Workflow . RD.el "div" $ do
   return ("Page 1", textView pagingDyn <$ pg2)
 
 
-textView :: forall a (m :: * -> *) a1 t. (Data.String.IsString a1, MonadWidget t m)
+textView :: forall (m :: * -> *) a1 t. (Data.String.IsString a1, MonadWidget t m)
          => RD.Event t PageEvent -> RD.Workflow t m a1
 textView pagingDyn = RD.Workflow . RD.el "div" $ do
 
@@ -114,12 +112,8 @@ textView pagingDyn = RD.Workflow . RD.el "div" $ do
     return ("Page 2", titlePage pagingDyn <$ home)
 
     where pagingFunction NextPage currentPage = currentPage + 1
-          pagingFunction PrevPage currentPage = min 0 $ currentPage - 1
-          pagingFunction _ currentPage = 0
-
-
-initialModel :: TextViewModel
-initialModel = TextViewModel text 0 0
+          pagingFunction PrevPage currentPage = max 0 $ currentPage - 1
+          pagingFunction _ _ = 0
 
 
 -- can this be a monoid?
@@ -171,7 +165,7 @@ removeSpacesFromEnds (h : t)
     | itemIsSpring h = removeLastP t
     | otherwise    = h : removeLastP t
     where removeLastP r
-               | itemIsSpring (Prelude.last r) = init r
+               | not (null r) && itemIsSpring (Prelude.last r) = init r
                | otherwise             = r
 
 boustro :: [JQ.JQuery] -> IO [JQ.JQuery]
