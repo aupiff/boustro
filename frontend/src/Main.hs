@@ -3,7 +3,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
--- {-# LANGUAGE RecursiveDo #-}
+{-# LANGUAGE RecursiveDo #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 import           Data.FileEmbed
@@ -98,18 +98,24 @@ titlePage pagingDyn = RD.Workflow . RD.el "div" $ do
 
 
 textView :: forall a (m :: * -> *) a1 t. (Data.String.IsString a1, MonadWidget t m)
-         => RD.Event t a -> RD.Workflow t m a1
+         => RD.Event t PageEvent -> RD.Workflow t m a1
 textView pagingDyn = RD.Workflow . RD.el "div" $ do
 
-  RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
+    RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
 
-  RD.performEvent_ $ RD.ffor pagingDyn (\_ -> do
-          wordBoxes <- liftIO $ wordsWithWidths processedWords
-          liftIO $ arrangeBoustro wordBoxes
-          )
+    currentPage <- R.updated <$> RD.foldDyn pagingFunction 0 pagingDyn
 
-  home <- RD.button "back home"
-  return ("Page 2", titlePage pagingDyn <$ home)
+    RD.performEvent_ $ RD.ffor currentPage (\p -> do
+            wordBoxes <- liftIO . wordsWithWidths . take 200 . drop (200 * p) $ processedWords
+            liftIO $ arrangeBoustro wordBoxes
+            )
+
+    home <- RD.button "back home"
+    return ("Page 2", titlePage pagingDyn <$ home)
+
+    where pagingFunction NextPage currentPage = currentPage + 1
+          pagingFunction PrevPage currentPage = min 0 $ currentPage - 1
+          pagingFunction _ currentPage = 0
 
 
 initialModel :: TextViewModel
