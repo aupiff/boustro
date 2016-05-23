@@ -79,29 +79,31 @@ main :: IO ()
 main = JQ.ready $ RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
 
     RD.el "div" $ do
-        pagingDyn <- R.updated <$> pagingD
+        pagingEvent <- R.updated <$> pagingD
 
-        _ <- RD.workflow (titlePage pagingDyn)
+        _ <- RD.workflow (titlePage pagingEvent)
 
         -- TODO git rid of this if possible
         RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
 
 
--- TODO if I want these pages to both have access to pagingDyn, I could throw
+-- TODO if I want these pages to both have access to pagingEvent, I could throw
 -- them in a reader monad, couldn't I?
-titlePage pagingDyn = RD.Workflow . RD.el "div" $ do
-  RD.el "div" $ RD.text "This is a boustrophedon reading application"
-  pg2 <- RD.button "Start reading \"Middlemarch\" by George Elliot"
-  return ("Page 1", textView pagingDyn <$ pg2)
+titlePage :: forall t (m :: * -> *) a.  (IsString a, MonadWidget t m)
+          => RD.Event t PageEvent -> RD.Workflow t m a
+titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
+    RD.el "div" $ RD.text "This is a boustrophedon reading application"
+    pg2 <- RD.button "Start reading \"Middlemarch\" by George Elliot"
+    return ("Page 1", textView (RD.leftmost [pagingEvent, fmap (const Start) pg2]) <$ pg2)
 
 
 textView :: forall (m :: * -> *) a1 t. (Data.String.IsString a1, MonadWidget t m)
          => RD.Event t PageEvent -> RD.Workflow t m a1
-textView pagingDyn = RD.Workflow . RD.el "div" $ do
+textView pagingEvent = RD.Workflow . RD.el "div" $ do
 
     RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
 
-    currentPage <- R.updated <$> RD.foldDyn pagingFunction 0 pagingDyn
+    currentPage <- R.updated <$> RD.foldDyn pagingFunction 0 pagingEvent
 
     RD.performEvent_ $ RD.ffor currentPage (\p -> do
             wordBoxes <- liftIO . wordsWithWidths . take 200 . drop (200 * p) $ processedWords
@@ -109,7 +111,7 @@ textView pagingDyn = RD.Workflow . RD.el "div" $ do
             )
 
     home <- RD.button "back home"
-    return ("Page 2", titlePage pagingDyn <$ home)
+    return ("Page 2", titlePage pagingEvent <$ home)
 
     where pagingFunction NextPage currentPage = currentPage + 1
           pagingFunction PrevPage currentPage = max 0 $ currentPage - 1
