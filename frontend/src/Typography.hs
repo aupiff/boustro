@@ -13,6 +13,34 @@ import qualified Data.Text as T
 import           Text.Hyphenation
 import qualified JavaScript.JQuery as JQ hiding (filter, not)
 
+
+wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
+wordsWithWidths inputWords = do
+
+     ws <- mapM (toItem . T.pack) inputWords
+
+     -- creating a temporary div specifically to measure the width of every element
+     scratchArea <- JQ.empty =<< JQ.select "#scratch-area"
+     mapM_ (`JQ.appendJQuery` scratchArea) $ fmap itemElement ws
+     reverse <$> foldM func [] ws
+
+     where func (Penalty w _ flag a : ls) i = do
+                width <- JQ.getInnerWidth (itemElement i)
+                return $ setItemWidth width i : Penalty w width flag a : ls
+           func p i = do n <- (\w -> return $ setItemWidth w i) =<< JQ.getInnerWidth (itemElement i)
+                         return $ n : p
+
+
+arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
+arrangeBoustro boxes = do
+    ls <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
+    -- Should I be applying this style every time? Definitely on window change
+    -- dim, so maybe it's not so bad.
+    textArea <- JQ.select "#boustro" >>= (JQ.empty >=> widthCss)
+    mapM_ (`JQ.appendJQuery` textArea) =<< boustro ls
+    where widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+
+
 toItem :: T.Text -> IO (Item JQ.JQuery Double)
 toItem "-" = hyphen 0 <$> JQ.select "<span>-</span>"
 toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< JQ.select "<span>&nbsp;</span>")

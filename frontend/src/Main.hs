@@ -8,12 +8,9 @@
 
 module Main where
 
-import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.FileEmbed
-import           Data.JSString.Text
 import qualified Data.Map.Strict as Map
-import qualified Data.Text as T
 import           GHCJS.DOM (webViewGetDomDocument)
 import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
@@ -26,33 +23,6 @@ import qualified Reflex.Dom as RD
 import           Typography
 
 data PageEvent = NextPage | PrevPage | Start deriving Show
-
-
-wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
-wordsWithWidths inputWords = do
-
-     ws <- mapM (toItem . T.pack) inputWords
-
-     -- creating a temporary div specifically to measure the width of every element
-     scratchArea <- JQ.empty =<< JQ.select "#scratch-area"
-     mapM_ (`JQ.appendJQuery` scratchArea) $ fmap itemElement ws
-     reverse <$> foldM func [] ws
-
-     where func (Penalty w _ flag a : ls) i = do
-                width <- JQ.getInnerWidth (itemElement i)
-                return $ setItemWidth width i : Penalty w width flag a : ls
-           func p i = do n <- (\w -> return $ setItemWidth w i) =<< JQ.getInnerWidth (itemElement i)
-                         return $ n : p
-
-
-arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
-arrangeBoustro boxes = do
-    ls <- mapM renderLine (removeSpacesFromEnds <$> foldr accumLines [[]] boxes)
-    -- Should I be applying this style every time? Definitely on window change
-    -- dim, so maybe it's not so bad.
-    textArea <- JQ.select "#boustro" >>= (JQ.empty >=> widthCss)
-    mapM_ (`JQ.appendJQuery` textArea) =<< boustro ls
-    where widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 
 
 pagingD :: MonadWidget t m => m (RD.Dynamic t PageEvent)
@@ -77,10 +47,7 @@ main = JQ.ready $ RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
         pagingEvent <- R.updated <$> pagingD
 
         _ <- RD.workflow (titlePage pagingEvent)
-
-        -- TODO git rid of this if possible
-        RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
-
+        return ()
 
 -- TODO if I want these pages to both have access to pagingEvent, I could throw
 -- them in a reader monad, couldn't I?
@@ -95,6 +62,8 @@ titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
 textView :: forall (m :: * -> *) t.  MonadWidget t m
          => RD.Event t PageEvent -> RD.Workflow t m String
 textView pagingEvent = RD.Workflow . RD.el "div" $ do
+
+    RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
 
     RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
     pb <- RD.getPostBuild
