@@ -77,10 +77,21 @@ par0 :: Txt -> Paragraph
 par0 = minWith waste . filter (all fits) . pars
 
 
+par1 :: Txt -> Paragraph
+par1 = minWith waste . fold1 step start
+    where step w ps = filter fitH (new w (minWith waste ps) : map (glue w) ps)
+          start w   = filter fitH [ [[w]] ]
+
+
+fitH :: Paragraph -> Bool
+fitH = fits . head
+
+
 typesetPage :: forall (m :: * -> *). MonadIO m => Int -> m ()
 typesetPage p = do
-            wordBoxes <- liftIO . wordsWithWidths . take 10 . drop (10 * p) $ processedWords
+            wordBoxes <- liftIO . wordsWithWidths . take 500 . drop (500 * p) $ processedWords
             liftIO $ arrangeBoustro wordBoxes
+
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
 wordsWithWidths inputWords = do
@@ -101,7 +112,7 @@ wordsWithWidths inputWords = do
 
 arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
 arrangeBoustro boxes = do
-    ls <- mapM renderLine (removeSpacesFromEnds <$> par0 boxes)
+    ls <- mapM renderLine (removeSpacesFromEnds <$> par1 boxes)
     -- Should I be applying this style every time? Definitely on window change
     -- dim, so maybe it's not so bad.
     textArea <- JQ.select "#boustro" >>= (JQ.empty >=> widthCss)
