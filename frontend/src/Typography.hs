@@ -121,10 +121,10 @@ data Item a b = Box b a             -- Box w_i
 -- all hypens are flagged penality items because we don't want two hyphens in
 -- a row
 
-itemWidth :: Item a b -> b
+itemWidth :: Num b => Item a b -> b
 itemWidth (Box w _) = w
 itemWidth (Spring w _ _ _) = w
-itemWidth (Penalty w _ _ _) = w
+itemWidth (Penalty w _ _ _) = 0
 
 
 setItemWidth :: b -> Item a b -> Item a b
@@ -141,6 +141,10 @@ itemElement (Penalty _ _ _ e) = e
 
 itemIsBox Box{} = True
 itemIsBox _ = False
+
+
+itemIsSpace Spring{} = True
+itemIsSpace _ = False
 
 
 spaceWidth :: Double
@@ -167,15 +171,17 @@ renderLine :: [Word] -> IO JQ.JQuery
 renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
                                                       >>= JQ.setCss "white-space" "nowrap"
                    nls <- fold1 dehyphen (\x -> return [x]) ls
-                   mapM_ (\i -> (`JQ.appendJQuery` lineDiv) <=< styleSpace (itemWidth i) $ itemElement i) nls
+                   let spaceSize = realToFrac $ (textWidth - width nls) / fromIntegral (length $ filter itemIsSpace nls)
+                       nls' = map (\x -> case x of
+                                            (Spring _ a b e) -> Spring spaceSize a b e
+                                            _ -> x) nls
+                   mapM_ (\i -> (`JQ.appendJQuery` lineDiv) <=< styleSpace (itemWidth i) $ itemElement i) nls'
                    return lineDiv
     where
-      spaceSize :: Double
-      spaceSize = realToFrac $ (textWidth - width ls) / fromIntegral (length ls - 1)
       dehyphen :: Word -> IO [Word] -> IO [Word]
       dehyphen n@(Box{}) p = do
                         p' <- p
-                        sp <- space spaceSize <$> JQ.select "<span>&nbsp;</span>"
+                        sp <- space 0 <$> JQ.select "<span>&nbsp;</span>"
                         case head p' of
                            Box{} -> return $ n : sp : p'
                            Penalty{} -> case tail p' of
