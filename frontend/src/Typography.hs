@@ -19,6 +19,8 @@ import qualified JavaScript.JQuery as JQ hiding (filter, not)
 import           Prelude hiding (Word)
 import           Text.Hyphenation
 
+import           Debug.Trace
+
 type Word = Item JQ.JQuery Double
 type Txt = [Word]
 type Line = [Word]
@@ -58,12 +60,10 @@ par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe 
         step :: Word -> [(Paragraph, Double, Double)] -> [(Paragraph, Double, Double)]
         step w ps = let origin = (new w (fromMaybe (error $ "par1' step" ++ show ps) $ minWith waste ps) : map (glue w) ps)
                         result = filter fitH origin
-                    in if null result then take 1 origin else result
+                    in if null result then traceShow origin [fromMaybe (head origin) (minWith waste origin)] else result
 
         start :: Word -> [(Paragraph, Double, Double)]
-        start w   = let result = filter fitH origin
-                        origin = [([[w]], itemWidth w, 0.0)]
-                    in if null result then origin else result
+        start w = [([[w]], itemWidth w, 0.0)]
 
         new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0.0)
         new w p@(ls, _, _) = ([w]:ls, itemWidth w, waste p)
@@ -123,10 +123,10 @@ data Item a b = Box b a             -- Box w_i
               | Spring b b b a      -- Spring w_i y_i z_i
               | Penalty b b Bool a  -- Penalty w_i p_i f_i
 
-instance Show (Item a b) where
-    show (Box{}) = "Box"
-    show (Spring{}) = "Spring"
-    show (Penalty{}) = "Penalty"
+instance Show b => Show (Item a b) where
+    show (Box w _) = "Box " ++ show w
+    show (Spring w _ _ _) = "Spring " ++ show w
+    show (Penalty w _ _ _) = "Penalty " ++ show w
 
 -- all hypens are flagged penality items because we don't want two hyphens in
 -- a row
@@ -162,7 +162,7 @@ itemIsSpace _ = False
 
 
 spaceWidth :: Double
-spaceWidth = 5
+spaceWidth = 4
 
 
 space :: Double -> JQ.JQuery -> Item JQ.JQuery Double
@@ -222,6 +222,8 @@ hyphenString = "-"
 nonBreakingHypenString :: Char
 nonBreakingHypenString = '‑'
 
+emdash :: Char
+emdash = '—'
 
 preprocess :: String -> [String]
 preprocess = prepareText
@@ -231,7 +233,7 @@ preprocess = prepareText
        | otherwise = intersperse hyphenString $ hyphenate english_US x
     insertPilcrows = concatMap (\x -> if x == '\n' then " ¶ " else [x])
     prepareText = concatMap insertHyphens . words . replace . insertPilcrows
-    replace = map (\x -> if x == '-' then nonBreakingHypenString else x)
+    replace = map (\x -> if x == '-' || x == emdash then nonBreakingHypenString else x)
 
 
 processedWords :: [String]
