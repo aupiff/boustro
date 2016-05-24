@@ -12,6 +12,7 @@ import           Control.Monad.IO.Class
 import           Data.FileEmbed
 import           Data.JSString.Text
 import           Data.List (intersperse)
+import           Data.Maybe
 import           Data.Monoid ((<>))
 import qualified Data.Text as T
 import qualified JavaScript.JQuery as JQ hiding (filter, not)
@@ -24,12 +25,13 @@ type Line = [Word]
 type Paragraph = [Line]
 
 
-fold1 :: forall a b. (a -> b -> b) -> (a -> b) -> [a] -> b
-fold1 _ g [x] = g x
-fold1 f g (x:xs) = f x (fold1 f g xs)
+fold1 :: forall a b. (a -> b -> b) -> (a -> b) -> [a] -> Maybe b
+fold1 _ _ [] = Nothing
+fold1 _ g [x] = Just $ g x
+fold1 f g (x:xs) = f x <$> fold1 f g xs
 
 
-minWith :: Ord b => (a -> b) -> [a] -> a
+minWith :: Ord b => (a -> b) -> [a] -> Maybe a
 minWith f = fold1 choice id
     where choice a b
              | f a < f b = a
@@ -51,11 +53,19 @@ lineWaste l = numSpaces * (spaceSize / numSpaces - spaceWidth) ^ (2 :: Int)
 
 
 par1' :: Txt -> Paragraph
-par1' = parLines . minWith waste . fold1 step start
+par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe (error "par1' fold1") . fold1 step start
     where
-        step w ps = filter fitH (new w (minWith waste ps) : map (glue w) ps)
-        start w   = filter fitH [([[w]], itemWidth w, 0)]
-        new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0)
+        step :: Word -> [(Paragraph, Double, Double)] -> [(Paragraph, Double, Double)]
+        step w ps = let origin = (new w (fromMaybe (error $ "par1' step" ++ show ps) $ minWith waste ps) : map (glue w) ps)
+                        result = filter fitH origin
+                    in if null result then take 1 origin else result
+
+        start :: Word -> [(Paragraph, Double, Double)]
+        start w   = let result = filter fitH origin
+                        origin = [([[w]], itemWidth w, 0.0)]
+                    in if null result then origin else result
+
+        new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0.0)
         new w p@(ls, _, _) = ([w]:ls, itemWidth w, waste p)
         glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + n, m) -- TODO what is this 1 about? space width? change this
         parLines (ls, _, _) = ls
@@ -107,18 +117,26 @@ toItem "-" = hyphen 0 <$> JQ.select "<span>-</span>"
 toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< JQ.select "<span>&nbsp;</span>")
 toItem str = Box 0 <$> JQ.select ("<span>" <> textToJSString str <> "</span>")
 
+
 -- can this be a monoid?
 data Item a b = Box b a             -- Box w_i
               | Spring b b b a      -- Spring w_i y_i z_i
               | Penalty b b Bool a  -- Penalty w_i p_i f_i
 
+instance Show (Item a b) where
+    show (Box{}) = "Box"
+    show (Spring{}) = "Spring"
+    show (Penalty{}) = "Penalty"
+
 -- all hypens are flagged penality items because we don't want two hyphens in
 -- a row
+
 
 itemWidth :: Num b => Item a b -> b
 itemWidth (Box w _) = w
 itemWidth (Spring w _ _ _) = w
-itemWidth (Penalty w _ _ _) = 0
+itemWidth (Penalty w _ True _) = w
+itemWidth (Penalty _ _ False _) = 0
 
 
 itemWidth' :: Num b => Item a b -> b
@@ -170,8 +188,8 @@ hyphen hyphenWidth = Penalty hyphenWidth penaltyValue False
 renderLine :: [Word] -> IO JQ.JQuery
 renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
                                                       >>= JQ.setCss "white-space" "nowrap"
-                   nls <- fold1 dehyphen (\x -> return [x]) ls
-                   let spaceSize = realToFrac $ (textWidth - (sum $ fmap itemWidth' nls)) / fromIntegral (length $ filter itemIsSpace nls)
+                   nls <- fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> return [x]) ls
+                   let spaceSize = realToFrac $ (textWidth - sum (fmap itemWidth' nls)) / fromIntegral (length $ filter itemIsSpace nls)
                        nls' = map (\x -> case x of
                                             (Spring _ a b e) -> Spring spaceSize a b e
                                             _ -> x) nls
@@ -187,7 +205,7 @@ renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (tex
                            Penalty{} -> case tail p' of
                                             (Box{}:_) -> return $ n : tail p'
                                             _         -> return $ n : p'
-      dehyphen n@(Penalty{}) p = (n:) <$>  p
+      dehyphen (Penalty a b _ d) p = (Penalty a b True d :) <$>  p
       dehyphen _ p = p
 
 
