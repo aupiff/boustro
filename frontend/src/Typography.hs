@@ -3,7 +3,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Typography where
+module Typography
+    ( typesetPage
+    ) where
 
 import           Control.Monad
 import           Control.Monad.IO.Class
@@ -38,16 +40,12 @@ textWidth :: Double
 textWidth = 600 -- TODO this will eventually have to be dynamic
 
 
-optTextWidth :: Double
-optTextWidth = 550
-
-
 -- TODO Should I keep this 'Int'?
 width :: Line -> Double
 width = sum . map itemWidth
 
 lineWaste :: Line -> Double
-lineWaste l = numSpaces * (spaceSize / numSpaces - spaceWidth) ^ 2
+lineWaste l = numSpaces * (spaceSize / numSpaces - spaceWidth) ^ (2 :: Int)
     where spaceSize = textWidth - width l
           numSpaces = fromIntegral $ length l - 1
 
@@ -63,7 +61,7 @@ par1' = parLines . minWith waste . fold1 step start
         parLines (ls, _, _) = ls
         widthHead (_, n, _) = n
         wasteTail (_, _, m) = m
-        linwHead p@(l:ls, _, _) = lineWaste l ^ (2 :: Int)
+        linwHead = lineWaste . head . parLines
         waste ([_], _, _) = 0
         waste p = linwHead p + wasteTail p
         fitH p = widthHead p <= textWidth
@@ -123,11 +121,6 @@ data Item a b = Box b a             -- Box w_i
 -- all hypens are flagged penality items because we don't want two hyphens in
 -- a row
 
-itemIsSpring :: Item a b -> Bool
-itemIsSpring Spring{} = True
-itemIsSpring _ = False
-
-
 itemWidth :: Item a b -> b
 itemWidth (Box w _) = w
 itemWidth (Spring w _ _ _) = w
@@ -146,12 +139,17 @@ itemElement (Spring _ _ _ e) = e
 itemElement (Penalty _ _ _ e) = e
 
 
+itemIsBox Box{} = True
+itemIsBox _ = False
+
+
 spaceWidth :: Double
 spaceWidth = 5
 
 
 space :: Double -> JQ.JQuery -> Item JQ.JQuery Double
 space w = Spring w 3 2
+
 
 --TODO rename this
 styleSpace :: Double -> JQ.JQuery -> IO JQ.JQuery
@@ -161,18 +159,32 @@ styleSpace txtWidth =
 
 
 hyphen :: Double -> JQ.JQuery -> Item JQ.JQuery Double
-hyphen hyphenWidth = Penalty hyphenWidth 2 True
+hyphen hyphenWidth = Penalty hyphenWidth penaltyValue False
+    where penaltyValue = undefined -- TODO I may not end up using this
 
 
-renderLine :: [Item JQ.JQuery Double] -> IO JQ.JQuery
+renderLine :: [Word] -> IO JQ.JQuery
 renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
                                                       >>= JQ.setCss "white-space" "nowrap"
-                   nls <- sequence . intersperse (space spaceSize <$> JQ.select "<span>&nbsp;</span>") $ map return ls
+                   nls <- fold1 dehyphen (\x -> return [x]) ls
                    mapM_ (\i -> (`JQ.appendJQuery` lineDiv) <=< styleSpace (itemWidth i) $ itemElement i) nls
                    return lineDiv
     where
       spaceSize :: Double
       spaceSize = realToFrac $ (textWidth - width ls) / fromIntegral (length ls - 1)
+      dehyphen :: Word -> IO [Word] -> IO [Word]
+      dehyphen n@(Box{}) p = do
+                        p' <- p
+                        sp <- space spaceSize <$> JQ.select "<span>&nbsp;</span>"
+                        case head p' of
+                           Box{} -> return $ n : sp : p'
+                           Penalty{} -> case tail p' of
+                                            (Box{}:_) -> return $ n : tail p'
+                                            _         -> return $ n : p'
+      dehyphen n@(Penalty{}) p = (n:) <$>  p
+      dehyphen _ p = p
+
+
 
 reverseLine :: JQ.JQuery -> IO JQ.JQuery
 reverseLine = JQ.setCss "-moz-transform" "scaleX(-1)" <=<
@@ -181,6 +193,7 @@ reverseLine = JQ.setCss "-moz-transform" "scaleX(-1)" <=<
               JQ.setCss "transform" "scaleX(-1)" <=<
               JQ.setCss "filter" "FlipH" <=<
               JQ.setCss "-ms-filter" "\"FlipH\""
+
 
 hyphenString :: String
 hyphenString = "-"
