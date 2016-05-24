@@ -81,13 +81,7 @@ wordsWithWidths inputWords = do
      -- creating a temporary div specifically to measure the width of every element
      scratchArea <- JQ.empty =<< JQ.select "#scratch-area"
      mapM_ (`JQ.appendJQuery` scratchArea) $ fmap itemElement ws
-     reverse <$> foldM func [] ws
-
-     where func (Penalty w _ flag a : ls) i = do
-                iWidth <- JQ.getInnerWidth (itemElement i)
-                return $ setItemWidth iWidth i : Penalty w iWidth flag a : ls
-           func p i = (:) <$> ((`setItemWidth` i) <$> JQ.getInnerWidth (itemElement i))
-                          <*> return p
+     mapM (\i -> (`setItemWidth` i) <$> JQ.getInnerWidth (itemElement i)) ws
 
 
 arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
@@ -125,6 +119,12 @@ itemWidth :: Num b => Item a b -> b
 itemWidth (Box w _) = w
 itemWidth (Spring w _ _ _) = w
 itemWidth (Penalty w _ _ _) = 0
+
+
+itemWidth' :: Num b => Item a b -> b
+itemWidth' (Box w _) = w
+itemWidth' (Spring w _ _ _) = w
+itemWidth' (Penalty w _ _ _) = w
 
 
 setItemWidth :: b -> Item a b -> Item a b
@@ -171,11 +171,11 @@ renderLine :: [Word] -> IO JQ.JQuery
 renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
                                                       >>= JQ.setCss "white-space" "nowrap"
                    nls <- fold1 dehyphen (\x -> return [x]) ls
-                   let spaceSize = realToFrac $ (textWidth - width nls) / fromIntegral (length $ filter itemIsSpace nls)
+                   let spaceSize = realToFrac $ (textWidth - (sum $ fmap itemWidth' nls)) / fromIntegral (length $ filter itemIsSpace nls)
                        nls' = map (\x -> case x of
                                             (Spring _ a b e) -> Spring spaceSize a b e
                                             _ -> x) nls
-                   mapM_ (\i -> (`JQ.appendJQuery` lineDiv) <=< styleSpace (itemWidth i) $ itemElement i) nls'
+                   mapM_ (\i -> (`JQ.appendJQuery` lineDiv) <=< styleSpace (itemWidth' i) $ itemElement i) nls'
                    return lineDiv
     where
       dehyphen :: Word -> IO [Word] -> IO [Word]
