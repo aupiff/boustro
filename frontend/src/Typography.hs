@@ -157,10 +157,6 @@ itemElement (Spring _ _ _ e) = e
 itemElement (Penalty _ _ _ e) = e
 
 
-itemIsBox Box{} = True
-itemIsBox _ = False
-
-
 itemIsSpace Spring{} = True
 itemIsSpace _ = False
 
@@ -223,17 +219,19 @@ hyphenString :: String
 hyphenString = "-"
 
 
-nonBreakingHypenString :: String
-nonBreakingHypenString = "‑"
+nonBreakingHypenString :: Char
+nonBreakingHypenString = '‑'
 
 
 preprocess :: String -> [String]
 preprocess = prepareText
   where
-    insertHyphens = concatMap (intersperse hyphenString . hyphenate english_US)
+    insertHyphens x
+       | nonBreakingHypenString `elem` x = [x]
+       | otherwise = intersperse hyphenString $ hyphenate english_US x
     insertPilcrows = concatMap (\x -> if x == '\n' then " ¶ " else [x])
-    prepareText = insertHyphens . words . replace . insertPilcrows
-    replace = concatMap (\x -> if x == '-' then nonBreakingHypenString else [x])
+    prepareText = concatMap insertHyphens . words . replace . insertPilcrows
+    replace = map (\x -> if x == '-' then nonBreakingHypenString else x)
 
 
 processedWords :: [String]
