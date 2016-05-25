@@ -50,15 +50,15 @@ width = sum . map itemWidth
 
 
 lineWaste :: Line -> Double
-lineWaste l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth)
+lineWaste l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphenPenalty
     where spaceSize = textWidth - width l
           numSpaces :: Double
           numSpaces = fromIntegral . length $ filter itemIsBox l
+          hyphenPenalty = if itemIsPenalty (last l) then 10 else 0
           weighting x -- too close is worse than too far apart : TODO This seems backwards to me
             | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
             | otherwise =  3 * x ^ (2 :: Int) -- spaces smaller than optimal width
     -- Write tests for this.
-
 
 
 par1' :: Txt -> Paragraph
@@ -170,8 +170,12 @@ itemIsBox Box{} = True
 itemIsBox _ = False
 
 
+itemIsPenalty Penalty{} = True
+itemIsPenalty _ = False
+
+
 spaceWidth :: Double
-spaceWidth = 4
+spaceWidth = 5
 
 
 space :: Double -> JQ.JQuery -> Item JQ.JQuery Double
@@ -191,7 +195,7 @@ hyphen hyphenWidth = Penalty hyphenWidth penaltyValue False
 
 
 renderLine :: [Word] -> IO JQ.JQuery
-renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+renderLine ls = do lineDiv <- JQ.select "<div class='line'></div>" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
                                                       >>= JQ.setCss "white-space" "nowrap"
                    nls <- fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> return [x]) ls
                    let spaceSize = realToFrac $ (textWidth - sum (fmap itemWidth' nls)) / fromIntegral (length $ filter itemIsSpace nls)
