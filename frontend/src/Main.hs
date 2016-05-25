@@ -35,9 +35,12 @@ pagingD = do
        preventDefault
        return i
      RD.foldDynMaybe toPageEvent Start kp
-  where toPageEvent 37 _ = Just PrevPage
-        toPageEvent 39 _ = Just NextPage
-        toPageEvent _  _ = Nothing
+  where toPageEvent keyCode _
+           | keyCode == leftArrow  = Just PrevPage
+           | keyCode == rightArrow = Just NextPage
+           | otherwise             = Nothing
+        rightArrow               = 39 :: Int
+        leftArrow                = 37 :: Int
 
 
 main :: IO ()
@@ -54,9 +57,9 @@ main = JQ.ready $ RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
 titlePage :: forall t (m :: * -> *).  MonadWidget t m
           => RD.Event t PageEvent -> RD.Workflow t m String
 titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
-    RD.el "div" $ RD.text "This is a boustrophedon reading application"
+    RD.el "div" $ RD.text "This is a boustrophedon reading application. Use left and right arrows to turn pages."
     showTextView <-
-        RD.button "Start reading \"Tess of the D'Urbervilles\" by Thomas Hardy"
+        RD.button "Reading \"Tess of the D'Urbervilles\" by Thomas Hardy"
     return ("Page 1", textView pagingEvent <$ showTextView)
 
 
@@ -71,7 +74,7 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
     let textRefresh = RD.leftmost [pagingEvent, fmap (const Start) pb]
     currentPage <- R.updated <$> RD.foldDyn pagingFunction 0 textRefresh
 
-    RD.performEvent_ $ RD.ffor currentPage typesetPage
+    lastWord <- RD.performEvent $ RD.ffor currentPage typesetPage
     home <- RD.button "back home"
 
     return ("Page 2", titlePage pagingEvent <$ home)

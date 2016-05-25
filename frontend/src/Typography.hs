@@ -84,10 +84,11 @@ par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe 
         fitH p = widthHead p <= textWidth
 
 
-typesetPage :: forall (m :: * -> *). MonadIO m => Int -> m ()
-typesetPage p = do
-            wordBoxes <- liftIO . wordsWithWidths . take 500 . drop (500 * p) $ processedWords
-            liftIO $ arrangeBoustro wordBoxes
+typesetPage :: forall (m :: * -> *). MonadIO m => Int -> m Int
+typesetPage pageNumber = do
+    wordBoxes <- liftIO . wordsWithWidths . take 500 . drop (500 * pageNumber) $ processedWords
+    liftIO $ arrangeBoustro wordBoxes
+    return 0
 
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
