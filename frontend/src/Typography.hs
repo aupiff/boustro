@@ -86,15 +86,18 @@ par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe 
 typesetPage :: Int -> IO Int
 typesetPage pageNumber = do
     boxes <- wordsWithWidths . take numWords . drop (numWords * pageNumber) $ processedWords
-    ls <- mapM renderLine $ par1' boxes
+    let par = take linesPerPage $ par1' boxes
+        numWords = sum $ map length par
+    ls <- mapM renderLine par
     boustroLines <- boustro ls
     -- Should I be applying this style every time? Definitely on window change
     -- dim, so maybe it's not so bad.
     textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
-    mapM_ (`JQ.appendJQuery` textArea) $ take 3 boustroLines
-    return 0
+    mapM_ (`JQ.appendJQuery` textArea) boustroLines
+    return numWords
     where numWords = 400
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+          linesPerPage = 16
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
 wordsWithWidths inputWords = do
