@@ -8,7 +8,6 @@ module Typography
     ) where
 
 import           Control.Monad
-import           Control.Monad.IO.Class
 import           Data.FileEmbed
 import           Data.JSString.Text
 import           Data.List (intersperse)
@@ -84,12 +83,18 @@ par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe 
         fitH p = widthHead p <= textWidth
 
 
-typesetPage :: forall (m :: * -> *). MonadIO m => Int -> m Int
+typesetPage :: Int -> IO Int
 typesetPage pageNumber = do
-    wordBoxes <- liftIO . wordsWithWidths . take 500 . drop (500 * pageNumber) $ processedWords
-    liftIO $ arrangeBoustro wordBoxes
+    boxes <- wordsWithWidths . take numWords . drop (numWords * pageNumber) $ processedWords
+    ls <- mapM renderLine $ par1' boxes
+    boustroLines <- boustro ls
+    -- Should I be applying this style every time? Definitely on window change
+    -- dim, so maybe it's not so bad.
+    textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
+    mapM_ (`JQ.appendJQuery` textArea) $ take 3 boustroLines
     return 0
-
+    where numWords = 400
+          widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
 wordsWithWidths inputWords = do
@@ -102,14 +107,6 @@ wordsWithWidths inputWords = do
      mapM (\i -> (`setItemWidth` i) <$> JQ.getInnerWidth (itemElement i)) ws
 
 
-arrangeBoustro :: [Item JQ.JQuery Double] -> IO ()
-arrangeBoustro boxes = do
-    ls <- mapM renderLine $ par1' boxes
-    -- Should I be applying this style every time? Definitely on window change
-    -- dim, so maybe it's not so bad.
-    textArea <- JQ.select "#boustro" >>= (JQ.empty >=> widthCss)
-    mapM_ (`JQ.appendJQuery` textArea) =<< boustro ls
-    where widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 
 
 boustro :: [JQ.JQuery] -> IO [JQ.JQuery]

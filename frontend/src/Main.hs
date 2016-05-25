@@ -74,7 +74,7 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
     let textRefresh = RD.leftmost [pagingEvent, fmap (const Start) pb]
     currentPage <- R.updated <$> RD.foldDyn pagingFunction 0 textRefresh
 
-    lastWord <- RD.performEvent $ RD.ffor currentPage typesetPage
+    lastWord <- RD.performEvent $ RD.ffor currentPage (liftIO . typesetPage)
     home <- RD.button "back home"
 
     return ("Page 2", titlePage pagingEvent <$ home)
