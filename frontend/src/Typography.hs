@@ -48,10 +48,17 @@ textWidth = 600 -- TODO this will eventually have to be dynamic
 width :: Line -> Double
 width = sum . map itemWidth
 
+
 lineWaste :: Line -> Double
-lineWaste l = numSpaces * (spaceSize / numSpaces - spaceWidth) ^ (2 :: Int)
+lineWaste l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth)
     where spaceSize = textWidth - width l
-          numSpaces = fromIntegral $ length l - 1
+          numSpaces :: Double
+          numSpaces = fromIntegral . length $ filter itemIsBox l
+          weighting x -- too close is worse than too far apart : TODO This seems backwards to me
+            | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
+            | otherwise =  3 * x ^ (2 :: Int) -- spaces smaller than optimal width
+    -- Write tests for this.
+
 
 
 par1' :: Txt -> Paragraph
@@ -130,8 +137,6 @@ instance Show b => Show (Item a b) where
 
 -- all hypens are flagged penality items because we don't want two hyphens in
 -- a row
-
-
 itemWidth :: Num b => Item a b -> b
 itemWidth (Box w _) = w
 itemWidth (Spring w _ _ _) = w
@@ -159,6 +164,10 @@ itemElement (Penalty _ _ _ e) = e
 
 itemIsSpace Spring{} = True
 itemIsSpace _ = False
+
+
+itemIsBox Box{} = True
+itemIsBox _ = False
 
 
 spaceWidth :: Double
@@ -205,7 +214,6 @@ renderLine ls = do lineDiv <- JQ.select "<div></div>" >>= JQ.setCss "width" (tex
       dehyphen _ p = p
 
 
-
 reverseLine :: JQ.JQuery -> IO JQ.JQuery
 reverseLine = JQ.setCss "-moz-transform" "scaleX(-1)" <=<
               JQ.setCss "-o-transform"  "scaleX(-1)" <=<
@@ -222,8 +230,10 @@ hyphenString = "-"
 nonBreakingHypenString :: Char
 nonBreakingHypenString = '‑'
 
+
 emdash :: Char
 emdash = '—'
+
 
 preprocess :: String -> [String]
 preprocess = prepareText
