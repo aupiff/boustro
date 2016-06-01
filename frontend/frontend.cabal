@@ -21,10 +21,12 @@ executable boustro
                   , containers
                   , data-default
                   , file-embed
+                  , free
                   , ghcjs-base
                   , ghcjs-jquery
                   , ghcjs-dom > 0.2
                   , hyphenation
+                  , lens
                   , reflex
                   , reflex-dom
                   , text

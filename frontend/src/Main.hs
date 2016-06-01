@@ -8,6 +8,15 @@
 
 module Main where
 
+
+import Control.Lens
+import Control.Monad
+import Control.Monad.Fix
+import Control.Monad.Free
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.State
+import Data.Maybe
+
 import           Control.Monad.IO.Class
 import           Data.FileEmbed
 import qualified Data.Map.Strict as Map
@@ -21,8 +30,6 @@ import           Reflex.Dom.Class
 import qualified Reflex.Dom as RD
 
 import           Typography
-
-data PageEvent = NextPage | PrevPage | Start deriving Show
 
 
 pagingD :: MonadWidget t m => m (RD.Dynamic t PageEvent)
@@ -63,6 +70,12 @@ titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
     return ("Page 1", textView pagingEvent <$ showTextView)
 
 
+-- Now we have some Reflex code to wrap our demo in a minimal web page
+getUserSelections :: MonadWidget t m => RD.Event t PageEvent -> RD.Dynamic t Int -> m (RD.Event t Int)
+getUserSelections pagingEvent currentWord = do
+    let textRefresh = pagingEvent
+    RD.performEvent $ (liftIO . typesetPage) <$> RD.attachDyn currentWord textRefresh
+
 textView :: forall (m :: * -> *) t.  MonadWidget t m
          => RD.Event t PageEvent -> RD.Workflow t m String
 textView pagingEvent = RD.Workflow . RD.el "div" $ do
@@ -70,17 +83,12 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
     RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
 
     RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
+
     pb <- RD.getPostBuild
-    let textRefresh = RD.leftmost [pagingEvent, fmap (const Start) pb]
 
-    currentWord <- R.updated <$> RD.foldDyn pagingFunction 0 textRefresh
-
-    lastWord <- RD.performEvent $ RD.ffor currentWord (liftIO . typesetPage)
+    rec wordDelta   <- getUserSelections (RD.leftmost [fmap (const Start) pb, pagingEvent]) currentPage
+        currentPage <- RD.foldDyn (+) 0 wordDelta
 
     home <- RD.button "back home"
 
     return ("Page 2", titlePage pagingEvent <$ home)
-
-    where pagingFunction NextPage currentPage = currentPage + 1
-          pagingFunction PrevPage currentPage = max 0 $ currentPage - 1
-          pagingFunction _ _ = 0

@@ -5,6 +5,7 @@
 
 module Typography
     ( typesetPage
+    , PageEvent(..)
     ) where
 
 import           Control.Monad
@@ -19,6 +20,8 @@ import           Prelude hiding (Word)
 import           Text.Hyphenation
 
 import           Debug.Trace
+
+data PageEvent = NextPage | PrevPage | Start deriving Show
 
 type Word = Item JQ.JQuery Double
 type Txt = [Word]
@@ -83,9 +86,9 @@ par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe 
         fitH p = widthHead p <= textWidth
 
 
-typesetPage :: Int -> IO Int
-typesetPage pageNumber = do
-    boxes <- wordsWithWidths . take numWords . drop (numWords * pageNumber) $ processedWords
+typesetPage :: (Int, PageEvent) -> IO Int
+typesetPage (pageNumber', pageEvent) = do
+    boxes <- wordsWithWidths . take numWords . drop pageNumber $ processedWords
     let par = take linesPerPage $ par1' boxes
         numWords = sum $ map length par
     ls <- mapM renderLine par
@@ -98,6 +101,10 @@ typesetPage pageNumber = do
     where numWords = 400
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
           linesPerPage = 16
+          pagingFunction NextPage = pageNumber' + 1
+          pagingFunction PrevPage = pageNumber' - 1
+          pagingFunction Start    = 0
+          pageNumber = pagingFunction pageEvent
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
 wordsWithWidths inputWords = do
