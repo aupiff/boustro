@@ -71,7 +71,7 @@ titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
 
 
 -- Now we have some Reflex code to wrap our demo in a minimal web page
-getUserSelections :: MonadWidget t m => RD.Event t PageEvent -> RD.Dynamic t Int -> m (RD.Event t Int)
+getUserSelections :: MonadWidget t m => RD.Event t PageEvent -> RD.Dynamic t (Int, Int) -> m (RD.Event t (Int, Int))
 getUserSelections pagingEvent currentWord = do
     let textRefresh = pagingEvent
     RD.performEvent $ (liftIO . typesetPage) <$> RD.attachDyn currentWord textRefresh
@@ -87,7 +87,7 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
     pb <- RD.getPostBuild
 
     rec wordDelta   <- getUserSelections (RD.leftmost [fmap (const Start) pb, pagingEvent]) currentPage
-        currentPage <- RD.foldDyn (+) 0 wordDelta
+        currentPage <- RD.holdDyn (0,0) wordDelta
 
     home <- RD.button "back home"
 

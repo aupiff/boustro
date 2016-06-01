@@ -86,8 +86,8 @@ par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe 
         fitH p = widthHead p <= textWidth
 
 
-typesetPage :: (Int, PageEvent) -> IO Int
-typesetPage (pageNumber', pageEvent) = do
+typesetPage :: ((Int, Int), PageEvent) -> IO (Int, Int)
+typesetPage ((pageNumber', _), pageEvent) = do
     boxes <- wordsWithWidths . take numWords . drop pageNumber $ processedWords
     let par = take linesPerPage $ par1' boxes
         numWords = sum $ map length par
@@ -97,7 +97,7 @@ typesetPage (pageNumber', pageEvent) = do
     -- dim, so maybe it's not so bad.
     textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
     mapM_ (`JQ.appendJQuery` textArea) boustroLines
-    return numWords
+    return (pageNumber, numWords)
     where numWords = 400
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
           linesPerPage = 16
