@@ -32,8 +32,8 @@ import qualified Reflex.Dom as RD
 import           Typography
 
 
-pagingD :: MonadWidget t m => m (RD.Dynamic t PageEvent)
-pagingD = do
+pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)
+pagingEvent = do
      wv <- askWebView
      Just doc <- liftIO $ webViewGetDomDocument wv
      Just body <- liftIO $ getBody doc
@@ -41,8 +41,9 @@ pagingD = do
        i <- RD.getKeyEvent
        preventDefault
        return i
-     RD.foldDynMaybe toPageEvent Start kp
-  where toPageEvent keyCode _
+     return $ RD.fmapMaybe toPageEvent kp
+
+  where toPageEvent keyCode
            | keyCode == leftArrow  = Just PrevPage
            | keyCode == rightArrow = Just NextPage
            | otherwise             = Nothing
@@ -51,11 +52,10 @@ pagingD = do
 
 
 main :: IO ()
-main = JQ.ready $ RD.mainWidget $ do
-    -- RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
-    pagingEvent <- R.updated <$> pagingD
+main = JQ.ready $ RD.mainWidget $
 
-    void $ RD.workflow (titlePage pagingEvent)
+    -- RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
+    void . RD.workflow . titlePage =<< pagingEvent
 
 
 -- TODO if I want these pages to both have access to pagingEvent, I could throw
