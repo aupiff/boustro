@@ -87,8 +87,29 @@ par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe 
 
 
 typesetPage :: ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage ((wordNumber', wordsOnPage), pageEvent) = do
-    boxes <- wordsWithWidths . take numWords . drop wordNumber $ processedWords
+typesetPage ((wordNumber, wordsOnPage), PrevPage) = do
+    boxesMeasure <- wordsWithWidths . take numWords . reverse $ take wordNumber processedWords
+    let parMeasure = take linesPerPage $ par1' boxesMeasure
+        wordsOnPageMeasure = sum $ map length parMeasure
+
+    let wordNumber' = max 0 $ wordNumber - wordsOnPageMeasure
+
+    boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords
+    let par = take linesPerPage $ par1' boxes
+        wordsOnPage' = sum $ map length par
+    ls <- mapM renderLine par
+
+    boustroLines <- boustro ls
+    -- Should I be applying this style every time? Definitely on window change
+    -- dim, so maybe it's not so bad.
+    textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
+    mapM_ (`JQ.appendJQuery` textArea) boustroLines
+    return $ traceShow (wordNumber', wordsOnPage') (wordNumber', wordsOnPage')
+    where numWords = 400
+          widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+          linesPerPage = 16
+typesetPage ((wordNumber, wordsOnPage), pageEvent) = do
+    boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords
     let par = take linesPerPage $ par1' boxes
         wordsOnPage' = sum $ map length par
     ls <- mapM renderLine par
@@ -97,14 +118,15 @@ typesetPage ((wordNumber', wordsOnPage), pageEvent) = do
     -- dim, so maybe it's not so bad.
     textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
     mapM_ (`JQ.appendJQuery` textArea) boustroLines
-    return $ traceShow (wordNumber, wordsOnPage') (wordNumber, wordsOnPage')
+    return $ traceShow (wordNumber', wordsOnPage') (wordNumber', wordsOnPage')
     where numWords = 400
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
           linesPerPage = 16
-          pagingFunction NextPage = min (wordNumber' + wordsOnPage) (length processedWords - 2)
-          pagingFunction PrevPage = max 0 $ wordNumber' - 10
+          pagingFunction NextPage = min (wordNumber + wordsOnPage) (length processedWords - 2)
+          pagingFunction PrevPage = max 0 $ wordNumber - 10
           pagingFunction Start    = 0
-          wordNumber = pagingFunction pageEvent
+          wordNumber' = pagingFunction pageEvent
+
 
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
