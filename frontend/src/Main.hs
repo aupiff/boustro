@@ -32,37 +32,12 @@ import qualified Reflex.Dom as RD
 import           Typography
 
 
-pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)
-pagingEvent = do
-     wv <- askWebView
-     Just doc <- liftIO $ webViewGetDomDocument wv
-     Just body <- liftIO $ getBody doc
-     kp <- RD.wrapDomEvent body (`on` keyDown) $ do
-       i <- RD.getKeyEvent
-       preventDefault
-       return i
-     return $ RD.fmapMaybe toPageEvent kp
-
-  where toPageEvent keyCode
-           | keyCode == leftArrow  = Just PrevPage
-           | keyCode == rightArrow = Just NextPage
-           | otherwise             = Nothing
-        rightArrow               = 39 :: Int
-        leftArrow                = 37 :: Int
-
-
 main :: IO ()
-main = JQ.ready $ RD.mainWidget $
-
-    -- RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
-    void . RD.workflow . titlePage =<< pagingEvent
+main = JQ.ready $ RD.mainWidget $ void . RD.workflow $ titlePage
 
 
--- TODO if I want these pages to both have access to pagingEvent, I could throw
--- them in a reader monad, couldn't I?
-titlePage :: forall t (m :: * -> *).  MonadWidget t m
-          => RD.Event t PageEvent -> RD.Workflow t m String
-titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
+titlePage :: forall t (m :: * -> *).  MonadWidget t m => RD.Workflow t m String
+titlePage = RD.Workflow . RD.el "div" $ do
 
     RD.elAttr "div" (Map.singleton "id" "content") $
 
@@ -82,22 +57,16 @@ titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
 
             RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
 
-        return ("Page 1", textView pagingEvent <$ showTextView)
+        return ("Page 1", textView <$ showTextView)
 
 
--- Now we have some Reflex code to wrap our demo in a minimal web page
-pageEventResponse :: MonadWidget t m => RD.Event t PageEvent -> RD.Dynamic t (Int, Int) -> m (RD.Event t (Int, Int))
-pageEventResponse pagingEvent currentWord = RD.performEvent $
-
-        (liftIO . typesetPage) <$> RD.attachDyn currentWord pagingEvent
-
-
-textView :: forall (m :: * -> *) t.  MonadWidget t m
-         => RD.Event t PageEvent -> RD.Workflow t m String
-textView pagingEvent = RD.Workflow . RD.el "div" $ do
+textView :: forall (m :: * -> *) t.  MonadWidget t m => RD.Workflow t m String
+textView = RD.Workflow . RD.el "div" $ do
 
     -- `scratch-area` is a hidden div where words widths are measured
     RD.elAttr "div" (Map.singleton "id" "scratch-area") $ RD.blank
+
+    pagingE <- pagingEvent
 
     RD.elAttr "div" (Map.singleton "id" "reader-view") $ do
 
@@ -105,9 +74,12 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
 
             pb <- RD.getPostBuild
 
-            rec wordDelta  <- pageEventResponse (RD.leftmost [fmap (const Start) pb, pagingEvent]) wordDeltaD
+            let buildAndPagingEvent = RD.leftmost [ fmap (const Start) pb
+                                                  , pagingE ]
+
+            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD
                 wordDeltaD <- RD.holdDyn (0,0) wordDelta
-                posString' <- RD.mapDyn (show . (flip (,) (length processedWords)) . fst) wordDeltaD
+                posString' <- RD.mapDyn renderProgressString wordDeltaD
 
             return posString'
 
@@ -115,4 +87,33 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
 
         home <- RD.button "back home"
 
-        return ("Page 2", titlePage pagingEvent <$ home)
+        return ("Page 2", titlePage <$ home)
+
+    where renderProgressString = show . (flip (,) (length processedWords)) . fst
+
+
+pageEventResponse :: MonadWidget t m
+                  => RD.Event t PageEvent -> RD.Dynamic t (Int, Int)
+                  -> m (RD.Event t (Int, Int))
+pageEventResponse pageEvent currentWord = RD.performEvent $
+
+        (liftIO . typesetPage) <$> RD.attachDyn currentWord pageEvent
+
+
+pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)
+pagingEvent = do
+     wv <- askWebView
+     Just doc <- liftIO $ webViewGetDomDocument wv
+     Just body <- liftIO $ getBody doc
+     kp <- RD.wrapDomEvent body (`on` keyDown) $ do
+       i <- RD.getKeyEvent
+       preventDefault
+       return i
+     return $ RD.fmapMaybe toPageEvent kp
+
+  where toPageEvent keyCode
+           | keyCode == leftArrow  = Just PrevPage
+           | keyCode == rightArrow = Just NextPage
+           | otherwise             = Nothing
+        rightArrow               = 39 :: Int
+        leftArrow                = 37 :: Int
