@@ -52,23 +52,26 @@ pagingD = do
 
 main :: IO ()
 main = JQ.ready $ -- RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
+                  RD.mainWidget $ do
 
-                     RD.mainWidget $
+    pagingEvent <- R.updated <$> pagingD
 
-    RD.elAttr "div" (Map.singleton "id" "content") $ do
-        pagingEvent <- R.updated <$> pagingD
-
-        _ <- RD.workflow (titlePage pagingEvent)
-        return ()
+    void $ RD.workflow (titlePage pagingEvent)
 
 -- TODO if I want these pages to both have access to pagingEvent, I could throw
 -- them in a reader monad, couldn't I?
 titlePage :: forall t (m :: * -> *).  MonadWidget t m
           => RD.Event t PageEvent -> RD.Workflow t m String
 titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
+
     RD.elAttr "div" (Map.singleton "id" "content")
-        $ do RD.text "Boustro"
-             RD.text "Use left and right arrows to turn pages."
+        $ do RD.el "h1" $ RD.text "Boustro"
+             RD.el "p" $
+                RD.text "Boustrophedon is an ancient, efficient, yet \
+                       \ unfortunately forgotten style of typsetting.\
+                       \ Choose one of the texts below to try it out."
+             RD.el "p" $ RD.text "Use left and right arrows to turn pages."
+
     RD.elAttr "div" (Map.singleton "id" "menu") $ do
         showTextView <-
             RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"

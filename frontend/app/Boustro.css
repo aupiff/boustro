@@ -5,6 +5,27 @@
   font-family: Georgia, Serif;
 }
 
+#content button {
+  width: auto;
+  float: right;
+}
+
+#menu {
+  width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: Georgia, Serif;
+
+  margin-top: 20px;
+}
+
+#menu button {
+   width: 100px;
+   margin-left: auto;
+   margin-right: auto;
+}
+
+
 #scratch-area {
   visibility: hidden;
   width: 100%;
@@ -28,18 +49,4 @@ button {
    border: 3px solid #000;
    font-weight: 500;
    letter-spacing: 0;
-}
-
-#menu {
-  margin: 20px 0 auto;
-}
-
-#menu button {
-   width: 50%;
-   /* margin: 0 auto; */
-}
-
-#content button {
-  width: auto;
-  float: right;
 }
