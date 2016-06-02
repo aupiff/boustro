@@ -86,16 +86,18 @@ titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
 
 
 -- Now we have some Reflex code to wrap our demo in a minimal web page
-getUserSelections :: MonadWidget t m => RD.Event t PageEvent -> RD.Dynamic t (Int, Int) -> m (RD.Event t (Int, Int))
-getUserSelections pagingEvent currentWord = do
-    let textRefresh = pagingEvent
-    RD.performEvent $ (liftIO . typesetPage) <$> RD.attachDyn currentWord textRefresh
+pageEventResponse :: MonadWidget t m => RD.Event t PageEvent -> RD.Dynamic t (Int, Int) -> m (RD.Event t (Int, Int))
+pageEventResponse pagingEvent currentWord = RD.performEvent $
+
+        (liftIO . typesetPage) <$> RD.attachDyn currentWord pagingEvent
+
 
 textView :: forall (m :: * -> *) t.  MonadWidget t m
          => RD.Event t PageEvent -> RD.Workflow t m String
 textView pagingEvent = RD.Workflow . RD.el "div" $ do
 
-    RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
+    -- `scratch-area` is a hidden div where words widths are measured
+    RD.elAttr "div" (Map.singleton "id" "scratch-area") $ RD.blank
 
     RD.elAttr "div" (Map.singleton "id" "reader-view") $ do
 
@@ -103,7 +105,7 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
 
             pb <- RD.getPostBuild
 
-            rec wordDelta  <- getUserSelections (RD.leftmost [fmap (const Start) pb, pagingEvent]) wordDeltaD
+            rec wordDelta  <- pageEventResponse (RD.leftmost [fmap (const Start) pb, pagingEvent]) wordDeltaD
                 wordDeltaD <- RD.holdDyn (0,0) wordDelta
                 posString' <- RD.mapDyn (show . (flip (,) (length processedWords)) . fst) wordDeltaD
 
