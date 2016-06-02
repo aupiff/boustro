@@ -86,8 +86,8 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
 
     pb <- RD.getPostBuild
 
-    rec wordDelta   <- getUserSelections (RD.leftmost [fmap (const Start) pb, pagingEvent]) currentPage
-        currentPage <- RD.holdDyn (0,0) wordDelta
+    rec wordDelta  <- getUserSelections (RD.leftmost [fmap (const Start) pb, pagingEvent]) wordDeltaD
+        wordDeltaD <- RD.holdDyn (0,0) wordDelta
 
     home <- RD.button "back home"
 

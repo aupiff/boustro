@@ -76,7 +76,7 @@ par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe 
 
         new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0.0)
         new w p@(ls, _, _) = ([w]:ls, itemWidth w, waste p)
-        glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + n, m) -- TODO what is this 1 about? space width? change this
+        glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + n, m) -- TODO what is this 1/n about? space width? change this
         parLines (ls, _, _) = ls
         widthHead (_, n, _) = n
         wasteTail (_, _, m) = m
@@ -87,24 +87,25 @@ par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe 
 
 
 typesetPage :: ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage ((pageNumber', _), pageEvent) = do
-    boxes <- wordsWithWidths . take numWords . drop pageNumber $ processedWords
+typesetPage ((wordNumber', wordsOnPage), pageEvent) = do
+    boxes <- wordsWithWidths . take numWords . drop wordNumber $ processedWords
     let par = take linesPerPage $ par1' boxes
-        numWords = sum $ map length par
+        wordsOnPage' = sum $ map length par
     ls <- mapM renderLine par
     boustroLines <- boustro ls
     -- Should I be applying this style every time? Definitely on window change
     -- dim, so maybe it's not so bad.
     textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
     mapM_ (`JQ.appendJQuery` textArea) boustroLines
-    return (pageNumber, numWords)
+    return $ traceShow (wordNumber, wordsOnPage') (wordNumber, wordsOnPage')
     where numWords = 400
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
           linesPerPage = 16
-          pagingFunction NextPage = pageNumber' + 1
-          pagingFunction PrevPage = pageNumber' - 1
+          pagingFunction NextPage = min (wordNumber' + wordsOnPage) (length processedWords - 2)
+          pagingFunction PrevPage = max 0 $ wordNumber' - 10
           pagingFunction Start    = 0
-          pageNumber = pagingFunction pageEvent
+          wordNumber = pagingFunction pageEvent
+
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
 wordsWithWidths inputWords = do
@@ -115,8 +116,6 @@ wordsWithWidths inputWords = do
      scratchArea <- JQ.empty =<< JQ.select "#scratch-area"
      mapM_ (`JQ.appendJQuery` scratchArea) $ fmap itemElement ws
      mapM (\i -> (`setItemWidth` i) <$> JQ.getInnerWidth (itemElement i)) ws
-
-
 
 
 boustro :: [JQ.JQuery] -> IO [JQ.JQuery]
