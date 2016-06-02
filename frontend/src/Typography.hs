@@ -64,7 +64,7 @@ lineWaste l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphe
 
 
 par1' :: Txt -> Paragraph
-par1' = parLines . fromMaybe (error "par1 minWith") . minWith waste . fromMaybe (error "par1' fold1") . fold1 step start
+par1' = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste . fromMaybe (trace "par1' fold1" []) . fold1 step start
     where
         step :: Word -> [(Paragraph, Double, Double)] -> [(Paragraph, Double, Double)]
         step w ps = let origin = (new w (fromMaybe (error $ "par1' step" ++ show ps) $ minWith waste ps) : map (glue w) ps)
