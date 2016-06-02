@@ -1,4 +1,4 @@
-#boustro {
+#content {
   width: 600px;
   margin-left: auto;
   margin-right: auto;
@@ -16,5 +16,30 @@
 }
 
 .line {
-  margin-bottom: 3px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+button {
+   text-transform: none;
+   text-decoration: none;
+   background-color: #fff;
+   color: #000;
+   border: 3px solid #000;
+   font-weight: 500;
+   letter-spacing: 0;
+}
+
+#menu {
+  margin: 20px 0 auto;
+}
+
+#menu button {
+   width: 50%;
+   /* margin: 0 auto; */
+}
+
+#content button {
+  width: auto;
+  float: right;
 }

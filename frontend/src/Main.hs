@@ -4,7 +4,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecursiveDo #-}
-{-# LANGUAGE TemplateHaskell #-}
+-- {-# LANGUAGE TemplateHaskell #-}
 
 module Main where
 
@@ -51,7 +51,9 @@ pagingD = do
 
 
 main :: IO ()
-main = JQ.ready $ RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
+main = JQ.ready $ -- RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
+
+                     RD.mainWidget $
 
     RD.elAttr "div" (Map.singleton "id" "content") $ do
         pagingEvent <- R.updated <$> pagingD
@@ -64,10 +66,13 @@ main = JQ.ready $ RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
 titlePage :: forall t (m :: * -> *).  MonadWidget t m
           => RD.Event t PageEvent -> RD.Workflow t m String
 titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
-    RD.el "div" $ RD.text "This is a boustrophedon reading application. Use left and right arrows to turn pages."
-    showTextView <-
-        RD.button "Reading \"Tess of the D'Urbervilles\" by Thomas Hardy"
-    return ("Page 1", textView pagingEvent <$ showTextView)
+    RD.elAttr "div" (Map.singleton "id" "content")
+        $ do RD.text "Boustro"
+             RD.text "Use left and right arrows to turn pages."
+    RD.elAttr "div" (Map.singleton "id" "menu") $ do
+        showTextView <-
+            RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
+        return ("Page 1", textView pagingEvent <$ showTextView)
 
 
 -- Now we have some Reflex code to wrap our demo in a minimal web page
@@ -82,13 +87,20 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
 
     RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
 
-    RD.elAttr "div" (Map.singleton "id" "boustro") RD.blank
+    RD.elAttr "div" (Map.singleton "id" "content") $ do
 
-    pb <- RD.getPostBuild
+        posString <- RD.elAttr "div" (Map.singleton "id" "boustro") $ do
 
-    rec wordDelta  <- getUserSelections (RD.leftmost [fmap (const Start) pb, pagingEvent]) wordDeltaD
-        wordDeltaD <- RD.holdDyn (0,0) wordDelta
+            pb <- RD.getPostBuild
 
-    home <- RD.button "back home"
+            rec wordDelta  <- getUserSelections (RD.leftmost [fmap (const Start) pb, pagingEvent]) wordDeltaD
+                wordDeltaD <- RD.holdDyn (0,0) wordDelta
+                posString' <- RD.mapDyn (show . (flip (,) (length processedWords)) . fst) wordDeltaD
 
-    return ("Page 2", titlePage pagingEvent <$ home)
+            return posString'
+
+        RD.dynText posString
+
+        home <- RD.button "back home"
+
+        return ("Page 2", titlePage pagingEvent <$ home)

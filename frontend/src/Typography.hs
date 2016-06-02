@@ -6,6 +6,7 @@
 module Typography
     ( typesetPage
     , PageEvent(..)
+    , processedWords
     ) where
 
 import           Control.Monad
@@ -85,9 +86,14 @@ par1' = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste .
         waste p = linwHead p + wasteTail p
         fitH p = widthHead p <= textWidth
 
+-- data PageState = PageState {
+--                    fullText :: [String]
+--                    currentWord :: Int
+--                    wordsDisplayed :: Int
+--                  }
 
 typesetPage :: ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage ((wordNumber, wordsOnPage), PrevPage) = do
+typesetPage ((wordNumber, _), PrevPage) = do
     boxesMeasure <- wordsWithWidths . take numWords . reverse $ take wordNumber processedWords
     let parMeasure = take linesPerPage $ par1' boxesMeasure
         wordsOnPageMeasure = sum $ map length parMeasure
@@ -107,7 +113,6 @@ typesetPage ((wordNumber, wordsOnPage), PrevPage) = do
     return $ traceShow (wordNumber', wordsOnPage') (wordNumber', wordsOnPage')
     where numWords = 400
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
-          linesPerPage = 16
 typesetPage ((wordNumber, wordsOnPage), pageEvent) = do
     boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords
     let par = take linesPerPage $ par1' boxes
@@ -121,12 +126,12 @@ typesetPage ((wordNumber, wordsOnPage), pageEvent) = do
     return $ traceShow (wordNumber', wordsOnPage') (wordNumber', wordsOnPage')
     where numWords = 400
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
-          linesPerPage = 16
-          pagingFunction NextPage = min (wordNumber + wordsOnPage) (length processedWords - 2)
-          pagingFunction PrevPage = max 0 $ wordNumber - 10
-          pagingFunction Start    = 0
-          wordNumber' = pagingFunction pageEvent
+          wordNumber' = case pageEvent of
+                              NextPage -> min (wordNumber + wordsOnPage) (length processedWords - 2)
+                              Start    -> 0
 
+
+linesPerPage = 14
 
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
