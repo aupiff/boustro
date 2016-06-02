@@ -51,12 +51,12 @@ pagingD = do
 
 
 main :: IO ()
-main = JQ.ready $ -- RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
-                  RD.mainWidget $ do
-
+main = JQ.ready $ RD.mainWidget $ do
+    -- RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $
     pagingEvent <- R.updated <$> pagingD
 
     void $ RD.workflow (titlePage pagingEvent)
+
 
 -- TODO if I want these pages to both have access to pagingEvent, I could throw
 -- them in a reader monad, couldn't I?
@@ -64,17 +64,24 @@ titlePage :: forall t (m :: * -> *).  MonadWidget t m
           => RD.Event t PageEvent -> RD.Workflow t m String
 titlePage pagingEvent = RD.Workflow . RD.el "div" $ do
 
-    RD.elAttr "div" (Map.singleton "id" "content")
-        $ do RD.el "h1" $ RD.text "Boustro"
+    RD.elAttr "div" (Map.singleton "id" "content") $
+
+          do RD.el "h1" $ RD.text "Boustrophedon"
+
              RD.el "p" $
-                RD.text "Boustrophedon is an ancient, efficient, yet \
-                       \ unfortunately forgotten style of typsetting.\
-                       \ Choose one of the texts below to try it out."
-             RD.el "p" $ RD.text "Use left and right arrows to turn pages."
+
+                RD.text "An ancient, efficient, yet \
+                       \ unfortunately forgotten style of typsetting."
+
+             RD.el "p" $ RD.text "In the reader view, use left and \
+                                \ right arrows to turn pages."
 
     RD.elAttr "div" (Map.singleton "id" "menu") $ do
+
         showTextView <-
+
             RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
+
         return ("Page 1", textView pagingEvent <$ showTextView)
 
 
@@ -90,7 +97,7 @@ textView pagingEvent = RD.Workflow . RD.el "div" $ do
 
     RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
 
-    RD.elAttr "div" (Map.singleton "id" "content") $ do
+    RD.elAttr "div" (Map.singleton "id" "reader-view") $ do
 
         posString <- RD.elAttr "div" (Map.singleton "id" "boustro") $ do
 
