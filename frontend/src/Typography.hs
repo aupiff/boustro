@@ -47,7 +47,6 @@ textWidth :: Double
 textWidth = 600 -- TODO this will eventually have to be dynamic
 
 
--- TODO Should I keep this 'Int'?
 width :: Line -> Double
 width = sum . map itemWidth
 
@@ -61,7 +60,7 @@ lineWaste l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphe
           weighting x -- too close is worse than too far apart : TODO This seems backwards to me
             | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
             | otherwise =  3 * x ^ (2 :: Int) -- spaces smaller than optimal width
-    -- Write tests for this.
+    -- Write quickcheck properties
 
 
 par1' :: Txt -> Paragraph
@@ -86,38 +85,26 @@ par1' = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste .
         waste p = linwHead p + wasteTail p
         fitH p = widthHead p <= textWidth
 
--- data PageState = PageState {
---                    fullText :: [String]
---                    currentWord :: Int
---                    wordsDisplayed :: Int
---                  }
 
 typesetPage :: ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage ((wordNumber, _), PrevPage) = do
-    boxesMeasure <- wordsWithWidths . take numWords . reverse $ take wordNumber processedWords
-    let parMeasure = take linesPerPage $ par1' boxesMeasure
-        wordsOnPageMeasure = sum $ map length parMeasure
-
-    let wordNumber' = max 0 $ wordNumber - wordsOnPageMeasure
-
-    boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords
-    let par = take linesPerPage $ par1' boxes
-        wordsOnPage' = sum $ map length par
-    ls <- mapM renderLine par
-
-    boustroLines <- boustro ls
-    -- Should I be applying this style every time? Definitely on window change
-    -- dim, so maybe it's not so bad.
-    textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
-    mapM_ (`JQ.appendJQuery` textArea) boustroLines
-    return $ traceShow (wordNumber', wordsOnPage') (wordNumber', wordsOnPage')
-    where numWords = 400
-          widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 typesetPage ((wordNumber, wordsOnPage), pageEvent) = do
+
+    wordNumber' <- case pageEvent of
+
+        NextPage -> return $ min (wordNumber + wordsOnPage)
+                                 (length processedWords - 2)
+        Start    -> return 0
+        PrevPage -> do let boxify = wordsWithWidths . take numWords . reverse
+                       boxesMeasure <- boxify $ take wordNumber processedWords
+                       let parMeasure = take linesPerPage $ par1' boxesMeasure
+                           wordsOnPageMeasure = sum $ map length parMeasure
+                       return $ max 0 $ wordNumber - wordsOnPageMeasure
+
     boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords
     let par = take linesPerPage $ par1' boxes
         wordsOnPage' = sum $ map length par
     ls <- mapM renderLine par
+
     boustroLines <- boustro ls
     -- Should I be applying this style every time? Definitely on window change
     -- dim, so maybe it's not so bad.
@@ -126,10 +113,6 @@ typesetPage ((wordNumber, wordsOnPage), pageEvent) = do
     return $ traceShow (wordNumber', wordsOnPage') (wordNumber', wordsOnPage')
     where numWords = 400
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
-          wordNumber' = case pageEvent of
-                              NextPage -> min (wordNumber + wordsOnPage) (length processedWords - 2)
-                              Start    -> 0
-
 
 linesPerPage = 14
 

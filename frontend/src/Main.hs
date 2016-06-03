@@ -41,7 +41,7 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
     RD.elAttr "div" (Map.singleton "id" "content") $
 
-          do RD.el "h1" $ RD.text "Boustrophedon"
+          do RD.el "h1" $ RD.text "βουστροφηδόν"
 
              RD.el "p" $
 
@@ -64,7 +64,7 @@ textView :: forall (m :: * -> *) t.  MonadWidget t m => RD.Workflow t m String
 textView = RD.Workflow . RD.el "div" $ do
 
     -- `scratch-area` is a hidden div where words widths are measured
-    RD.elAttr "div" (Map.singleton "id" "scratch-area") $ RD.blank
+    RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
 
     pagingE <- pagingEvent
 
@@ -89,7 +89,7 @@ textView = RD.Workflow . RD.el "div" $ do
 
         return ("Page 2", titlePage <$ home)
 
-    where renderProgressString = show . (flip (,) (length processedWords)) . fst
+    where renderProgressString = show . flip (,) (length processedWords) . fst
 
 
 pageEventResponse :: MonadWidget t m
