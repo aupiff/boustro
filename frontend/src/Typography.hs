@@ -60,7 +60,7 @@ lineWaste l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphe
           weighting x -- too close is worse than too far apart : TODO This seems backwards to me
             | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
             | otherwise =  3 * x ^ (2 :: Int) -- spaces smaller than optimal width
-    -- Write quickcheck properties
+    -- Write quickcheck properties for this
 
 
 par1' :: Txt -> Paragraph
@@ -76,7 +76,8 @@ par1' = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste .
 
         new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0.0)
         new w p@(ls, _, _) = ([w]:ls, itemWidth w, waste p)
-        glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + n, m) -- TODO what is this 1/n about? space width? change this
+        -- TODO what is this 1/n about? space width? change this
+        glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + n, m)
         parLines (ls, _, _) = ls
         widthHead (_, n, _) = n
         wasteTail (_, _, m) = m
@@ -216,16 +217,21 @@ hyphen hyphenWidth = Penalty hyphenWidth penaltyValue False
 
 
 renderLine :: [Word] -> IO JQ.JQuery
-renderLine ls = do lineDiv <- JQ.select "<div class='line'></div>" >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
-                                                      >>= JQ.setCss "white-space" "nowrap"
-                   nls <- fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> return [x]) ls
-                   let spaceSize = realToFrac $ (textWidth - sum (fmap itemWidth' nls)) / fromIntegral (length $ filter itemIsSpace nls)
-                       nls' = map (\x -> case x of
-                                            (Spring _ a b e) -> Spring spaceSize a b e
-                                            _ -> x) nls
-                   mapM_ (\i -> (`JQ.appendJQuery` lineDiv) <=< styleSpace (itemWidth' i) $ itemElement i) nls'
-                   return lineDiv
+renderLine ls = do
+    lineDiv <- JQ.select "<div class='line'></div>"
+                 >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+                 >>= JQ.setCss "white-space" "nowrap"
+    nls <- fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> return [x]) ls
+    let numSpaces = fromIntegral (length $ filter itemIsSpace nls)
+        spaceSize = realToFrac $ (textWidth - sum (fmap itemWidth' nls)) / numSpaces
+        nls' = map (\x -> case x of
+                             (Spring _ a b e) -> Spring spaceSize a b e
+                             _ -> x) nls
+    mapM_ ((`JQ.appendJQuery` lineDiv) <=< toJQueryWithWidth) nls'
+    return lineDiv
+
     where
+      toJQueryWithWidth i = styleSpace (itemWidth' i) $ itemElement i
       dehyphen :: Word -> IO [Word] -> IO [Word]
       dehyphen n@(Box{}) p = do
                         p' <- p
