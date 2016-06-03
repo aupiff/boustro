@@ -1,16 +1,13 @@
+body {
+  font-size: 22px;
+}
+
 #content {
-  max-width: 600px;
+  max-width: 800px;
   margin-left: auto;
   margin-right: auto;
   font-family: Georgia, Serif;
   text-align: center;
-}
-
-#reader-view {
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-  font-family: Georgia, Serif;
 }
 
 #reader-view button {
@@ -20,8 +17,6 @@
 
 
 #menu {
-  max-width: 600px;
-
   margin-left: auto;
   margin-right: auto;
   margin-top: 20px;
@@ -60,5 +55,6 @@ button {
    color: #000;
    border: 3px solid #000;
    font-weight: 500;
+   font-size: 18px;
    letter-spacing: 0;
 }

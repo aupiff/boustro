@@ -65,7 +65,7 @@ textView textWidth = RD.Workflow . RD.el "div" $ do
 
     pagingE <- pagingEvent
 
-    RD.elAttr "div" (Map.singleton "id" "reader-view") $ do
+    RD.elAttr "div" (Map.singleton "id" "content") $ do
 
         (boustroEl, buildAndPagingEvent) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $
 
