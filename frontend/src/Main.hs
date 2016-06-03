@@ -18,6 +18,7 @@ import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
 import           GHCJS.DOM.Document (getBody)
 import qualified JavaScript.JQuery as JQ hiding (filter, not)
+import           Reflex
 import           Reflex.Dom.Class
 import qualified Reflex.Dom as RD
 
@@ -62,7 +63,7 @@ textView = RD.Workflow . RD.el "div" $ do
 
     RD.elAttr "div" (Map.singleton "id" "reader-view") $ do
 
-        posString <- RD.elAttr "div" (Map.singleton "id" "boustro") $ do
+        (boustroEl, posString) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ do
 
             pb <- RD.getPostBuild
 
@@ -75,7 +76,11 @@ textView = RD.Workflow . RD.el "div" $ do
 
             return posString'
 
+        let svgClick = RD.domEvent RD.Mouseup boustroEl
+
         RD.dynText posString
+        clickInfo <- RD.holdDyn "" $ fmap show svgClick
+        RD.dynText clickInfo
 
         home <- RD.button "back home"
 
