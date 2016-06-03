@@ -1,5 +1,5 @@
 #content {
-  width: 600px;
+  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
   font-family: Georgia, Serif;
@@ -7,7 +7,7 @@
 }
 
 #reader-view {
-  width: 600px;
+  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
   font-family: Georgia, Serif;
@@ -20,7 +20,7 @@
 
 
 #menu {
-  width: 600px;
+  max-width: 600px;
 
   margin-left: auto;
   margin-right: auto;

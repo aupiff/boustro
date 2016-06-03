@@ -50,36 +50,39 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
             RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
 
-        return ("Page 1", textView <$ showTextView)
+        widthEvent <- RD.performEvent $ liftIO . const viewWidth <$> showTextView
+
+        return ("Page 1", textView <$> widthEvent)
+
+    where viewWidth = JQ.getInnerWidth =<< JQ.select "#content"
 
 
-textView :: forall (m :: * -> *) t.  MonadWidget t m => RD.Workflow t m String
-textView = RD.Workflow . RD.el "div" $ do
+textView :: forall (m :: * -> *) t.  MonadWidget t m => Double -> RD.Workflow t m String
+textView textWidth = RD.Workflow . RD.el "div" $ do
 
     -- `scratch-area` is a hidden div where words widths are measured
-    RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.blank
+    pb <- RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.getPostBuild
 
     pagingE <- pagingEvent
 
     RD.elAttr "div" (Map.singleton "id" "reader-view") $ do
 
-        (boustroEl, posString) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ do
+        (boustroEl, buildAndPagingEvent) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $
 
-            pb <- RD.getPostBuild
+            return $ RD.leftmost [ fmap (const Start) pb
+                                 , pagingE ]
 
-            let buildAndPagingEvent = RD.leftmost [ fmap (const Start) pb
-                                                  , pagingE ]
 
-            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD
-                wordDeltaD <- RD.holdDyn (0,0) wordDelta
-                posString' <- RD.mapDyn renderProgressString wordDeltaD
+        rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD textWidth
+            wordDeltaD <- RD.holdDyn (0,0) wordDelta
+            posString <- RD.mapDyn renderProgressString wordDeltaD
 
-            return posString'
 
-        let svgClick = RD.domEvent RD.Mouseup boustroEl
+        let textClick = RD.domEvent RD.Mouseup boustroEl
 
         RD.dynText posString
-        clickInfo <- RD.holdDyn "" $ fmap show svgClick
+        RD.text $ show textWidth
+        clickInfo <- RD.holdDyn "" $ fmap show textClick
         RD.dynText clickInfo
 
         home <- RD.button "back home"
@@ -91,10 +94,10 @@ textView = RD.Workflow . RD.el "div" $ do
 
 pageEventResponse :: MonadWidget t m
                   => RD.Event t PageEvent -> RD.Dynamic t (Int, Int)
-                  -> m (RD.Event t (Int, Int))
-pageEventResponse pageEvent currentWord = RD.performEvent $
+                  -> Double -> m (RD.Event t (Int, Int))
+pageEventResponse pageEvent currentWord textWidth = RD.performEvent $
 
-        (liftIO . typesetPage) <$> RD.attachDyn currentWord pageEvent
+        (liftIO . typesetPage textWidth) <$> currentWord `RD.attachDyn` pageEvent
 
 
 pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)

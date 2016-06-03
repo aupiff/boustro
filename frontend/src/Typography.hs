@@ -43,16 +43,12 @@ minWith f = fold1 choice id
              | otherwise = b
 
 
-textWidth :: Double
-textWidth = 600 -- TODO this will eventually have to be dynamic
-
-
 width :: Line -> Double
 width = sum . map itemWidth
 
 
-lineWaste :: Line -> Double
-lineWaste l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphenPenalty
+lineWaste :: Double -> Line -> Double
+lineWaste textWidth l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphenPenalty
     where spaceSize = textWidth - width l
           numSpaces :: Double
           numSpaces = fromIntegral . length $ filter itemIsBox l
@@ -63,8 +59,9 @@ lineWaste l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphe
     -- Write quickcheck properties for this
 
 
-par1' :: Txt -> Paragraph
-par1' = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste . fromMaybe (trace "par1' fold1" []) . fold1 step start
+par1' :: Double -> Txt -> Paragraph
+par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste
+                           . fromMaybe (trace "par1' fold1" []) . fold1 step start
     where
         step :: Word -> [(Paragraph, Double, Double)] -> [(Paragraph, Double, Double)]
         step w ps = let origin = (new w (fromMaybe (error $ "par1' step" ++ show ps) $ minWith waste ps) : map (glue w) ps)
@@ -81,14 +78,14 @@ par1' = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste .
         parLines (ls, _, _) = ls
         widthHead (_, n, _) = n
         wasteTail (_, _, m) = m
-        linwHead = lineWaste . head . parLines
+        linwHead = lineWaste textWidth . head . parLines
         waste ([_], _, _) = 0
         waste p = linwHead p + wasteTail p
         fitH p = widthHead p <= textWidth
 
 
-typesetPage :: ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage ((wordNumber, wordsOnPage), pageEvent) = do
+typesetPage :: Double -> ((Int, Int), PageEvent) -> IO (Int, Int)
+typesetPage textWidth ((wordNumber, wordsOnPage), pageEvent) = do
 
     wordNumber' <- case pageEvent of
 
@@ -97,14 +94,14 @@ typesetPage ((wordNumber, wordsOnPage), pageEvent) = do
         Start    -> return 0
         PrevPage -> do let boxify = wordsWithWidths . take numWords . reverse
                        boxesMeasure <- boxify $ take wordNumber processedWords
-                       let parMeasure = take linesPerPage $ par1' boxesMeasure
+                       let parMeasure = take linesPerPage $ par1' textWidth boxesMeasure
                            wordsOnPageMeasure = sum $ map length parMeasure
                        return $ max 0 $ wordNumber - wordsOnPageMeasure
 
     boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords
-    let par = take linesPerPage $ par1' boxes
+    let par = take linesPerPage $ par1' textWidth boxes
         wordsOnPage' = sum $ map length par
-    ls <- mapM renderLine par
+    ls <- mapM (renderLine textWidth) par
 
     boustroLines <- boustro ls
     -- Should I be applying this style every time? Definitely on window change
@@ -112,7 +109,7 @@ typesetPage ((wordNumber, wordsOnPage), pageEvent) = do
     textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
     mapM_ (`JQ.appendJQuery` textArea) boustroLines
     return $ traceShow (wordNumber', wordsOnPage') (wordNumber', wordsOnPage')
-    where numWords = 400
+    where numWords = 500
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 
 
@@ -216,8 +213,8 @@ hyphen hyphenWidth = Penalty hyphenWidth penaltyValue False
     where penaltyValue = undefined -- TODO I may not end up using this
 
 
-renderLine :: [Word] -> IO JQ.JQuery
-renderLine ls = do
+renderLine :: Double -> [Word] -> IO JQ.JQuery
+renderLine textWidth ls = do
     lineDiv <- JQ.select "<div class='line'></div>"
                  >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
                  >>= JQ.setCss "white-space" "nowrap"
