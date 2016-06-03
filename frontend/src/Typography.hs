@@ -114,6 +114,8 @@ typesetPage ((wordNumber, wordsOnPage), pageEvent) = do
     where numWords = 400
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 
+
+linesPerPage :: Int
 linesPerPage = 14
 
 
@@ -178,15 +180,17 @@ itemElement (Box _ e) = e
 itemElement (Spring _ _ _ e) = e
 itemElement (Penalty _ _ _ e) = e
 
-
+itemIsSpace :: forall t s . Item t s -> Bool
 itemIsSpace Spring{} = True
 itemIsSpace _ = False
 
 
+itemIsBox :: forall t s . Item t s -> Bool
 itemIsBox Box{} = True
 itemIsBox _ = False
 
 
+itemIsPenalty :: forall t s . Item t s -> Bool
 itemIsPenalty Penalty{} = True
 itemIsPenalty _ = False
 

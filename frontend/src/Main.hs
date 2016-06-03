@@ -9,14 +9,7 @@
 module Main where
 
 
-import Control.Lens
-import Control.Monad
-import Control.Monad.Fix
-import Control.Monad.Free
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.State
-import Data.Maybe
-
+import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.FileEmbed
 import qualified Data.Map.Strict as Map
@@ -25,7 +18,6 @@ import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
 import           GHCJS.DOM.Document (getBody)
 import qualified JavaScript.JQuery as JQ hiding (filter, not)
-import qualified Reflex as R
 import           Reflex.Dom.Class
 import qualified Reflex.Dom as RD
 
