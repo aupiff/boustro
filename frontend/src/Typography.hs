@@ -4,9 +4,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Typography
-    ( typesetPage
+    ( measureLineHeight
     , PageEvent(..)
+    , ViewDimensions(..)
     , processedWords
+    , typesetPage
     ) where
 
 import           Control.Monad
@@ -23,6 +25,11 @@ import           Text.Hyphenation
 import           Debug.Trace
 
 data PageEvent = NextPage | PrevPage | Start deriving Show
+
+data ViewDimensions = ViewDimensions { viewWidth :: Double
+                                     , veiwHeight :: Double
+                                     , lineHeight :: Double
+                                     }
 
 type Word = Item JQ.JQuery Double
 type Txt = [Word]
@@ -84,8 +91,10 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
         fitH p = widthHead p <= textWidth
 
 
-typesetPage :: Double -> ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage textWidth ((wordNumber, wordsOnPage), pageEvent) = do
+typesetPage :: ViewDimensions -> ((Int, Int), PageEvent) -> IO (Int, Int)
+typesetPage (ViewDimensions textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent) = do
+
+    let linesPerPage = round $ textHeight / (lineH + 6) - 1
 
     wordNumber' <- case pageEvent of
 
@@ -101,7 +110,7 @@ typesetPage textWidth ((wordNumber, wordsOnPage), pageEvent) = do
     boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords
     let par = take linesPerPage $ par1' textWidth boxes
         wordsOnPage' = sum $ map length par
-    ls <- mapM (renderLine textWidth) par
+    ls <- mapM (renderLine lineH textWidth) par
 
     boustroLines <- boustro ls
     -- Should I be applying this style every time? Definitely on window change
@@ -111,10 +120,6 @@ typesetPage textWidth ((wordNumber, wordsOnPage), pageEvent) = do
     return $ traceShow (wordNumber', wordsOnPage') (wordNumber', wordsOnPage')
     where numWords = 500
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
-
-
-linesPerPage :: Int
-linesPerPage = 14
 
 
 wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
@@ -138,8 +143,16 @@ boustro (l:l2:ls) = do ho <- reverseLine l2
 
 toItem :: T.Text -> IO (Item JQ.JQuery Double)
 toItem "-" = hyphen 0 <$> JQ.select "<span>-</span>"
-toItem " " = space spaceWidth <$> (styleSpace spaceWidth =<< JQ.select "<span>&nbsp;</span>")
+toItem " " = space spaceWidth <$> (assignCssWidth spaceWidth =<< JQ.select "<span>&nbsp;</span>")
 toItem str = Box 0 <$> JQ.select ("<span>" <> textToJSString str <> "</span>")
+
+
+measureLineHeight :: IO Double
+measureLineHeight = do
+     scratchArea <- JQ.empty =<< JQ.select "#scratch-area"
+     quux <- JQ.select ("<span>" <> textToJSString "Hail qQuuXX!" <> "</span>")
+     _ <- quux `JQ.appendJQuery` scratchArea
+     JQ.getInnerHeight quux
 
 
 -- can this be a monoid?
@@ -192,9 +205,8 @@ itemIsPenalty :: forall t s . Item t s -> Bool
 itemIsPenalty Penalty{} = True
 itemIsPenalty _ = False
 
-
 spaceWidth :: Double
-spaceWidth = 5
+spaceWidth = 6
 
 
 space :: Double -> JQ.JQuery -> Item JQ.JQuery Double
@@ -202,8 +214,8 @@ space w = Spring w 3 2
 
 
 --TODO rename this
-styleSpace :: Double -> JQ.JQuery -> IO JQ.JQuery
-styleSpace txtWidth =
+assignCssWidth :: Double -> JQ.JQuery -> IO JQ.JQuery
+assignCssWidth txtWidth =
         JQ.setCss "display" "inline-block"
     <=< JQ.setCss "width" (textToJSString . T.pack $ show txtWidth)
 
@@ -213,10 +225,11 @@ hyphen hyphenWidth = Penalty hyphenWidth penaltyValue False
     where penaltyValue = undefined -- TODO I may not end up using this
 
 
-renderLine :: Double -> [Word] -> IO JQ.JQuery
-renderLine textWidth ls = do
+renderLine :: Double -> Double -> [Word] -> IO JQ.JQuery
+renderLine lineH textW ls = do
     lineDiv <- JQ.select "<div class='line'></div>"
-                 >>= JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+                 >>= JQ.setCss "width" (textToJSString . T.pack $ show textW)
+                 >>= JQ.setCss "height" (textToJSString . T.pack $ show lineH)
                  >>= JQ.setCss "white-space" "nowrap"
     nls <- fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> return [x]) ls
     let numSpaces = fromIntegral (length $ filter itemIsSpace nls)
@@ -228,7 +241,7 @@ renderLine textWidth ls = do
     return lineDiv
 
     where
-      toJQueryWithWidth i = styleSpace (itemWidth' i) $ itemElement i
+      toJQueryWithWidth i = assignCssWidth (itemWidth' i) $ itemElement i
       dehyphen :: Word -> IO [Word] -> IO [Word]
       dehyphen n@(Box{}) p = do
                         p' <- p

@@ -26,7 +26,12 @@ import           Typography
 
 
 main :: IO ()
-main = JQ.ready $ RD.mainWidget $ void . RD.workflow $ titlePage
+main = JQ.ready $ RD.mainWidget $ do
+
+    -- `scratch-area` is a hidden div where words widths are measured
+    RD.elAttr "div" (Map.singleton "id" "scratch-area") $ pure ()
+
+    void . RD.workflow $ titlePage
 
 
 titlePage :: forall t (m :: * -> *).  MonadWidget t m => RD.Workflow t m String
@@ -50,54 +55,62 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
             RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
 
-        widthEvent <- RD.performEvent $ liftIO . const viewWidth <$> showTextView
+        dims <- RD.performEvent $ liftIO . const viewDims <$> showTextView
 
-        return ("Page 1", textView <$> widthEvent)
+        return ("Page 1", textView <$> dims)
 
-    where viewWidth = JQ.getInnerWidth =<< JQ.select "#content"
-
-
-textView :: forall (m :: * -> *) t.  MonadWidget t m => Double -> RD.Workflow t m String
-textView textWidth = RD.Workflow . RD.el "div" $ do
-
-    -- `scratch-area` is a hidden div where words widths are measured
-    pb <- RD.elAttr "div" (Map.singleton "id" "scratch-area") RD.getPostBuild
-
-    pagingE <- pagingEvent
-
-    RD.elAttr "div" (Map.singleton "id" "content") $ do
-
-        (boustroEl, buildAndPagingEvent) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $
-
-            return $ RD.leftmost [ fmap (const Start) pb
-                                 , pagingE ]
+    where viewDims = do b <- JQ.select "body"
+                        c <- JQ.select "#content"
+                        w <- JQ.getInnerWidth c
+                        h <- JQ.getInnerHeight b
+                        lineHeight <- measureLineHeight
+                        return $ ViewDimensions w h lineHeight
 
 
-        rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD textWidth
-            wordDeltaD <- RD.holdDyn (0,0) wordDelta
-            posString <- RD.mapDyn renderProgressString wordDeltaD
+textView :: forall (m :: * -> *) t.  MonadWidget t m
+         => ViewDimensions -> RD.Workflow t m String
+textView vd@(ViewDimensions textWidth textHeight lineHeight) =
+
+    RD.Workflow . RD.el "div" $ do
+
+        pagingE <- pagingEvent
+
+        pb <- RD.getPostBuild
+
+        RD.elAttr "div" (Map.singleton "id" "content") $ do
+
+            (boustroEl, buildAndPagingEvent) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $
+
+                return $ RD.leftmost [ fmap (const Start) pb
+                                     , pagingE ]
+
+            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD vd
+                wordDeltaD <- RD.holdDyn (0,0) wordDelta
+                posString <- RD.mapDyn renderProgressString wordDeltaD
 
 
-        let textClick = RD.domEvent RD.Mouseup boustroEl
+            let textClick = RD.domEvent RD.Mouseup boustroEl
 
-        RD.dynText posString
-        RD.text $ show textWidth
-        clickInfo <- RD.holdDyn "" $ fmap show textClick
-        RD.dynText clickInfo
+            RD.dynText posString
+            RD.text $ " textWidth: " ++ show textWidth
+            RD.text $ " textHeight: " ++ show textHeight
+            RD.text $ " linesPerPage: " ++ show lineHeight
+            clickInfo <- RD.holdDyn "" $ fmap show textClick
+            RD.dynText clickInfo
 
-        home <- RD.button "back home"
+            home <- RD.button "back home"
 
-        return ("Page 2", titlePage <$ home)
+            return ("Page 2", titlePage <$ home)
 
     where renderProgressString = show . flip (,) (length processedWords) . fst
 
 
 pageEventResponse :: MonadWidget t m
                   => RD.Event t PageEvent -> RD.Dynamic t (Int, Int)
-                  -> Double -> m (RD.Event t (Int, Int))
-pageEventResponse pageEvent currentWord textWidth = RD.performEvent $
+                  -> ViewDimensions -> m (RD.Event t (Int, Int))
+pageEventResponse pageEvent currentWord vd = RD.performEvent $
 
-        (liftIO . typesetPage textWidth) <$> currentWord `RD.attachDyn` pageEvent
+        (liftIO . typesetPage vd) <$> currentWord `RD.attachDyn` pageEvent
 
 
 pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)
