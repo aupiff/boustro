@@ -26,7 +26,8 @@ import           Debug.Trace
 
 data PageEvent = NextPage | PrevPage | Start deriving Show
 
-data ViewDimensions = ViewDimensions { viewWidth :: Double
+data ViewDimensions = ViewDimensions { fullWidth  :: Int
+                                     , viewWidth  :: Double
                                      , veiwHeight :: Double
                                      , lineHeight :: Double
                                      }
@@ -92,7 +93,7 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
 
 
 typesetPage :: ViewDimensions -> ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage (ViewDimensions textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent) = do
+typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent) = do
 
     let linesPerPage = round $ textHeight / (lineH + 6) - 1
 

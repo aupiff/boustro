@@ -67,12 +67,12 @@ titlePage = RD.Workflow . RD.el "div" $ do
     where viewDims w h = do lineHeight <- measureLineHeight
                             let w' = min 650 $ fromIntegral w - 40
                                 h' = fromIntegral h - 40
-                            return $ ViewDimensions w' h' lineHeight
+                            return $ ViewDimensions w w' h' lineHeight
 
 
 textView :: forall (m :: * -> *) t.  MonadWidget t m
          => ViewDimensions -> RD.Workflow t m String
-textView vd@(ViewDimensions textWidth textHeight lineHeight) =
+textView vd@(ViewDimensions fullWidth textWidth textHeight lineHeight) =
 
     RD.Workflow . RD.el "div" $ do
 
@@ -85,7 +85,7 @@ textView vd@(ViewDimensions textWidth textHeight lineHeight) =
             (boustroEl, _) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ return ()
 
             let textClick = RD.domEvent RD.Mouseup boustroEl
-                textTransform = (\x -> if x > 500 then NextPage else PrevPage) . fst
+                textTransform = (\x -> if x > div fullWidth 2 then NextPage else PrevPage) . fst
                 buildAndPagingEvent = RD.leftmost [ fmap (const Start) pb
                                                   , pagingE
                                                   , fmap textTransform textClick
