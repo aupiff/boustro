@@ -10,6 +10,7 @@ module Main where
 
 
 import           Control.Monad
+import           Data.Monoid ((<>))
 import           Control.Monad.IO.Class
 import           Data.FileEmbed
 import qualified Data.Map.Strict as Map
@@ -53,24 +54,20 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
     RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
-        wd <- windowDimensions
-        swd <- RD.holdDyn (0,0) wd
-        RD.display $ swd
-
         showTextView <-
 
             RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
 
-        dims <- RD.performEvent $ liftIO . const viewDims <$> showTextView
+        (w, h) <- windowDimensions
+
+        dims <- RD.performEvent $ liftIO . const (viewDims w h) <$> showTextView
 
         return ("Page 1", textView <$> dims)
 
-    where viewDims = do b <- JQ.select "body"
-                        c <- JQ.select "#content"
-                        w <- JQ.getInnerWidth c
-                        h <- JQ.getInnerHeight b
-                        lineHeight <- measureLineHeight
-                        return $ ViewDimensions w h lineHeight
+    where viewDims w h = do lineHeight <- measureLineHeight
+                            let w' = min 650 $ fromIntegral w - 40
+                                h' = fromIntegral h - 40
+                            return $ ViewDimensions w' h' lineHeight
 
 
 textView :: forall (m :: * -> *) t.  MonadWidget t m
@@ -83,7 +80,7 @@ textView vd@(ViewDimensions textWidth textHeight lineHeight) =
 
         pb <- RD.getPostBuild
 
-        RD.elAttr "div" (Map.singleton "id" "content") $ do
+        RD.elAttr "div" ("id" =: "content" <> "style" =: ("width:" ++ show textWidth ++";")) $ do
 
             (boustroEl, _) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ return ()
 
@@ -121,8 +118,8 @@ pageEventResponse pageEvent currentWord vd = RD.performEvent $
         (liftIO . typesetPage vd) <$> currentWord `RD.attachDyn` pageEvent
 
 
-windowDimensions :: MonadWidget t m => m (RD.Event t (Int, Int))
-windowDimensions = do
+windowDimensionsE :: MonadWidget t m => m (RD.Event t (Int, Int))
+windowDimensionsE = do
      wv <- askWebView
      Just window <- liftIO $ getWindow wv
      RD.wrapDomEvent window (`on` resize) $ do
@@ -130,6 +127,15 @@ windowDimensions = do
        h <- getOuterHeight window
        preventDefault
        return (w, h)
+
+
+windowDimensions :: MonadWidget t m => m (Int, Int)
+windowDimensions = do
+     wv <- askWebView
+     Just window <- liftIO $ getWindow wv
+     w <- liftIO $ getOuterWidth window
+     h <- liftIO $ getOuterHeight window
+     return (w, h)
 
 
 pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)
