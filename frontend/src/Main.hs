@@ -95,14 +95,6 @@ textView vd@(ViewDimensions textWidth textHeight lineHeight) =
                 wordDeltaD <- RD.holdDyn (0,0) wordDelta
                 posString <- RD.mapDyn renderProgressString wordDeltaD
 
-
-            RD.dynText posString
-            RD.text $ " textWidth: " ++ show textWidth
-            RD.text $ " textHeight: " ++ show textHeight
-            RD.text $ " linesPerPage: " ++ show lineHeight
-            -- clickInfo <- RD.holdDyn "" $ fmap show textClick
-            -- RD.dynText clickInfo
-
             home <- RD.button "back home"
 
             return ("Page 2", titlePage <$ home)

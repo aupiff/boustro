@@ -1,6 +1,7 @@
 { reflex-platform, ... }:
 let inherit (reflex-platform) nixpkgs;
 in reflex-platform.ghcjs.override {
+
   overrides = self: super: {
     ghcjs-jquery = self.callPackage ({ mkDerivation, data-default, ghcjs-base, ghcjs-dom, text }:
       mkDerivation {
@@ -37,42 +38,6 @@ in reflex-platform.ghcjs.override {
       }
 
     ) {};
-
-    # webkit = self.callPackage ({ mkDerivation }:
-    #   mkDerivation {
-    #     pname = "webkitgtk3";
-    #     version = "0.14.1.2";
-    #     src = nixpkgs.fetchgit {
-    #       url = "https://github.com/gtk2hs/webkit";
-    #       rev = "03f58e1e9a53d98a587023b3359bfd8da3b3c7ab";
-    #       sha256 = "0qb8cra8q5lhp6pd3dll0i4waza36kk5hig6jf36iyiqsls93bcj";
-    #     };
-
-    #     buildDepends = [
-    #     ];
-
-    #     license = null;
-    #   }
-
-    # ) {};
-
-
-    #    file-embed = self.callPackage ({ mkDerivation }:
-    #      mkDerivation {
-    #        pname = "file-embed";
-    #        version = "0.0.10";
-    #        src = nixpkgs.fetchgit {
-    #         url = "https://github.com/snoyberg/file-embed";
-    #         rev = "abcf9018bd8b10f7147e8a7383faf2872b0e3051";
-    #         sha256 = "139npi667vfn06q01bmj3x37pxv00xhwjs7dxvkc8y3dmblffk4s";
-    #        };
-    #
-    #        buildDepends = [ ];
-    #
-    #        license = null;
-    #      }
-    #
-    #    ) {};
 
   };
 }
