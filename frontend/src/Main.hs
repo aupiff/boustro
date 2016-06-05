@@ -14,6 +14,8 @@ import           Control.Monad.IO.Class
 import           Data.FileEmbed
 import qualified Data.Map.Strict as Map
 import           GHCJS.DOM (webViewGetDomDocument)
+import           GHCJS.DOM.Window ( getOuterHeight, getOuterWidth
+                                  , getWindow, resize)
 import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
 import           GHCJS.DOM.Document (getBody)
@@ -51,6 +53,10 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
     RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
+        wd <- windowDimensions
+        swd <- RD.holdDyn (0,0) wd
+        RD.display $ swd
+
         showTextView <-
 
             RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
@@ -79,24 +85,26 @@ textView vd@(ViewDimensions textWidth textHeight lineHeight) =
 
         RD.elAttr "div" (Map.singleton "id" "content") $ do
 
-            (boustroEl, buildAndPagingEvent) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $
+            (boustroEl, _) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ return ()
 
-                return $ RD.leftmost [ fmap (const Start) pb
-                                     , pagingE ]
+            let textClick = RD.domEvent RD.Mouseup boustroEl
+                textTransform = (\x -> if x > 500 then NextPage else PrevPage) . fst
+                buildAndPagingEvent = RD.leftmost [ fmap (const Start) pb
+                                                  , pagingE
+                                                  , fmap textTransform textClick
+                                                  ]
 
             rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD vd
                 wordDeltaD <- RD.holdDyn (0,0) wordDelta
                 posString <- RD.mapDyn renderProgressString wordDeltaD
 
 
-            let textClick = RD.domEvent RD.Mouseup boustroEl
-
             RD.dynText posString
             RD.text $ " textWidth: " ++ show textWidth
             RD.text $ " textHeight: " ++ show textHeight
             RD.text $ " linesPerPage: " ++ show lineHeight
-            clickInfo <- RD.holdDyn "" $ fmap show textClick
-            RD.dynText clickInfo
+            -- clickInfo <- RD.holdDyn "" $ fmap show textClick
+            -- RD.dynText clickInfo
 
             home <- RD.button "back home"
 
@@ -111,6 +119,17 @@ pageEventResponse :: MonadWidget t m
 pageEventResponse pageEvent currentWord vd = RD.performEvent $
 
         (liftIO . typesetPage vd) <$> currentWord `RD.attachDyn` pageEvent
+
+
+windowDimensions :: MonadWidget t m => m (RD.Event t (Int, Int))
+windowDimensions = do
+     wv <- askWebView
+     Just window <- liftIO $ getWindow wv
+     RD.wrapDomEvent window (`on` resize) $ do
+       w <- getOuterWidth window
+       h <- getOuterHeight window
+       preventDefault
+       return (w, h)
 
 
 pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)

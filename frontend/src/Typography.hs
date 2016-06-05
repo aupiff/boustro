@@ -233,7 +233,7 @@ renderLine lineH textW ls = do
                  >>= JQ.setCss "white-space" "nowrap"
     nls <- fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> return [x]) ls
     let numSpaces = fromIntegral (length $ filter itemIsSpace nls)
-        spaceSize = realToFrac $ (textWidth - sum (fmap itemWidth' nls)) / numSpaces
+        spaceSize = realToFrac $ (textW - sum (fmap itemWidth' nls)) / numSpaces
         nls' = map (\x -> case x of
                              (Spring _ a b e) -> Spring spaceSize a b e
                              _ -> x) nls
