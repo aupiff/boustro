@@ -4,7 +4,6 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecursiveDo #-}
--- {-# LANGUAGE TemplateHaskell #-}
 
 module Main where
 
@@ -26,6 +25,7 @@ import           Reflex.Dom.Class
 import qualified Reflex.Dom as RD
 
 import           Typography
+import           Style
 
 
 main :: IO ()
@@ -80,7 +80,7 @@ textView vd@(ViewDimensions textWidth textHeight lineHeight) =
 
         pb <- RD.getPostBuild
 
-        RD.elAttr "div" ("id" =: "content" <> "style" =: ("width:" ++ show textWidth ++";")) $ do
+        RD.elAttr "div" ("id" =: "content" <> style [("width", show textWidth)]) $ do
 
             (boustroEl, _) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ return ()
 
