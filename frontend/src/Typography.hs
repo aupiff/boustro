@@ -232,7 +232,7 @@ renderLine lineH textW ls = do
                  >>= JQ.setCss "width" (textToJSString . T.pack $ show textW)
                  >>= JQ.setCss "height" (textToJSString . T.pack $ show lineH)
                  >>= JQ.setCss "white-space" "nowrap"
-    nls <- fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> return [x]) ls
+    nls <- (:) (head ls) . filter (not . itemIsPenalty) $ tail ls
     let numSpaces = fromIntegral (length $ filter itemIsSpace nls)
         spaceSize = realToFrac $ (textW - sum (fmap itemWidth' nls)) / numSpaces
         nls' = map (\x -> case x of
@@ -243,17 +243,6 @@ renderLine lineH textW ls = do
 
     where
       toJQueryWithWidth i = assignCssWidth (itemWidth' i) $ itemElement i
-      dehyphen :: Word -> IO [Word] -> IO [Word]
-      dehyphen n@(Box{}) p = do
-                        p' <- p
-                        sp <- space 0 <$> JQ.select "<span>&nbsp;</span>"
-                        case head p' of
-                           Box{} -> return $ n : sp : p'
-                           Penalty{} -> case tail p' of
-                                            (Box{}:_) -> return $ n : tail p'
-                                            _         -> return $ n : p'
-      dehyphen (Penalty a b _ d) p = (Penalty a b True d :) <$>  p
-      dehyphen _ p = p
 
 
 reverseLine :: JQ.JQuery -> IO JQ.JQuery
