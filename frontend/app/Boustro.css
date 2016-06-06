@@ -1,5 +1,14 @@
 body {
-  font-size: 22px;
+  font-size: 19px;
+}
+
+html, body {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+body {
+  position: relative
 }
 
 #content {

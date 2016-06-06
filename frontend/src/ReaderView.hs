@@ -13,7 +13,7 @@ import           Control.Monad.IO.Class
 import           Data.FileEmbed
 import qualified Data.Map.Strict as Map
 import           GHCJS.DOM (webViewGetDomDocument)
-import           GHCJS.DOM.Window ( getOuterHeight, getOuterWidth
+import           GHCJS.DOM.Window ( getInnerHeight, getInnerWidth
                                   , getWindow, resize)
 import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
@@ -60,7 +60,7 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
     where viewDims w h = do lineHeight <- measureLineHeight
                             let w' = min 650 $ fromIntegral w - 40
-                                h' = fromIntegral h - 40
+                                h' = fromIntegral h - 20
                             return $ ViewDimensions w w' h' lineHeight
 
 
@@ -69,8 +69,8 @@ windowDimensionsE = do
      wv <- askWebView
      Just window <- liftIO $ getWindow wv
      RD.wrapDomEvent window (`on` resize) $ do
-       w <- getOuterWidth window
-       h <- getOuterHeight window
+       w <- getInnerWidth window
+       h <- getInnerHeight window
        preventDefault
        return (w, h)
 
@@ -79,9 +79,11 @@ windowDimensions :: MonadWidget t m => m (Int, Int)
 windowDimensions = do
      wv <- askWebView
      Just window <- liftIO $ getWindow wv
-     w <- liftIO $ getOuterWidth window
-     h <- liftIO $ getOuterHeight window
+     w <- liftIO $ getInnerWidth window
+     h <- liftIO $ getInnerHeight window
      return (w, h)
+
+
 textView :: forall (m :: * -> *) t.  MonadWidget t m
          => ViewDimensions -> RD.Workflow t m String
 textView vd@(ViewDimensions fullWidth textWidth textHeight lineHeight) =

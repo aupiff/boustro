@@ -1,5 +1,4 @@
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Typography
@@ -103,7 +102,7 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
 typesetPage :: ViewDimensions -> ((Int, Int), PageEvent) -> IO (Int, Int)
 typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent) = do
 
-    let linesPerPage = 5 -- round $ textHeight / (lineH + 6) - 1
+    let linesPerPage = round $ textHeight / (lineH + 6) - 1
 
     wordNumber' <- case pageEvent of
 
@@ -126,7 +125,7 @@ typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnP
     -- dim, so maybe it's not so bad.
     textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
     mapM_ (`JQ.appendJQuery` textArea) boustroLines
-    return $ (wordNumber', wordsOnPage')
+    return (wordNumber', wordsOnPage')
     where numWords = 500
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 
@@ -181,7 +180,7 @@ itemWidth :: Num b => Item a b -> b
 itemWidth (Box w _) = w
 itemWidth (Spring w _ _) = w
 -- itemWidth (Penalty w _ _ _) = w
-itemWidth (Penalty _ _ _ _) = 0
+itemWidth Penalty{} = 0
 
 
 itemWidth' :: Num b => Item a b -> b
@@ -198,14 +197,14 @@ setItemWidth w (Penalty _ a b c) = Penalty w a b c
 
 toItem :: T.Text -> IO JQ.JQuery
 toItem "-" = JQ.select "<span>-</span>"
-toItem " " = (assignCssWidth spaceWidth =<< JQ.select "<span>&nbsp;</span>")
+toItem " " = assignCssWidth spaceWidth =<< JQ.select "<span>&nbsp;</span>"
 toItem str = JQ.select ("<span>" <> textToJSString str <> "</span>")
 
 
 itemElement :: Word -> IO JQ.JQuery
 itemElement (Box _ e) = JQ.select ("<span>" <> textToJSString e <> "</span>")
-itemElement (Spring _ _ _) = JQ.select "<span>&nbsp;</span>"
-itemElement (Penalty _ _ _ e) = JQ.select "<span>-</span>"
+itemElement Spring{} = JQ.select "<span>&nbsp;</span>"
+itemElement Penalty{} = JQ.select "<span>-</span>"
 
 itemIsSpace :: forall t s . Item t s -> Bool
 itemIsSpace Spring{} = True
