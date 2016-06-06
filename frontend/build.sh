@@ -1,2 +1,2 @@
 cabal build
-cp dist/build/boustro/boustro.jsexe/all.js app/all.js
+cp dist/build/boustro/boustro.jsexe/all.js ../static/all.js

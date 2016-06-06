@@ -20,7 +20,6 @@ import           Data.Monoid ((<>))
 
 type API = Get '[HTML] WelcomePage
       :<|> "app"   :> Raw
-      :<|> "texts" :> Raw
 
 data WelcomePage = WelcomePage
 
@@ -40,7 +39,6 @@ api = Proxy
 
 server :: Server API
 server = return WelcomePage
-    :<|> serveDirectory "static/texts"
     :<|> serveDirectory "static"
 
 app :: Application

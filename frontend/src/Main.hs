@@ -4,9 +4,9 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecursiveDo #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Main where
-
 
 import           Control.Monad
 import           Data.Monoid ((<>))
@@ -29,7 +29,7 @@ import           Style
 
 
 main :: IO ()
-main = JQ.ready $ RD.mainWidget $ do
+main = JQ.ready $ RD.mainWidgetWithCss $(embedStringFile "app/Boustro.css") $ do
 
     -- `scratch-area` is a hidden div where words widths are measured
     RD.elAttr "div" (Map.singleton "id" "scratch-area") $ pure ()
