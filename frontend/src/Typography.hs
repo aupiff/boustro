@@ -247,7 +247,7 @@ renderLine lineH textW ls = do
                  >>= JQ.setCss "width" (textToJSString . T.pack $ show textW)
                  >>= JQ.setCss "height" (textToJSString . T.pack $ show lineH)
                  >>= JQ.setCss "white-space" "nowrap"
-    let nls = fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> [x]) ls
+    let nls = foldr dehyphen [] ls
         numSpaces = fromIntegral (length $ filter itemIsSpace nls)
         spaceSize = realToFrac $ (textW - sum (fmap itemWidth' nls)) / numSpaces
         nls' = map (\x -> case x of
@@ -259,6 +259,7 @@ renderLine lineH textW ls = do
     where
       toJQueryWithWidth i = assignCssWidth (itemWidth' i) =<< itemElement i
       dehyphen :: Word -> [Word] -> [Word]
+      dehyphen n [] = [n]
       dehyphen n@(Box{}) p =
                         let sp = space 0
                         in case head p of
@@ -266,7 +267,7 @@ renderLine lineH textW ls = do
                             Penalty{} -> case tail p of
                                              (Box{}:_) -> n : tail p
                                              _         -> n : p
-      dehyphen (Penalty a b _ d) p = Penalty a b True d : p
+      dehyphen n@(Penalty{}) p = n : p
       dehyphen _ p = p
 
 
