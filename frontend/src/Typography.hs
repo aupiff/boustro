@@ -103,6 +103,7 @@ typesetPage :: ViewDimensions -> ((Int, Int), PageEvent) -> IO (Int, Int)
 typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent) = do
 
     let linesPerPage = round $ textHeight / (lineH + 6) - 1
+        numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
 
     wordNumber' <- case pageEvent of
 
@@ -126,8 +127,8 @@ typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnP
     textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
     mapM_ (`JQ.appendJQuery` textArea) boustroLines
     return (wordNumber', wordsOnPage')
-    where numWords = 500
-          widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+
+      where widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 
 
 wordsWithWidths :: [String] -> IO [Word]
@@ -145,7 +146,7 @@ wordsWithWidths inputWords = do
 
   where toItem' :: T.Text -> Double -> Word
         toItem' "-" w = hyphen w "-"
-        toItem' " " w = space spaceWidth
+        toItem' " " _ = space spaceWidth
         toItem' str w = Box w str
 
 boustro :: [JQ.JQuery] -> IO [JQ.JQuery]

@@ -17,7 +17,6 @@ import           GHCJS.DOM.Window ( getInnerHeight, getInnerWidth
 import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
 import           GHCJS.DOM.Document (getBody)
-import qualified JavaScript.JQuery as JQ hiding (filter, not)
 import           Reflex.Dom.Class
 import qualified Reflex.Dom as RD
 
@@ -30,7 +29,7 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
     (w, h) <- windowDimensions
 
-    let contentWidth = min 750 $ w - 40
+    let contentWidth = min 700 $ w - 40
 
     RD.elAttr "div" ("id" =: "content" <> style [("width", show contentWidth)]) $
 
@@ -46,18 +45,18 @@ titlePage = RD.Workflow . RD.el "div" $ do
                                 \ On mobile phones, single click \
                                 \ left and right sides of the screen."
 
-    RD.elAttr "div" (Map.singleton "id" "menu") $ do
+             RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
-        showTextView <-
+                 showTextView <-
 
-            RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
+                     RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
 
-        dims <- RD.performEvent $ liftIO . const (viewDims w h) <$> showTextView
+                 dims <- RD.performEvent $ liftIO . const (viewDims w h) <$> showTextView
 
-        return ("Page 1", textView <$> dims)
+                 return ("Page 1", textView <$> dims)
 
     where viewDims w h = do lineHeight <- measureLineHeight
-                            let w' = min 750 $ fromIntegral w - 40
+                            let w' = min 700 $ fromIntegral w - 40
                                 h' = fromIntegral h
                             return $ ViewDimensions w w' h' lineHeight
 
@@ -84,7 +83,7 @@ windowDimensions = do
 
 textView :: forall (m :: * -> *) t.  MonadWidget t m
          => ViewDimensions -> RD.Workflow t m String
-textView vd@(ViewDimensions fullWidth textWidth _ _) =
+textView vd@(ViewDimensions fullWidth textWidth textHeight _) =
 
     RD.Workflow . RD.el "div" $ do
 
@@ -92,7 +91,7 @@ textView vd@(ViewDimensions fullWidth textWidth _ _) =
 
         pb <- RD.getPostBuild
 
-        RD.elAttr "div" ("id" =: "content" <> style [("width", show textWidth)]) $ do
+        RD.elAttr "div" ("id" =: "content" <> style [("width", show textWidth), ("height", show textHeight)]) $ do
 
             (boustroEl, _) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ return ()
 
