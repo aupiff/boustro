@@ -30,7 +30,7 @@ instance ToHtml WelcomePage where
 
     body_ $ do
         h1_ "Boustrophedon Syndicate"
-        p_ "hello" <> p_ "sup"
+        p_ "software consulting" <> p_ "contact: riblankman@gmail.com"
         a_ [href_ "/app"] "boustrophedon reading application"
 
 

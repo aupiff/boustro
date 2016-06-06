@@ -103,7 +103,7 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
 typesetPage :: ViewDimensions -> ((Int, Int), PageEvent) -> IO (Int, Int)
 typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent) = do
 
-    let linesPerPage = round $ textHeight / (lineH + 6) - 1
+    let linesPerPage = 5 -- round $ textHeight / (lineH + 6) - 1
 
     wordNumber' <- case pageEvent of
 
@@ -126,7 +126,7 @@ typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnP
     -- dim, so maybe it's not so bad.
     textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#boustro"
     mapM_ (`JQ.appendJQuery` textArea) boustroLines
-    return $ traceShow (wordNumber', wordsOnPage') (wordNumber', wordsOnPage')
+    return $ (wordNumber', wordsOnPage')
     where numWords = 500
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 
