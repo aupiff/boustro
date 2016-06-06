@@ -30,6 +30,7 @@ data ViewDimensions = ViewDimensions { fullWidth  :: Int
                                      , viewWidth  :: Double
                                      , veiwHeight :: Double
                                      , lineHeight :: Double
+                                     , pixelRatio :: Double
                                      }
 
 type Word = Item T.Text Double
@@ -59,51 +60,10 @@ width l = sum (map itemWidth l)
 --                            _                 -> 0
 
 
-lineWaste :: Double -> Line -> Double
-lineWaste textWidth l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphenPenalty + hyphenHeadPenalty
-    where spaceSize = textWidth - width l
-          numSpaces :: Double
-          numSpaces = fromIntegral . length $ filter itemIsBox l
-          -- penalize placing hyphen at end of line
-          hyphenPenalty = if itemIsPenalty (last l) then 10 else 0 -- what number should I use here?
-                                                                   -- I just need to see what wastes look like generally
-          -- disallow hyphens first
-          hyphenHeadPenalty = if itemIsPenalty (head l) then 1000000 else 0
-          weighting x -- too close is worse than too far apart : TODO This seems backwards to me
-            | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
-            | otherwise =  3 * x ^ (2 :: Int) -- spaces smaller than optimal width
-    -- Write quickcheck properties for this
-
-
-par1' :: Double -> Txt -> Paragraph
-par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste
-                           . fromMaybe (trace "par1' fold1" []) . fold1 step start
-    where
-        step :: Word -> [(Paragraph, Double, Double)] -> [(Paragraph, Double, Double)]
-        step w ps = let origin = (new w (fromMaybe (error $ "par1' step" ++ show ps) $ minWith waste ps) : map (glue w) ps)
-                        result = filter fitH origin
-                    in if null result then traceShow origin [fromMaybe (head origin) (minWith waste origin)] else result
-
-        start :: Word -> [(Paragraph, Double, Double)]
-        start w = [([[w]], itemWidth w, 0.0)]
-
-        new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0.0)
-        new w p@(ls, _, _) = ([w]:ls, itemWidth w, waste p)
-        -- TODO what is this 1/n about? space width? change this
-        glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + n, m)
-        parLines (ls, _, _) = ls
-        widthHead (_, n, _) = n
-        wasteTail (_, _, m) = m
-        linwHead = lineWaste textWidth . head . parLines
-        waste ([_], _, _) = 0
-        waste p = linwHead p + wasteTail p
-        fitH p = widthHead p <= textWidth
-
-
 typesetPage :: ViewDimensions -> ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent) = do
+typesetPage (ViewDimensions _ textWidth textHeight lineH r) ((wordNumber, wordsOnPage), pageEvent) = do
 
-    let linesPerPage = 5 -- round $ textHeight / (lineH + 6) - 1
+    let linesPerPage = round $ textHeight / (lineH + 6) - 1
 
     wordNumber' <- case pageEvent of
 
@@ -129,25 +89,69 @@ typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnP
     return $ (wordNumber', wordsOnPage')
     where numWords = 500
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+          spaceWidth = 6 * r
 
+          toItem :: T.Text -> IO JQ.JQuery
+          toItem "-" = JQ.select "<span>-</span>"
+          toItem " " = (assignCssWidth spaceWidth =<< JQ.select "<span>&nbsp;</span>")
+          toItem str = JQ.select ("<span>" <> textToJSString str <> "</span>")
 
-wordsWithWidths :: [String] -> IO [Word]
-wordsWithWidths inputWords = do
+          lineWaste :: Double -> Line -> Double
+          lineWaste textWidth l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphenPenalty + hyphenHeadPenalty
+              where spaceSize = textWidth - width l
+                    numSpaces :: Double
+                    numSpaces = fromIntegral . length $ filter itemIsBox l
+                    -- penalize placing hyphen at end of line
+                    hyphenPenalty = if itemIsPenalty (last l) then 10 else 0 -- what number should I use here?
+                                                                             -- I just need to see what wastes look like generally
+                    -- disallow hyphens first
+                    hyphenHeadPenalty = if itemIsPenalty (head l) then 1000000 else 0
+                    weighting x -- too close is worse than too far apart : TODO This seems backwards to me
+                      | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
+                      | otherwise =  3 * x ^ (2 :: Int) -- spaces smaller than optimal width
+              -- Write quickcheck properties for this
+          par1' :: Double -> Txt -> Paragraph
+          par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste
+                                     . fromMaybe (trace "par1' fold1" []) . fold1 step start
+              where
+                  step :: Word -> [(Paragraph, Double, Double)] -> [(Paragraph, Double, Double)]
+                  step w ps = let origin = (new w (fromMaybe (error $ "par1' step" ++ show ps) $ minWith waste ps) : map (glue w) ps)
+                                  result = filter fitH origin
+                              in if null result then [fromMaybe (head origin) (minWith waste origin)] else result
 
-     -- creating a temporary div specifically to measure the width of every element
-     scratchArea <- JQ.empty =<< JQ.select "#scratch-area"
+                  start :: Word -> [(Paragraph, Double, Double)]
+                  start w = [([[w]], itemWidth w, 0.0)]
 
-     mapM (\x -> do let t = T.pack x
-                    jq <- toItem t
-                    jq `JQ.appendJQuery` scratchArea
-                    jqWidth <- JQ.getInnerWidth jq
-                    return $ toItem' t jqWidth
-                ) inputWords
+                  new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0.0)
+                  new w p@(ls, _, _) = ([w]:ls, itemWidth w, waste p)
+                  -- TODO what is this 1/n about? space width? change this
+                  glue w (l:ls, n, m) = ((w:l):ls, itemWidth w + n, m)
+                  parLines (ls, _, _) = ls
+                  widthHead (_, n, _) = n
+                  wasteTail (_, _, m) = m
+                  linwHead = lineWaste textWidth . head . parLines
+                  waste ([_], _, _) = 0
+                  waste p = linwHead p + wasteTail p
+                  fitH p = widthHead p <= textWidth
 
-  where toItem' :: T.Text -> Double -> Word
-        toItem' "-" w = hyphen w "-"
-        toItem' " " w = space spaceWidth
-        toItem' str w = Box w str
+          wordsWithWidths :: [String] -> IO [Word]
+          wordsWithWidths inputWords = do
+
+               -- creating a temporary div specifically to measure the width of every element
+               scratchArea <- JQ.empty =<< JQ.select "#scratch-area"
+
+               mapM (\x -> do let t = T.pack x
+                              jq <- toItem t
+                              jq `JQ.appendJQuery` scratchArea
+                              jqWidth <- JQ.getInnerWidth jq
+                              return $ toItem' t jqWidth
+                          ) inputWords
+
+            where toItem' :: T.Text -> Double -> Word
+                  toItem' "-" w = hyphen w "-"
+                  toItem' " " w = space spaceWidth
+                  toItem' str w = Box w str
+
 
 boustro :: [JQ.JQuery] -> IO [JQ.JQuery]
 boustro [] = return []
@@ -196,12 +200,6 @@ setItemWidth w (Spring _ a b)  = Spring w a b
 setItemWidth w (Penalty _ a b c) = Penalty w a b c
 
 
-toItem :: T.Text -> IO JQ.JQuery
-toItem "-" = JQ.select "<span>-</span>"
-toItem " " = (assignCssWidth spaceWidth =<< JQ.select "<span>&nbsp;</span>")
-toItem str = JQ.select ("<span>" <> textToJSString str <> "</span>")
-
-
 itemElement :: Word -> IO JQ.JQuery
 itemElement (Box _ e) = JQ.select ("<span>" <> textToJSString e <> "</span>")
 itemElement (Spring _ _ _) = JQ.select "<span>&nbsp;</span>"
@@ -220,9 +218,6 @@ itemIsBox _ = False
 itemIsPenalty :: forall t s . Item t s -> Bool
 itemIsPenalty Penalty{} = True
 itemIsPenalty _ = False
-
-spaceWidth :: Double
-spaceWidth = 6
 
 
 space :: Double -> Word

@@ -13,8 +13,9 @@ import           Control.Monad.IO.Class
 import           Data.FileEmbed
 import qualified Data.Map.Strict as Map
 import           GHCJS.DOM (webViewGetDomDocument)
-import           GHCJS.DOM.Window ( getOuterHeight, getOuterWidth
-                                  , getWindow, resize)
+import           GHCJS.DOM.Window ( getInnerHeight, getInnerWidth
+                                  , getWindow, resize, getDevicePixelRatio
+                                  )
 import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
 import           GHCJS.DOM.Document (getBody)
@@ -23,16 +24,19 @@ import           Reflex
 import           Reflex.Dom.Class
 import qualified Reflex.Dom as RD
 
-import Style
-import Typography
-
+import           Style
+import           Typography
 
 titlePage :: forall t (m :: * -> *).  MonadWidget t m => RD.Workflow t m String
 titlePage = RD.Workflow . RD.el "div" $ do
 
-    (w, h) <- windowDimensions
+    (w, h, r) <- windowDimensions
 
-    let contentWidth = min 650 $ w - 40
+    let viewDims w h = do lineHeight <- measureLineHeight
+                          let w' = min maxWidth $ fromIntegral w - 40
+                              h' = fromIntegral h - 40
+                          return $ ViewDimensions w w' h' lineHeight r
+        contentWidth = min (round maxWidth) $ w - 40
 
     RD.elAttr "div" ("id" =: "content" <> style [("width", show contentWidth)]) $
 
@@ -48,6 +52,15 @@ titlePage = RD.Workflow . RD.el "div" $ do
                                 \ On mobile phones, single click \
                                 \ left and right sides of the screen."
 
+             wde <- windowDimensionsE
+             dims <- RD.holdDyn (w, h) wde
+
+             RD.el "p" $ RD.display dims
+
+             RD.el "p" . RD.text $ show r
+
+             return ()
+
     RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
         showTextView <-
@@ -58,33 +71,34 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
         return ("Page 1", textView <$> dims)
 
-    where viewDims w h = do lineHeight <- measureLineHeight
-                            let w' = min 650 $ fromIntegral w - 40
-                                h' = fromIntegral h - 40
-                            return $ ViewDimensions w w' h' lineHeight
 
+maxWidth :: Double
+maxWidth = 850
 
 windowDimensionsE :: MonadWidget t m => m (RD.Event t (Int, Int))
 windowDimensionsE = do
      wv <- askWebView
      Just window <- liftIO $ getWindow wv
      RD.wrapDomEvent window (`on` resize) $ do
-       w <- getOuterWidth window
-       h <- getOuterHeight window
+       w <- getInnerWidth window
+       h <- getInnerHeight window
        preventDefault
        return (w, h)
 
 
-windowDimensions :: MonadWidget t m => m (Int, Int)
+windowDimensions :: MonadWidget t m => m (Int, Int, Double)
 windowDimensions = do
      wv <- askWebView
      Just window <- liftIO $ getWindow wv
-     w <- liftIO $ getOuterWidth window
-     h <- liftIO $ getOuterHeight window
-     return (w, h)
+     w <- liftIO $ getInnerWidth window
+     h <- liftIO $ getInnerHeight window
+     ratio <- liftIO $ getDevicePixelRatio window
+     return (w, h, ratio)
+
+
 textView :: forall (m :: * -> *) t.  MonadWidget t m
          => ViewDimensions -> RD.Workflow t m String
-textView vd@(ViewDimensions fullWidth textWidth textHeight lineHeight) =
+textView vd@(ViewDimensions fullWidth textWidth textHeight lineHeight r) =
 
     RD.Workflow . RD.el "div" $ do
 
