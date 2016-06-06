@@ -37,10 +37,6 @@ body {
    margin-right: auto;
 }
 
-#boustro {
-  margin-bottom: 10px;
-}
-
 #scratch-area {
   visibility: hidden;
   width: 100%;
@@ -52,7 +48,6 @@ body {
 }
 
 .line {
-  margin-top: 3px;
   margin-bottom: 3px;
 }
 

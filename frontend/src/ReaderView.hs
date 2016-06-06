@@ -7,7 +7,6 @@
 
 module ReaderView where
 
-import           Control.Monad
 import           Data.Monoid ((<>))
 import           Control.Monad.IO.Class
 import qualified Data.Map.Strict as Map
@@ -29,7 +28,7 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
     (w, h) <- windowDimensions
 
-    let contentWidth = min 700 $ w - 40
+    let contentWidth = min 700 $ w - 30
 
     RD.elAttr "div" ("id" =: "content" <> style [("width", show contentWidth)]) $
 
@@ -83,7 +82,7 @@ windowDimensions = do
 
 textView :: forall (m :: * -> *) t.  MonadWidget t m
          => ViewDimensions -> RD.Workflow t m String
-textView vd@(ViewDimensions fullWidth textWidth textHeight _) =
+textView vd@(ViewDimensions fullWidth textWidth fullHeight lineHeight) =
 
     RD.Workflow . RD.el "div" $ do
 
@@ -91,7 +90,9 @@ textView vd@(ViewDimensions fullWidth textWidth textHeight _) =
 
         pb <- RD.getPostBuild
 
-        RD.elAttr "div" ("id" =: "content" <> style [("width", show textWidth), ("height", show textHeight)]) $ do
+        RD.elAttr "div" ("id" =: "content" <> style [("width", show textWidth), ("height", show fullHeight)]) $ do
+
+          RD.elAttr "div" ("id" =: "b" <> style [("width", show textWidth), ("height", show $ 0.9 * fullHeight)]) $ do
 
             (boustroEl, _) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ return ()
 
@@ -102,11 +103,16 @@ textView vd@(ViewDimensions fullWidth textWidth textHeight _) =
                                                   , fmap textTransform textClick
                                                   ]
 
-            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD vd
+            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD (ViewDimensions fullWidth textWidth
+                                                                                               (0.9 * fullHeight) lineHeight)
                 wordDeltaD <- RD.holdDyn (0,0) wordDelta
                 posString <- RD.mapDyn renderProgressString wordDeltaD
 
-            home <- RD.button "back home"
+            return ()
+
+          RD.elAttr "div" ("id" =: "back" <> style [("width", show textWidth), ("height", show $ 0.1 * fullHeight)]) $ do
+
+            home <- RD.button "<="
 
             return ("Page 2", titlePage <$ home)
 

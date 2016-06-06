@@ -102,7 +102,7 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
 typesetPage :: ViewDimensions -> ((Int, Int), PageEvent) -> IO (Int, Int)
 typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent) = do
 
-    let linesPerPage = round $ textHeight / (lineH + 6) - 1
+    let linesPerPage = floor $ textHeight / (lineH + 3)
         numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
 
     wordNumber' <- case pageEvent of
@@ -139,7 +139,7 @@ wordsWithWidths inputWords = do
 
      mapM (\x -> do let t = T.pack x
                     jq <- toItem t
-                    jq `JQ.appendJQuery` scratchArea
+                    _ <- jq `JQ.appendJQuery` scratchArea
                     jqWidth <- JQ.getInnerWidth jq
                     return $ toItem' t jqWidth
                 ) inputWords
