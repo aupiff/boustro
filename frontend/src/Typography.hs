@@ -189,12 +189,6 @@ itemWidth' (Spring w _ _) = w
 itemWidth' (Penalty w _ _ _) = w
 
 
-setItemWidth :: b -> Item a b -> Item a b
-setItemWidth w (Box _ a) = Box w a
-setItemWidth w (Spring _ a b)  = Spring w a b
-setItemWidth w (Penalty _ a b c) = Penalty w a b c
-
-
 toItem :: T.Text -> IO JQ.JQuery
 toItem "-" = JQ.select "<span>-</span>"
 toItem " " = assignCssWidth spaceWidth =<< JQ.select "<span>&nbsp;</span>"
