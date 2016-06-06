@@ -8,3 +8,4 @@ site_key.txt
 log/
 cabal.sandbox.config
 repl*
+.stack-work/

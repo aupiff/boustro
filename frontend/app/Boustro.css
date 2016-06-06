@@ -1,0 +1,68 @@
+body {
+  font-size: 19px;
+}
+
+html, body {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+body {
+  position: relative
+}
+
+#content {
+  margin-left: auto;
+  margin-right: auto;
+  font-family: Georgia, Serif;
+  text-align: center;
+}
+
+#reader-view button {
+  width: auto;
+  float: right;
+}
+
+
+#menu {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  text-align: center;
+}
+
+#menu button {
+   width: 50%;
+   margin-left: auto;
+   margin-right: auto;
+}
+
+#boustro {
+  margin-bottom: 10px;
+}
+
+#scratch-area {
+  visibility: hidden;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: Georgia, Serif;
+}
+
+.line {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+button {
+   text-transform: none;
+   text-decoration: none;
+   background-color: #fff;
+   color: #000;
+   border: 3px solid #000;
+   font-weight: 500;
+   font-size: 18px;
+   letter-spacing: 0;
+}

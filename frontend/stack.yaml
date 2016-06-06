@@ -1,0 +1,35 @@
+resolver: lts-5.17
+compiler: ghcjs-0.2.0.20160315_ghc-7.10.2
+compiler-check: match-exact
+setup-info:
+     ghcjs:
+           source:
+                  ghcjs-0.2.0.20160315_ghc-7.10.2:
+                          url: "https://github.com/nrolland/ghcjs/releases/download/v.0.2.0.20160315/ghcjs-0.2.0.20160315.tar.gz"
+
+packages:
+- '.'
+- location:
+    git: git@github.com:aupiff/hyphenation.git
+    commit: 6371bdc3446e7eb6fe74e24922e812f41af2a8e1
+- location:
+    git: git@github.com:ghcjs/ghcjs-jquery.git
+    commit: 6e8023229342eaf78204cde3189865be891e5aa4
+- location:
+    git: git://github.com/mainland/ref-tf.git
+    commit: 77ea006cadb347c266124b5a9e111f3175e20947
+# - location:
+#     git: git@github.com:reflex-frp/reflex.git
+#     commit: e876aaaa98bf0b7fd2ba31dacdc756abce56ea54
+# - location:
+#     git: git@github.com:reflex-frp/reflex-dom.git
+#     commit: d94f3a73f59ac57a7c9b9f60619b1c5ac0ee2192
+
+
+extra-deps:
+  - ghcjs-dom-0.2.3.0
+  - hyphenation-0.6.1
+  - ghcjs-jquery-0.1.0.0
+
+flags: {}
+extra-package-dbs: []

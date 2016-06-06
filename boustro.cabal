@@ -4,28 +4,37 @@
 name:                boustro
 version:             0.1.0.0
 synopsis:            reading in comfort
-homepage:            https://github.com/aupiff/boustro
+homepage:            http://boustro.com
 license-file:        LICENSE
+license:             MIT
 author:              Roy Blankman
 maintainer:          riblankman@gmail.com
 category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
+description:         Boustrophedon Syndicate's website
+
+source-repository head
+  type:     git
+  location: https://github.com/aupiff/boustro
 
 executable boustro
   main-is:             Main.hs
   hs-source-dirs:      backend
-  build-depends:       base >=4.7 && <5,
-                       bytestring,
-                       hyphenation,
-                       aeson,
-                       xmlhtml,
-                       text,
-                       time,
-                       transformers,
-                       mtl,
-                       lens,
-                       servant-server,
-                       wai,
-                       warp
+  build-depends:       base >=4.7 && <5
+                     , bytestring
+                     , hyphenation
+                     , aeson
+                     , xmlhtml
+                     , text
+                     , time
+                     , transformers
+                     , mtl
+                     , lens
+                     , lucid
+                     , servant
+                     , servant-lucid
+                     , servant-server
+                     , wai
+                     , warp
   default-language:    Haskell2010
