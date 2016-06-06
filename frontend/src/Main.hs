@@ -40,7 +40,11 @@ main = JQ.ready $ RD.mainWidget $ do
 titlePage :: forall t (m :: * -> *).  MonadWidget t m => RD.Workflow t m String
 titlePage = RD.Workflow . RD.el "div" $ do
 
-    RD.elAttr "div" (Map.singleton "id" "content") $
+    (w, h) <- windowDimensions
+
+    let contentWidth = min 650 $ w - 40
+
+    RD.elAttr "div" ("id" =: "content" <> style [("width", show contentWidth)]) $
 
           do RD.el "h1" $ RD.text "βουστροφηδόν"
 
@@ -50,15 +54,15 @@ titlePage = RD.Workflow . RD.el "div" $ do
                        \ unfortunately forgotten style of typsetting."
 
              RD.el "p" $ RD.text "In the reader view, use left and \
-                                \ right arrows to turn pages."
+                                \ right arrows to turn pages on PCs.\
+                                \ On mobile phones, single click \
+                                \ left and right sides of the screen."
 
     RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
         showTextView <-
 
             RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
-
-        (w, h) <- windowDimensions
 
         dims <- RD.performEvent $ liftIO . const (viewDims w h) <$> showTextView
 

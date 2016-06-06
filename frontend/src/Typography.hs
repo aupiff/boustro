@@ -1,7 +1,6 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Typography
     ( measureLineHeight
@@ -12,7 +11,6 @@ module Typography
     ) where
 
 import           Control.Monad
-import           Data.FileEmbed
 import           Data.JSString.Text
 import           Data.List (intersperse)
 import           Data.Maybe
@@ -21,6 +19,8 @@ import qualified Data.Text as T
 import qualified JavaScript.JQuery as JQ hiding (filter, not)
 import           Prelude hiding (Word)
 import           Text.Hyphenation
+
+import           Server
 
 import           Debug.Trace
 
@@ -52,15 +52,23 @@ minWith f = fold1 choice id
 
 
 width :: Line -> Double
-width = sum . map itemWidth
+width l = sum (map itemWidth l)
+-- bring this back in case of issues
+--   where hyphenWidth = case last l of
+--                            (Penalty w _ _ _) -> w
+--                            _                 -> 0
 
 
 lineWaste :: Double -> Line -> Double
-lineWaste textWidth l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphenPenalty
+lineWaste textWidth l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphenPenalty + hyphenHeadPenalty
     where spaceSize = textWidth - width l
           numSpaces :: Double
           numSpaces = fromIntegral . length $ filter itemIsBox l
-          hyphenPenalty = if itemIsPenalty (last l) then 10 else 0
+          -- penalize placing hyphen at end of line
+          hyphenPenalty = if itemIsPenalty (last l) then 10 else 0 -- what number should I use here?
+                                                                   -- I just need to see what wastes look like generally
+          -- disallow hyphens first
+          hyphenHeadPenalty = if itemIsPenalty (head l) then 1000000 else 0
           weighting x -- too close is worse than too far apart : TODO This seems backwards to me
             | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
             | otherwise =  3 * x ^ (2 :: Int) -- spaces smaller than optimal width
@@ -171,8 +179,8 @@ instance Show b => Show (Item a b) where
 itemWidth :: Num b => Item a b -> b
 itemWidth (Box w _) = w
 itemWidth (Spring w _ _ _) = w
-itemWidth (Penalty w _ True _) = w
-itemWidth (Penalty _ _ False _) = 0
+-- itemWidth (Penalty w _ _ _) = w
+itemWidth (Penalty _ _ _ _) = 0
 
 
 itemWidth' :: Num b => Item a b -> b
@@ -232,7 +240,7 @@ renderLine lineH textW ls = do
                  >>= JQ.setCss "width" (textToJSString . T.pack $ show textW)
                  >>= JQ.setCss "height" (textToJSString . T.pack $ show lineH)
                  >>= JQ.setCss "white-space" "nowrap"
-    nls <- (:) (head ls) . filter (not . itemIsPenalty) $ tail ls
+    nls <- fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> return [x]) ls
     let numSpaces = fromIntegral (length $ filter itemIsSpace nls)
         spaceSize = realToFrac $ (textW - sum (fmap itemWidth' nls)) / numSpaces
         nls' = map (\x -> case x of
@@ -243,6 +251,17 @@ renderLine lineH textW ls = do
 
     where
       toJQueryWithWidth i = assignCssWidth (itemWidth' i) $ itemElement i
+      dehyphen :: Word -> IO [Word] -> IO [Word]
+      dehyphen n@(Box{}) p = do
+                        p' <- p
+                        sp <- space 0 <$> JQ.select "<span>&nbsp;</span>"
+                        case head p' of
+                           Box{} -> return $ n : sp : p'
+                           Penalty{} -> case tail p' of
+                                            (Box{}:_) -> return $ n : tail p'
+                                            _         -> return $ n : p'
+      dehyphen (Penalty a b _ d) p = (Penalty a b True d :) <$>  p
+      dehyphen _ p = p
 
 
 reverseLine :: JQ.JQuery -> IO JQ.JQuery
@@ -279,7 +298,3 @@ preprocess = prepareText
 
 processedWords :: [String]
 processedWords = preprocess contextText
-
-
-contextText :: String
-contextText = $(embedStringFile "texts/middlemarch.txt")
