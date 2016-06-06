@@ -32,7 +32,7 @@ data ViewDimensions = ViewDimensions { fullWidth  :: Int
                                      , lineHeight :: Double
                                      }
 
-type Word = Item JQ.JQuery Double
+type Word = Item T.Text Double
 type Txt = [Word]
 type Line = [Word]
 type Paragraph = [Line]
@@ -131,16 +131,23 @@ typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnP
           widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
 
 
-wordsWithWidths :: [String] -> IO [Item JQ.JQuery Double]
+wordsWithWidths :: [String] -> IO [Word]
 wordsWithWidths inputWords = do
-
-     ws <- mapM (toItem . T.pack) inputWords
 
      -- creating a temporary div specifically to measure the width of every element
      scratchArea <- JQ.empty =<< JQ.select "#scratch-area"
-     mapM_ (`JQ.appendJQuery` scratchArea) $ fmap itemElement ws
-     mapM (\i -> (`setItemWidth` i) <$> JQ.getInnerWidth (itemElement i)) ws
 
+     mapM (\x -> do let t = T.pack x
+                    jq <- toItem t
+                    jq `JQ.appendJQuery` scratchArea
+                    jqWidth <- JQ.getInnerWidth jq
+                    return $ toItem' t jqWidth
+                ) inputWords
+
+  where toItem' :: T.Text -> Double -> Word
+        toItem' "-" w = hyphen w "-"
+        toItem' " " w = space spaceWidth
+        toItem' str w = Box w str
 
 boustro :: [JQ.JQuery] -> IO [JQ.JQuery]
 boustro [] = return []
@@ -148,12 +155,6 @@ boustro [l] = return [l]
 boustro (l:l2:ls) = do ho <- reverseLine l2
                        fi <- boustro ls
                        return (l : ho : fi)
-
-
-toItem :: T.Text -> IO (Item JQ.JQuery Double)
-toItem "-" = hyphen 0 <$> JQ.select "<span>-</span>"
-toItem " " = space spaceWidth <$> (assignCssWidth spaceWidth =<< JQ.select "<span>&nbsp;</span>")
-toItem str = Box 0 <$> JQ.select ("<span>" <> textToJSString str <> "</span>")
 
 
 measureLineHeight :: IO Double
@@ -166,39 +167,45 @@ measureLineHeight = do
 
 -- can this be a monoid?
 data Item a b = Box b a             -- Box w_i
-              | Spring b b b a      -- Spring w_i y_i z_i
+              | Spring b b b        -- Spring w_i y_i z_i
               | Penalty b b Bool a  -- Penalty w_i p_i f_i
 
 instance Show b => Show (Item a b) where
     show (Box w _) = "Box " ++ show w
-    show (Spring w _ _ _) = "Spring " ++ show w
+    show (Spring w _ _) = "Spring " ++ show w
     show (Penalty w _ _ _) = "Penalty " ++ show w
 
 -- all hypens are flagged penality items because we don't want two hyphens in
 -- a row
 itemWidth :: Num b => Item a b -> b
 itemWidth (Box w _) = w
-itemWidth (Spring w _ _ _) = w
+itemWidth (Spring w _ _) = w
 -- itemWidth (Penalty w _ _ _) = w
 itemWidth (Penalty _ _ _ _) = 0
 
 
 itemWidth' :: Num b => Item a b -> b
 itemWidth' (Box w _) = w
-itemWidth' (Spring w _ _ _) = w
+itemWidth' (Spring w _ _) = w
 itemWidth' (Penalty w _ _ _) = w
 
 
 setItemWidth :: b -> Item a b -> Item a b
 setItemWidth w (Box _ a) = Box w a
-setItemWidth w (Spring _ a b c) = Spring w a b c
+setItemWidth w (Spring _ a b)  = Spring w a b
 setItemWidth w (Penalty _ a b c) = Penalty w a b c
 
 
-itemElement :: Item a b -> a
-itemElement (Box _ e) = e
-itemElement (Spring _ _ _ e) = e
-itemElement (Penalty _ _ _ e) = e
+toItem :: T.Text -> IO JQ.JQuery
+toItem "-" = JQ.select "<span>-</span>"
+toItem " " = (assignCssWidth spaceWidth =<< JQ.select "<span>&nbsp;</span>")
+toItem str = JQ.select ("<span>" <> textToJSString str <> "</span>")
+
+
+itemElement :: Word -> IO JQ.JQuery
+itemElement (Box _ e) = JQ.select ("<span>" <> textToJSString e <> "</span>")
+itemElement (Spring _ _ _) = JQ.select "<span>&nbsp;</span>"
+itemElement (Penalty _ _ _ e) = JQ.select "<span>-</span>"
 
 itemIsSpace :: forall t s . Item t s -> Bool
 itemIsSpace Spring{} = True
@@ -218,7 +225,7 @@ spaceWidth :: Double
 spaceWidth = 6
 
 
-space :: Double -> JQ.JQuery -> Item JQ.JQuery Double
+space :: Double -> Word
 space w = Spring w 3 2
 
 
@@ -229,7 +236,7 @@ assignCssWidth txtWidth =
     <=< JQ.setCss "width" (textToJSString . T.pack $ show txtWidth)
 
 
-hyphen :: Double -> JQ.JQuery -> Item JQ.JQuery Double
+hyphen :: Double -> T.Text -> Word
 hyphen hyphenWidth = Penalty hyphenWidth penaltyValue False
     where penaltyValue = undefined -- TODO I may not end up using this
 
@@ -240,27 +247,26 @@ renderLine lineH textW ls = do
                  >>= JQ.setCss "width" (textToJSString . T.pack $ show textW)
                  >>= JQ.setCss "height" (textToJSString . T.pack $ show lineH)
                  >>= JQ.setCss "white-space" "nowrap"
-    nls <- fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> return [x]) ls
-    let numSpaces = fromIntegral (length $ filter itemIsSpace nls)
+    let nls = fromMaybe (error "renderLine fold1") $ fold1 dehyphen (\x -> [x]) ls
+        numSpaces = fromIntegral (length $ filter itemIsSpace nls)
         spaceSize = realToFrac $ (textW - sum (fmap itemWidth' nls)) / numSpaces
         nls' = map (\x -> case x of
-                             (Spring _ a b e) -> Spring spaceSize a b e
+                             (Spring _ a b) -> Spring spaceSize a b
                              _ -> x) nls
     mapM_ ((`JQ.appendJQuery` lineDiv) <=< toJQueryWithWidth) nls'
     return lineDiv
 
     where
-      toJQueryWithWidth i = assignCssWidth (itemWidth' i) $ itemElement i
-      dehyphen :: Word -> IO [Word] -> IO [Word]
-      dehyphen n@(Box{}) p = do
-                        p' <- p
-                        sp <- space 0 <$> JQ.select "<span>&nbsp;</span>"
-                        case head p' of
-                           Box{} -> return $ n : sp : p'
-                           Penalty{} -> case tail p' of
-                                            (Box{}:_) -> return $ n : tail p'
-                                            _         -> return $ n : p'
-      dehyphen (Penalty a b _ d) p = (Penalty a b True d :) <$>  p
+      toJQueryWithWidth i = assignCssWidth (itemWidth' i) =<< itemElement i
+      dehyphen :: Word -> [Word] -> [Word]
+      dehyphen n@(Box{}) p =
+                        let sp = space 0
+                        in case head p of
+                            Box{} -> n : sp : p
+                            Penalty{} -> case tail p of
+                                             (Box{}:_) -> n : tail p
+                                             _         -> n : p
+      dehyphen (Penalty a b _ d) p = Penalty a b True d : p
       dehyphen _ p = p
 
 
