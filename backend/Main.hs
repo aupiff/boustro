@@ -27,7 +27,12 @@ data WelcomePage = WelcomePage
 instance ToHtml WelcomePage where
   toHtml p = html_ $ do
 
-    head_ $ title_ "Boustro"
+    head_ $ do
+      title_ "Boustro"
+      meta_ [charset_ "UTF-8"]
+      meta_ [name_ "apple-mobile-web-app-capable", content_ "yes"]
+      meta_ [name_ "viewport", content_ "width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"]
+
 
     body_ [style_ "text-align: center"] $ do
         object_ [id_ "svg1", makeAttribute "data" "/app/boustro-logo.svg", type_ "image/svg+xml"] $ return ()
