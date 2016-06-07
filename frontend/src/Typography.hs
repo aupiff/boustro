@@ -23,7 +23,7 @@ import           Server
 
 import           Debug.Trace
 
-data PageEvent = NextPage | PrevPage | Start deriving Show
+data PageEvent = NextPage | PrevPage | Start deriving (Show, Eq)
 
 data ViewDimensions = ViewDimensions { fullWidth  :: Int
                                      , viewWidth  :: Double
@@ -100,15 +100,17 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
 
 
 typesetPage :: ViewDimensions -> ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent) = do
+typesetPage (ViewDimensions _ textWidth textHeight lineH) ((0, wordsOnPage), PrevPage) = return (0, wordsOnPage)
+typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent)
+  | pageEvent == NextPage && length processedWords == wordNumber + wordsOnPage = return (wordNumber, wordsOnPage)
+  | otherwise = do
 
-    let linesPerPage = floor $ textHeight / (lineH + 3)
+    let linesPerPage = floor $ textHeight / (lineH + 3) -- 3 is margin-bottom TODO remove this magic number
         numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
 
     wordNumber' <- case pageEvent of
 
-        NextPage -> return $ min (wordNumber + wordsOnPage)
-                                 (length processedWords - 2)
+        NextPage -> return $ wordNumber + wordsOnPage
         Start    -> return 0
         PrevPage -> do let boxify = wordsWithWidths . take numWords . reverse
                        boxesMeasure <- boxify $ take wordNumber processedWords
