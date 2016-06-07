@@ -43,7 +43,7 @@ fold1 _ g [x] = Just $ g x
 fold1 f g (x:xs) = f x <$> fold1 f g xs
 
 
-minWith :: Ord b => (a -> b) -> [a] -> Maybe a
+minWith :: forall a b. Ord b => (a -> b) -> [a] -> Maybe a
 minWith f = fold1 choice id
     where choice a b
              | f a < f b = a
@@ -106,6 +106,7 @@ typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnP
   | otherwise = do
 
     let linesPerPage = floor $ textHeight / (lineH + 3) -- 3 is margin-bottom TODO remove this magic number
+        lineSpacing = (textHeight - fromIntegral linesPerPage * lineH) / (fromIntegral linesPerPage - 1)
         numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
 
     wordNumber' <- case pageEvent of
@@ -121,7 +122,7 @@ typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnP
     boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords
     let par = take linesPerPage $ par1' textWidth boxes
         wordsOnPage' = sum $ map length par
-    ls <- mapM (renderLine lineH textWidth) par
+    ls <- mapM (renderLine lineH textWidth lineSpacing) par
 
     boustroLines <- boustro ls
     -- Should I be applying this style every time? Definitely on window change
@@ -237,12 +238,14 @@ hyphen hyphenWidth = Penalty hyphenWidth penaltyValue False
     where penaltyValue = undefined -- TODO I may not end up using this
 
 
-renderLine :: Double -> Double -> [Word] -> IO JQ.JQuery
-renderLine lineH textW ls = do
+renderLine :: Double -> Double -> Double -> [Word] -> IO JQ.JQuery
+renderLine lineH textW lineSpacing ls = do
     lineDiv <- JQ.select "<div class='line'></div>"
                  >>= JQ.setCss "width" (textToJSString . T.pack $ show textW)
                  >>= JQ.setCss "height" (textToJSString . T.pack $ show lineH)
                  >>= JQ.setCss "white-space" "nowrap"
+                 >>= JQ.setCss "margin-bottom" ((textToJSString . T.pack . show $ lineSpacing) <> "px")
+
     let nls = foldr dehyphen [] ls
         numSpaces = fromIntegral (length $ filter itemIsSpace nls)
         spaceSize = realToFrac $ (textW - sum (fmap itemWidth' nls)) / numSpaces

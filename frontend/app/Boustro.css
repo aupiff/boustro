@@ -11,18 +11,23 @@ body {
   position: relative
 }
 
+#back {
+  position: relative;
+}
+
+#back button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 #content {
   margin-left: auto;
   margin-right: auto;
   font-family: Georgia, Serif;
   text-align: center;
 }
-
-#reader-view button {
-  width: auto;
-  float: right;
-}
-
 
 #menu {
   margin-left: auto;
@@ -45,10 +50,6 @@ body {
   top: 0;
   left: 0;
   font-family: Georgia, Serif;
-}
-
-.line {
-  margin-bottom: 3px;
 }
 
 button {
