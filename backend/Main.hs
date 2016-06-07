@@ -15,6 +15,7 @@ import           Servant
 import           Control.Monad.IO.Class
 import           Text.Hyphenation.Hyphenator
 import           Lucid
+import           Lucid.Base
 import           Servant.HTML.Lucid
 import           Data.Monoid ((<>))
 
@@ -28,10 +29,10 @@ instance ToHtml WelcomePage where
 
     head_ $ title_ "Boustro"
 
-    body_ $ do
-        h1_ "Boustrophedon Syndicate"
-        p_ "software consulting" <> p_ "contact: riblankman@gmail.com"
-        a_ [href_ "/app"] "boustrophedon reading application"
+    body_ [style_ "text-align: center"] $ do
+        object_ [id_ "svg1", makeAttribute "data" "/app/boustro-logo.svg", type_ "image/svg+xml"] $ return ()
+        p_ "Efficient software" <> p_ "contact: riblankman@gmail.com"
+        a_ [href_ "/app", style_ "display:block"] "Boustrophedon Reading Application"
 
 
 api :: Proxy API
