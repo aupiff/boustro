@@ -1,5 +1,6 @@
 body {
   font-size: 19px;
+  margin: 0px;
 }
 
 html, body {
@@ -23,6 +24,7 @@ body {
 }
 
 #content {
+  padding-top: 8px;
   margin-left: auto;
   margin-right: auto;
   font-family: Georgia, Serif;

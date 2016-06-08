@@ -133,7 +133,7 @@ pagingEvent = do
 
 
 viewDims lineHeight w h = let w' = min 700 $ fromIntegral w - 40
-                              h' = fromIntegral h
+                              h' = fromIntegral h - 8
                           in ViewDimensions w w' h' lineHeight
 
 
