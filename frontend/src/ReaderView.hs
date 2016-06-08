@@ -62,46 +62,48 @@ textView = RD.Workflow . RD.el "div" $ do
         dims@(w, h) <- windowDimensions
         lineHeight <- liftIO measureLineHeight
         wds <- windowDimensionsE
-        viewDimsB <- RD.hold (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
-
+        viewDimsD <- RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
+        contentStyleMap <- RD.mapDyn func viewDimsD
         pagingE <- pagingEvent
 
-        vd@(ViewDimensions fullWidth textWidth fullHeight lineHeight) <- RD.sample viewDimsB
+        RD.elDynAttr "div" contentStyleMap $ do
 
-        RD.elAttr "div" ("id" =: "content" <> style [ ("width", show textWidth)
-                                                    , ("height", show fullHeight)]) $ do
-
-          RD.elAttr "div" ("id" =: "b" <> style [("width", show textWidth), ("height", show $ 0.9 * fullHeight)]) $ do
+          RD.elAttr "div" ("id" =: "b" <> style [("width", "100%"), ("height", "90%")]) $ do
 
             (boustroEl, _) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ return ()
 
             pb <- RD.getPostBuild
+
             let textClick = RD.domEvent RD.Mouseup boustroEl
-                textTransform = (\x -> if x > div fullWidth 2 then NextPage else PrevPage) . fst
+                textTransform vd (x, _) = if x > div (fullWidth vd) 2 then NextPage else PrevPage
+                textClick' = RD.attachDynWith textTransform viewDimsD textClick
                 buildAndPagingEvent = RD.leftmost [ fmap (const Start) pb
                                                   , pagingE
-                                                  , fmap textTransform textClick
+                                                  , textClick'
                                                   , fmap (const Resize) wds
                                                   ]
 
-            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD viewDimsB
+            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD viewDimsD
                 wordDeltaD <- RD.holdDyn (0,0) wordDelta
 
             return ()
 
-          RD.elAttr "div" ("id" =: "back" <> style [("width", show textWidth), ("height", show $ 0.1 * fullHeight)]) $ do
+          RD.elAttr "div" ("id" =: "back" <> style [("width", "100%"), ("height", "10%")]) $ do
 
             home <- RD.button "<="
 
             return $ ((), titlePage <$ home)
 
+    where func (ViewDimensions fullWidth textWidth fullHeight lineHeight) =
+                  ("id" =: "content" <> style [ ("width", show textWidth) , ("height", show fullHeight)])
+
 
 pageEventResponse :: MonadWidget t m
                   => RD.Event t PageEvent -> RD.Dynamic t (Int, Int)
-                  -> RD.Behavior t ViewDimensions -> m (RD.Event t (Int, Int))
+                  -> RD.Dynamic t ViewDimensions -> m (RD.Event t (Int, Int))
 pageEventResponse pageEvent currentWord vd = RD.performEvent $
 
-        (liftIO . typesetPage) <$> vd `RD.attach` (currentWord `RD.attachDyn` pageEvent)
+        (liftIO . typesetPage) <$> vd `RD.attachDyn` (currentWord `RD.attachDyn` pageEvent)
 
 
 pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)
