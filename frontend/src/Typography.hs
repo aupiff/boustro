@@ -23,7 +23,7 @@ import           Server
 
 import           Debug.Trace
 
-data PageEvent = NextPage | PrevPage | Start deriving (Show, Eq)
+data PageEvent = NextPage | PrevPage | Resize | Start deriving (Show, Eq)
 
 data ViewDimensions = ViewDimensions { fullWidth  :: Int
                                      , viewWidth  :: Double
@@ -99,9 +99,9 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
         fitH p = widthHead p <= textWidth
 
 
-typesetPage :: ViewDimensions -> ((Int, Int), PageEvent) -> IO (Int, Int)
-typesetPage (ViewDimensions _ textWidth textHeight lineH) ((0, wordsOnPage), PrevPage) = return (0, wordsOnPage)
-typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnPage), pageEvent)
+typesetPage :: (ViewDimensions, ((Int, Int), PageEvent)) -> IO (Int, Int)
+typesetPage ((ViewDimensions _ textWidth textHeight lineH), ((0, wordsOnPage), PrevPage)) = return (0, wordsOnPage)
+typesetPage ((ViewDimensions _ textWidth textHeight lineH), ((wordNumber, wordsOnPage), pageEvent))
   | pageEvent == NextPage && length processedWords == wordNumber + wordsOnPage = return (wordNumber, wordsOnPage)
   | otherwise = do
 
@@ -113,6 +113,7 @@ typesetPage (ViewDimensions _ textWidth textHeight lineH) ((wordNumber, wordsOnP
 
         NextPage -> return $ wordNumber + wordsOnPage
         Start    -> return 0
+        Resize   -> return wordNumber
         PrevPage -> do let boxify = wordsWithWidths . take numWords . reverse
                        boxesMeasure <- boxify $ take wordNumber processedWords
                        let parMeasure = take linesPerPage $ par1' textWidth boxesMeasure

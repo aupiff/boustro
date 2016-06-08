@@ -84,10 +84,10 @@ textView = RD.Workflow . RD.el "div" $ do
                 buildAndPagingEvent = RD.leftmost [ fmap (const Start) pb
                                                   , pagingE
                                                   , fmap textTransform textClick
+                                                  , fmap (const Resize) wds
                                                   ]
 
-            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD (ViewDimensions fullWidth textWidth
-                                                                                               (0.9 * fullHeight) lineHeight)
+            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD viewDimsB
                 wordDeltaD <- RD.holdDyn (0,0) wordDelta
 
             return ()
@@ -101,10 +101,10 @@ textView = RD.Workflow . RD.el "div" $ do
 
 pageEventResponse :: MonadWidget t m
                   => RD.Event t PageEvent -> RD.Dynamic t (Int, Int)
-                  -> ViewDimensions -> m (RD.Event t (Int, Int))
+                  -> RD.Behavior t ViewDimensions -> m (RD.Event t (Int, Int))
 pageEventResponse pageEvent currentWord vd = RD.performEvent $
 
-        (liftIO . typesetPage vd) <$> currentWord `RD.attachDyn` pageEvent
+        (liftIO . typesetPage) <$> vd `RD.attach` (currentWord `RD.attachDyn` pageEvent)
 
 
 pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)
