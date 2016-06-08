@@ -36,7 +36,7 @@ instance ToHtml WelcomePage where
 
     body_ [style_ "text-align: center"] $ do
         object_ [id_ "svg1", makeAttribute "data" "/app/boustro-logo.svg", type_ "image/svg+xml"] $ return ()
-        p_ "Efficient software" <> p_ "contact: riblankman@gmail.com"
+        p_ "Efficient Software" <> p_ "contact: riblankman@gmail.com"
         a_ [href_ "/app", style_ "display:block"] "Boustrophedon Reading Application"
 
 
