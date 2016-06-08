@@ -27,7 +27,7 @@ data PageEvent = NextPage | PrevPage | Start deriving (Show, Eq)
 
 data ViewDimensions = ViewDimensions { fullWidth  :: Int
                                      , viewWidth  :: Double
-                                     , veiwHeight :: Double
+                                     , viewHeight :: Double
                                      , lineHeight :: Double
                                      }
 
