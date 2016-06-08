@@ -25,7 +25,7 @@ import Typography
 
 
 titlePage :: forall t (m :: * -> *).  MonadWidget t m => RD.Workflow t m ()
-titlePage = RD.Workflow . RD.el "div" $ do
+titlePage = RD.Workflow $ do
 
     (w, h) <- windowDimensions
     lineHeight <- liftIO measureLineHeight
@@ -52,8 +52,6 @@ titlePage = RD.Workflow . RD.el "div" $ do
 
                       RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
 
-                RD.text $ show (w, h)
-
                 return $ ((), textView <$ showTextView)
 
 
@@ -67,10 +65,9 @@ textView = RD.Workflow . RD.el "div" $ do
         viewDimsB <- RD.hold (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
 
         pagingE <- pagingEvent
-        txt <- RD.mapDyn show =<< RD.holdDyn dims wds
-        RD.dynText txt
 
         vd@(ViewDimensions fullWidth textWidth fullHeight lineHeight) <- RD.sample viewDimsB
+
         RD.elAttr "div" ("id" =: "content" <> style [ ("width", show textWidth)
                                                     , ("height", show fullHeight)]) $ do
 

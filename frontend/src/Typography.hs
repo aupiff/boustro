@@ -100,14 +100,15 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
 
 
 typesetPage :: (ViewDimensions, ((Int, Int), PageEvent)) -> IO (Int, Int)
-typesetPage ((ViewDimensions _ textWidth textHeight lineH), ((0, wordsOnPage), PrevPage)) = return (0, wordsOnPage)
-typesetPage ((ViewDimensions _ textWidth textHeight lineH), ((wordNumber, wordsOnPage), pageEvent))
+typesetPage ((ViewDimensions _ textWidth viewHeight lineH), ((0, wordsOnPage), PrevPage)) = return (0, wordsOnPage)
+typesetPage ((ViewDimensions _ textWidth viewHeight lineH), ((wordNumber, wordsOnPage), pageEvent))
   | pageEvent == NextPage && length processedWords == wordNumber + wordsOnPage = return (wordNumber, wordsOnPage)
   | otherwise = do
 
     let linesPerPage = floor $ textHeight / (lineH + 3) -- 3 is margin-bottom TODO remove this magic number
         lineSpacing = (textHeight - fromIntegral linesPerPage * lineH) / (fromIntegral linesPerPage - 1)
         numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
+        textHeight = viewHeight * 0.9
 
     wordNumber' <- case pageEvent of
 
