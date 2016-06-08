@@ -29,10 +29,13 @@ titlePage = RD.Workflow $ do
 
     (w, h) <- windowDimensions
     lineHeight <- liftIO measureLineHeight
-    let vd = viewDims lineHeight w h
+    wds <- windowDimensionsE
+    viewDimsD <- RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
 
-    RD.elAttr "div" ("id" =: "content" <> style [ ("width", show $ viewWidth vd)
-                                                , ("height", show $ viewHeight vd)]) $
+    let vd = viewDims lineHeight w h
+    contentStyleMap <- RD.mapDyn dynamicStyle viewDimsD
+
+    RD.elDynAttr "div" contentStyleMap $
 
           do RD.el "h1" $ RD.text "βουστροφηδόν"
 
@@ -52,7 +55,7 @@ titlePage = RD.Workflow $ do
 
                       RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
 
-                return $ ((), textView <$ showTextView)
+                return ((), textView <$ showTextView)
 
 
 textView :: forall (m :: * -> *) t.  MonadWidget t m
@@ -63,7 +66,7 @@ textView = RD.Workflow . RD.el "div" $ do
         lineHeight <- liftIO measureLineHeight
         wds <- windowDimensionsE
         viewDimsD <- RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
-        contentStyleMap <- RD.mapDyn func viewDimsD
+        contentStyleMap <- RD.mapDyn dynamicStyle viewDimsD
         pagingE <- pagingEvent
 
         RD.elDynAttr "div" contentStyleMap $ do
@@ -92,10 +95,11 @@ textView = RD.Workflow . RD.el "div" $ do
 
             home <- RD.button "<="
 
-            return $ ((), titlePage <$ home)
+            return ((), titlePage <$ home)
 
-    where func (ViewDimensions fullWidth textWidth fullHeight lineHeight) =
-                  ("id" =: "content" <> style [ ("width", show textWidth) , ("height", show fullHeight)])
+
+dynamicStyle (ViewDimensions fullWidth textWidth fullHeight lineHeight) =
+    "id" =: "content" <> style [ ("width", show textWidth) , ("height", show fullHeight) ]
 
 
 pageEventResponse :: MonadWidget t m
