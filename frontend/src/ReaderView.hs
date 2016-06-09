@@ -23,6 +23,7 @@ import qualified Reflex.Dom as RD
 import Style
 import Typography
 
+
 titlePage :: forall t (m :: * -> *). MonadWidget t m
           => RD.Workflow t m ()
 titlePage = RD.Workflow $ do
@@ -101,7 +102,10 @@ viewDimensions = do
     (w, h) <- windowDimensions
     lineHeight <- liftIO measureLineHeight
     wds <- windowDimensionsE
-    RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
+    RD.holdDyn (makeDims lineHeight w h) $ uncurry (makeDims lineHeight) <$> wds
+    where makeDims lineHeight w h = let w' = min 700 $ fromIntegral w - 40
+                                        h' = fromIntegral h - 8
+                                    in ViewDimensions w w' h' lineHeight
 
 
 dynamicStyle (ViewDimensions fullWidth textWidth fullHeight lineHeight) =
@@ -140,11 +144,6 @@ pagingEvent = do
            | otherwise             = Nothing
         rightArrow               = 39 :: Int
         leftArrow                = 37 :: Int
-
-
-viewDims lineHeight w h = let w' = min 700 $ fromIntegral w - 40
-                              h' = fromIntegral h - 8
-                          in ViewDimensions w w' h' lineHeight
 
 
 windowDimensionsE :: MonadWidget t m => m (RD.Event t (Int, Int))
