@@ -13,7 +13,7 @@ import           Control.Monad.IO.Class
 import qualified Data.Map.Strict as Map
 import           GHCJS.DOM (webViewGetDomDocument)
 import           GHCJS.DOM.Window ( getInnerHeight, getInnerWidth
-                                  , getWindow, resize, load)
+                                  , getWindow, resize)
 import           GHCJS.DOM.EventM (on, preventDefault)
 import           GHCJS.DOM.Element (keyDown)
 import           GHCJS.DOM.Document (getBody)
@@ -30,7 +30,7 @@ titlePage = RD.Workflow $ do
 
     viewDimsD <- viewDimensions
 
-    contentStyleMap <- RD.mapDyn dynamicStyle viewDimsD
+    contentStyleMap <- RD.mapDyn viewDimsToStyleMap viewDimsD
 
     RD.elDynAttr "div" contentStyleMap $
 
@@ -60,7 +60,7 @@ textView :: forall (m :: * -> *) t. MonadWidget t m
 textView = RD.Workflow . RD.el "div" $ do
 
         viewDimsD <- viewDimensions
-        contentStyleMap <- RD.mapDyn dynamicStyle viewDimsD
+        contentStyleMap <- RD.mapDyn viewDimsToStyleMap viewDimsD
         pagingE <- pagingEvent
 
         RD.elDynAttr "div" contentStyleMap $ do
@@ -100,16 +100,18 @@ viewDimensions :: forall (m :: * -> *) t. MonadWidget t m
                => m (RD.Dynamic t ViewDimensions)
 viewDimensions = do
     (w, h) <- windowDimensions
-    lineHeight <- liftIO measureLineHeight
+    lineH <- liftIO measureLineHeight
     wds <- windowDimensionsE
-    RD.holdDyn (makeDims lineHeight w h) $ uncurry (makeDims lineHeight) <$> wds
-    where makeDims lineHeight w h = let w' = min 700 $ fromIntegral w - 40
-                                        h' = fromIntegral h - 8
-                                    in ViewDimensions w w' h' lineHeight
+    RD.holdDyn (makeDims lineH w h) $ uncurry (makeDims lineH) <$> wds
+    where makeDims lineH w h = let w' = min 700 $ fromIntegral w - 40
+                                   h' = fromIntegral h - 8
+                               in ViewDimensions w w' h' lineH
 
 
-dynamicStyle (ViewDimensions fullWidth textWidth fullHeight lineHeight) =
-    "id" =: "content" <> style [ ("width", show textWidth) , ("height", show fullHeight) ]
+viewDimsToStyleMap :: ViewDimensions -> Map.Map String String
+viewDimsToStyleMap (ViewDimensions _ textWidth fullHeight _) =
+    "id" =: "content" <> style [ ("width", show textWidth)
+                               , ("height", show fullHeight) ]
 
 
 pageEventResponse :: MonadWidget t m
