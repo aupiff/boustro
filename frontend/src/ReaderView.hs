@@ -23,16 +23,10 @@ import qualified Reflex.Dom as RD
 import Style
 import Typography
 
-
-titlePage :: forall t (m :: * -> *).  MonadWidget t m => RD.Workflow t m ()
+titlePage :: forall t (m :: * -> *). MonadWidget t m => RD.Workflow t m ()
 titlePage = RD.Workflow $ do
 
-    (w, h) <- windowDimensions
-    lineHeight <- liftIO measureLineHeight
-    wds <- windowDimensionsE
-    viewDimsD <- RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
-
-    let vd = viewDims lineHeight w h
+    viewDimsD <- viewDimensions
     contentStyleMap <- RD.mapDyn dynamicStyle viewDimsD
 
     RD.elDynAttr "div" contentStyleMap $
@@ -53,19 +47,23 @@ titlePage = RD.Workflow $ do
 
                 showTextView <-
 
-                      RD.button "Read \"Tess of the D'Urbervilles\" by Thomas Hardy"
+                      RD.button "Read \"Inside the Whale\" by George Orwell"
 
                 return ((), textView <$ showTextView)
+        where -- viewDimensions :: forall (m :: * -> *) t. MonadWidget t m
+              --                => (RD.Dynamic t ViewDimensions)
+              viewDimensions = do
+                  (w, h) <- windowDimensions
+                  lineHeight <- liftIO measureLineHeight
+                  wds <- windowDimensionsE
+                  RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
 
 
 textView :: forall (m :: * -> *) t.  MonadWidget t m
          => RD.Workflow t m ()
 textView = RD.Workflow . RD.el "div" $ do
 
-        dims@(w, h) <- windowDimensions
-        lineHeight <- liftIO measureLineHeight
-        wds <- windowDimensionsE
-        viewDimsD <- RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
+        viewDimsD <- viewDimensions
         contentStyleMap <- RD.mapDyn dynamicStyle viewDimsD
         pagingE <- pagingEvent
 
@@ -78,12 +76,16 @@ textView = RD.Workflow . RD.el "div" $ do
             pb <- RD.getPostBuild
 
             let textClick = RD.domEvent RD.Mouseup boustroEl
-                textTransform vd (x, _) = if x > div (fullWidth vd) 2 then NextPage else PrevPage
                 textClick' = RD.attachDynWith textTransform viewDimsD textClick
-                buildAndPagingEvent = RD.leftmost [ fmap (const Start) pb
+                textTransform vd (x, _) | x > div (fullWidth vd) 2 = NextPage
+                                        | otherwise                = PrevPage
+
+                resizeE = RD.updated viewDimsD
+
+                buildAndPagingEvent = RD.leftmost [ const Start <$> pb
                                                   , pagingE
                                                   , textClick'
-                                                  , fmap (const Resize) wds
+                                                  , const Resize <$> resizeE
                                                   ]
 
             rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD viewDimsD
@@ -96,6 +98,13 @@ textView = RD.Workflow . RD.el "div" $ do
             home <- RD.button "<="
 
             return ((), titlePage <$ home)
+        where -- viewDimensions :: forall (m :: * -> *) t. MonadWidget t m
+              --                => (RD.Dynamic t ViewDimensions)
+              viewDimensions = do
+                  (w, h) <- windowDimensions
+                  lineHeight <- liftIO measureLineHeight
+                  wds <- windowDimensionsE
+                  RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
 
 
 dynamicStyle (ViewDimensions fullWidth textWidth fullHeight lineHeight) =
