@@ -23,10 +23,12 @@ import qualified Reflex.Dom as RD
 import Style
 import Typography
 
-titlePage :: forall t (m :: * -> *). MonadWidget t m => RD.Workflow t m ()
+titlePage :: forall t (m :: * -> *). MonadWidget t m
+          => RD.Workflow t m ()
 titlePage = RD.Workflow $ do
 
     viewDimsD <- viewDimensions
+
     contentStyleMap <- RD.mapDyn dynamicStyle viewDimsD
 
     RD.elDynAttr "div" contentStyleMap $
@@ -50,16 +52,9 @@ titlePage = RD.Workflow $ do
                       RD.button "Read \"Inside the Whale\" by George Orwell"
 
                 return ((), textView <$ showTextView)
-        where -- viewDimensions :: forall (m :: * -> *) t. MonadWidget t m
-              --                => (RD.Dynamic t ViewDimensions)
-              viewDimensions = do
-                  (w, h) <- windowDimensions
-                  lineHeight <- liftIO measureLineHeight
-                  wds <- windowDimensionsE
-                  RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
 
 
-textView :: forall (m :: * -> *) t.  MonadWidget t m
+textView :: forall (m :: * -> *) t. MonadWidget t m
          => RD.Workflow t m ()
 textView = RD.Workflow . RD.el "div" $ do
 
@@ -98,13 +93,15 @@ textView = RD.Workflow . RD.el "div" $ do
             home <- RD.button "<="
 
             return ((), titlePage <$ home)
-        where -- viewDimensions :: forall (m :: * -> *) t. MonadWidget t m
-              --                => (RD.Dynamic t ViewDimensions)
-              viewDimensions = do
-                  (w, h) <- windowDimensions
-                  lineHeight <- liftIO measureLineHeight
-                  wds <- windowDimensionsE
-                  RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
+
+
+viewDimensions :: forall (m :: * -> *) t. MonadWidget t m
+               => m (RD.Dynamic t ViewDimensions)
+viewDimensions = do
+    (w, h) <- windowDimensions
+    lineHeight <- liftIO measureLineHeight
+    wds <- windowDimensionsE
+    RD.holdDyn (viewDims lineHeight w h) $ uncurry (viewDims lineHeight) <$> wds
 
 
 dynamicStyle (ViewDimensions fullWidth textWidth fullHeight lineHeight) =
