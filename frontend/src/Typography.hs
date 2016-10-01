@@ -35,7 +35,7 @@ type Word = Item T.Text Double
 type Txt = [Word]
 type Line = [Word]
 type Paragraph = [Line]
-
+type ParagraphPlus = (Paragraph, Double, Double)
 
 fold1 :: forall a b. (a -> b -> b) -> (a -> b) -> [a] -> Maybe b
 fold1 _ _ [] = Nothing
@@ -79,9 +79,10 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
                            . fromMaybe (trace "par1' fold1" []) . fold1 step start
     where
         step :: Word -> [(Paragraph, Double, Double)] -> [(Paragraph, Double, Double)]
-        step w ps = let origin = (new w (fromMaybe (error $ "par1' step" ++ show ps) $ minWith waste ps) : map (glue w) ps)
-                        result = filter fitH origin
-                    in if null result then traceShow origin [fromMaybe (head origin) (minWith waste origin)] else result
+        step w ps = let origin = new w (last ps) : map (glue w) ps
+                        result = foldr trim [] $ filter fitH origin
+                    in if null result then traceShow origin [fromMaybe (head origin) (minWith waste origin)]
+                                      else result
 
         start :: Word -> [(Paragraph, Double, Double)]
         start w = [([[w]], itemWidth w, 0.0)]
@@ -99,9 +100,23 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
         fitH p = widthHead p <= textWidth
 
 
+        trim :: ParagraphPlus -> [ParagraphPlus] -> [ParagraphPlus]
+        trim q [] = [ q ]
+        trim q ps@(p : ps') =
+          let qWaste = waste q
+              pWaste = waste p
+          in if qWaste <= pWaste then q : ps'
+                                 else q : ps
+
+        add p [] = [p]
+        add p [q] = [p, q]
+        add p (q : r : rs) | bf p q <= bf q r = add p (r : rs)
+                           | otherwise = p : q : r : rs
+        bf p q = 0
+
 typesetPage :: (ViewDimensions, ((Int, Int), PageEvent)) -> IO (Int, Int)
-typesetPage ((ViewDimensions _ textWidth viewHeight lineH), ((0, wordsOnPage), PrevPage)) = return (0, wordsOnPage)
-typesetPage ((ViewDimensions _ textWidth viewHeight lineH), ((wordNumber, wordsOnPage), pageEvent))
+typesetPage (ViewDimensions _ textWidth viewHeight lineH, ((0, wordsOnPage), PrevPage)) = return (0, wordsOnPage)
+typesetPage (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber, wordsOnPage), pageEvent))
   | pageEvent == NextPage && length processedWords == wordNumber + wordsOnPage = return (wordNumber, wordsOnPage)
   | otherwise = do
 
@@ -280,6 +295,13 @@ reverseLine = JQ.setCss "-moz-transform" "scaleX(-1)" <=<
               JQ.setCss "filter" "FlipH" <=<
               JQ.setCss "-ms-filter" "\"FlipH\""
 
+reverseLine' :: JQ.JQuery -> IO JQ.JQuery
+reverseLine' = JQ.setCss "-moz-transform" "scale(-1, -1)" <=<
+               JQ.setCss "-o-transform"  "scale(-1, -1)" <=<
+               JQ.setCss "-webkit-transform" "scale(-1, -1)" <=<
+               JQ.setCss "transform" "scale(-1, -1)" <=<
+               JQ.setCss "filter" "FlipV FlipH" <=<
+               JQ.setCss "-ms-filter" "\"FlipV FlipH\""
 
 hyphenString :: String
 hyphenString = "-"

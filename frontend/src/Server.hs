@@ -7,4 +7,4 @@ module Server
 import           Data.FileEmbed
 
 contextText :: String
-contextText = $(embedStringFile "texts/middlemarch.txt")
+contextText = $(embedStringFile "texts/tess1.txt")
