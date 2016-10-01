@@ -79,10 +79,7 @@ par1' textWidth = parLines . last . fromMaybe (trace "par1' fold1" [])
                            . fold1 step start
     where
         step :: Word -> [ParagraphPlus] -> [ParagraphPlus]
-        step w ps = let origin = new w (last ps) : map (glue w) ps
-                        result = foldr trim [] $ filter fitH origin
-                    in if null result then traceShow origin [fromMaybe (head origin) (minWith waste origin)]
-                                      else result
+        step w ps = foldr trim [] $ filter fitH $ new w (last ps) : map (glue w) ps
 
         start :: Word -> [ParagraphPlus]
         start w = [([[w]], itemWidth w, 0.0)]
