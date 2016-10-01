@@ -75,16 +75,16 @@ lineWaste textWidth l = numSpaces * weighting (spaceSize / numSpaces - spaceWidt
 
 
 par1' :: Double -> Txt -> Paragraph
-par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWith waste
-                           . fromMaybe (trace "par1' fold1" []) . fold1 step start
+par1' textWidth = parLines . last . fromMaybe (trace "par1' fold1" [])
+                           . fold1 step start
     where
-        step :: Word -> [(Paragraph, Double, Double)] -> [(Paragraph, Double, Double)]
+        step :: Word -> [ParagraphPlus] -> [ParagraphPlus]
         step w ps = let origin = new w (last ps) : map (glue w) ps
                         result = foldr trim [] $ filter fitH origin
                     in if null result then traceShow origin [fromMaybe (head origin) (minWith waste origin)]
                                       else result
 
-        start :: Word -> [(Paragraph, Double, Double)]
+        start :: Word -> [ParagraphPlus]
         start w = [([[w]], itemWidth w, 0.0)]
 
         new w ([l], _, 0)  = ([w]:[l], itemWidth w, 0.0)
@@ -98,7 +98,6 @@ par1' textWidth = parLines . fromMaybe (trace "par1 minWith" ([], 0, 0)) . minWi
         waste ([_], _, _) = 0
         waste p = linwHead p + wasteTail p
         fitH p = widthHead p <= textWidth
-
 
         trim :: ParagraphPlus -> [ParagraphPlus] -> [ParagraphPlus]
         trim q [] = [ q ]
