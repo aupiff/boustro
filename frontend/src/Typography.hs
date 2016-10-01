@@ -104,11 +104,6 @@ par1' textWidth = parLines . last . fromMaybe (trace "par1' fold1" [])
           in if qWaste <= pWaste then q : ps'
                                  else q : ps
 
-        add p [] = [p]
-        add p [q] = [p, q]
-        add p (q : r : rs) | bf p q <= bf q r = add p (r : rs)
-                           | otherwise = p : q : r : rs
-        bf p q = 0
 
 typesetPage :: (ViewDimensions, ((Int, Int), PageEvent)) -> IO (Int, Int)
 typesetPage (ViewDimensions _ textWidth viewHeight lineH, ((0, wordsOnPage), PrevPage)) = return (0, wordsOnPage)
