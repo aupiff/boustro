@@ -59,7 +59,7 @@ width l = sum (map itemWidth l)
 
 
 lineWaste :: Double -> Line -> Double
-lineWaste textWidth l = numSpaces * weighting (spaceSize / numSpaces - spaceWidth) + hyphenPenalty + hyphenHeadPenalty
+lineWaste textWidth l = numSpaces * weighting (spaceWidth - spaceSize / numSpaces) + hyphenPenalty + hyphenHeadPenalty
     where spaceSize = textWidth - width l
           numSpaces :: Double
           numSpaces = fromIntegral . length $ filter itemIsBox l
@@ -70,7 +70,7 @@ lineWaste textWidth l = numSpaces * weighting (spaceSize / numSpaces - spaceWidt
           hyphenHeadPenalty = if itemIsPenalty (head l) then 1000000 else 0
           weighting x -- too close is worse than too far apart : TODO This seems backwards to me
             | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
-            | otherwise =  3 * x ^ (2 :: Int) -- spaces smaller than optimal width
+            | otherwise = if x > 2 then 1000 else 3 * x ^ (2 :: Int) -- spaces smaller than optimal width
     -- Write quickcheck properties for this
 
 
@@ -111,7 +111,7 @@ typesetPage (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber, wordsOnP
   | pageEvent == NextPage && length processedWords == wordNumber + wordsOnPage = return (wordNumber, wordsOnPage)
   | otherwise = do
 
-    let linesPerPage = floor $ textHeight / (lineH + 3) -- 3 is margin-bottom TODO remove this magic number
+    let linesPerPage = floor $ textHeight / (lineH + 5) -- 3 is margin-bottom TODO remove this magic number
         lineSpacing = (textHeight - fromIntegral linesPerPage * lineH) / (fromIntegral linesPerPage - 1)
         numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
         textHeight = viewHeight * 0.9
@@ -227,7 +227,7 @@ itemIsPenalty Penalty{} = True
 itemIsPenalty _ = False
 
 spaceWidth :: Double
-spaceWidth = 6
+spaceWidth = 7
 
 
 space :: Double -> Word
