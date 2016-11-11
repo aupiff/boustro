@@ -89,7 +89,7 @@ textView = RD.Workflow . RD.el "div" $ do
 
             return ()
 
-          (a, b, prev, next) <- RD.elAttr "div" ("id" =: "readerNav" <> style [("width", "100%"), ("height", "10%")]) $ do
+          (a, b, prev, next) <- RD.elAttr "div" ("id" =: "readerNav" <> style [("width", "100%"), ("height", "10%")]) $ RD.elAttr "div" ("id" =: "readerNavInner") $ do
 
             prev <- RD.button "<="
             home <- RD.button "o"

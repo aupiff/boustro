@@ -12,16 +12,20 @@ body {
   position: relative
 }
 
-#back {
+#readerNav {
   position: relative;
 }
 
-#back button {
-  /* position: absolute;
+#readerNav button {
+  position: relative;
+  margin: 0px 20px;
+}
+
+#readerNavInner {
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
- */
 }
 
 #content {
