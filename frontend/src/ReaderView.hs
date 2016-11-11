@@ -50,8 +50,7 @@ titlePage = RD.Workflow $ do
 
                 showTextView <-
 
-                      RD.button "Read \"Inside the Whale\" by George Orwell"
-
+                      RD.button "Read \"The History of the Peloponnesian War\" by Thucydides"
                 return ((), textView <$ showTextView)
 
 
@@ -63,14 +62,13 @@ textView = RD.Workflow . RD.el "div" $ do
         contentStyleMap <- RD.mapDyn viewDimsToStyleMap viewDimsD
         pagingE <- pagingEvent
 
-        RD.elDynAttr "div" contentStyleMap $ do
+        RD.elDynAttr "div" contentStyleMap $ mdo
 
           RD.elAttr "div" ("id" =: "b" <> style [("width", "100%"), ("height", "90%")]) $ do
 
             (boustroEl, _) <- RD.elAttr' "div" (Map.singleton "id" "boustro") $ return ()
 
             pb <- RD.getPostBuild
-
             let textClick = RD.domEvent RD.Mouseup boustroEl
                 textClick' = RD.attachDynWith textTransform viewDimsD textClick
                 textTransform vd (x, _) | x > div (fullWidth vd) 2 = NextPage
@@ -80,6 +78,8 @@ textView = RD.Workflow . RD.el "div" $ do
 
                 buildAndPagingEvent = RD.leftmost [ const Start <$> pb
                                                   , pagingE
+                                                  , const PrevPage <$> prev
+                                                  , const NextPage <$> next
                                                   , textClick'
                                                   , const Resize <$> resizeE
                                                   ]
@@ -89,11 +89,15 @@ textView = RD.Workflow . RD.el "div" $ do
 
             return ()
 
-          RD.elAttr "div" ("id" =: "back" <> style [("width", "100%"), ("height", "10%")]) $ do
+          (a, b, prev, next) <- RD.elAttr "div" ("id" =: "readerNav" <> style [("width", "100%"), ("height", "10%")]) $ do
 
-            home <- RD.button "<="
+            prev <- RD.button "<="
+            home <- RD.button "o"
+            next <- RD.button "=>"
 
-            return ((), titlePage <$ home)
+            return ((), titlePage <$ home, prev, next)
+
+          return (a, b)
 
 
 viewDimensions :: forall (m :: * -> *) t. MonadWidget t m
