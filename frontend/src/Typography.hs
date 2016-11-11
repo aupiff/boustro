@@ -227,7 +227,7 @@ itemIsPenalty Penalty{} = True
 itemIsPenalty _ = False
 
 spaceWidth :: Double
-spaceWidth = 7
+spaceWidth = 5.5
 
 
 space :: Double -> Word

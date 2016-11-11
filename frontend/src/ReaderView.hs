@@ -41,10 +41,13 @@ titlePage = RD.Workflow $ do
                 RD.text "An ancient, efficient, yet \
                        \ unfortunately forgotten style of typsetting."
 
-             RD.el "p" $ RD.text "In the reader view, use left and \
-                                \ right arrows to turn pages on PCs.\
-                                \ On mobile phones, single click \
-                                \ left and right sides of the screen."
+             RD.el "p" $ RD.text "To turn pages in the reader view, \
+                                \ use the left and right the arrows on \
+                                \ PCs or, if using a mobile device, single \
+                                \ click the left and right sides of the \
+                                \ screen. Additionally, paging and home \
+                                \ buttons are displayed at the bottom of \
+                                \ the screen."
 
              RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
