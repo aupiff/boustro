@@ -1,10 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Server
-     ( contextText
+     ( texts
      ) where
 
 import           Data.FileEmbed
 
-contextText :: String
-contextText = $(embedStringFile "texts/p_war.txt")
+texts :: [String]
+texts = [ $(embedStringFile "texts/rabbit.txt")
+        , $(embedStringFile "texts/reading.txt")
+        , $(embedStringFile "texts/eveline.txt")
+        ]

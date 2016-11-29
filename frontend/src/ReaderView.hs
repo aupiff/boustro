@@ -51,15 +51,21 @@ titlePage = RD.Workflow $ do
 
              RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
-                showTextView <-
+                one <- RD.button "\"The Velveteen Rabbit\" -- Margery Williams"
+                two <- RD.button "\"Walden, Chapter III\" -- Henry David Thoreau"
+                three <- RD.button "\"Eveline\" -- James Joyce"
 
-                      RD.button "Read \"The History of the Peloponnesian War\" by Thucydides"
-                return ((), textView <$ showTextView)
+                let selectionEvent = RD.leftmost [ const 0 <$> one
+                                                 , const 1 <$> two
+                                                 , const 2 <$> three
+                                                 ]
+
+                return ((), textView <$> selectionEvent)
 
 
 textView :: forall (m :: * -> *) t. MonadWidget t m
-         => RD.Workflow t m ()
-textView = RD.Workflow . RD.el "div" $ do
+         => Int -> RD.Workflow t m ()
+textView textIndex = RD.Workflow . RD.el "div" $ do
 
         viewDimsD <- viewDimensions
         contentStyleMap <- RD.mapDyn viewDimsToStyleMap viewDimsD
@@ -87,7 +93,7 @@ textView = RD.Workflow . RD.el "div" $ do
                                                   , const Resize <$> resizeE
                                                   ]
 
-            rec wordDelta  <- pageEventResponse buildAndPagingEvent wordDeltaD viewDimsD
+            rec wordDelta  <- pageEventResponse textIndex buildAndPagingEvent wordDeltaD viewDimsD
                 wordDeltaD <- RD.holdDyn (0,0) wordDelta
 
             return ()
@@ -122,11 +128,11 @@ viewDimsToStyleMap (ViewDimensions _ textWidth fullHeight _) =
 
 
 pageEventResponse :: MonadWidget t m
-                  => RD.Event t PageEvent -> RD.Dynamic t (Int, Int)
+                  => Int -> RD.Event t PageEvent -> RD.Dynamic t (Int, Int)
                   -> RD.Dynamic t ViewDimensions -> m (RD.Event t (Int, Int))
-pageEventResponse pageEvent currentWord vd = RD.performEvent $
+pageEventResponse textIndex pageEvent currentWord vd = RD.performEvent $
 
-        (liftIO . typesetPage) <$> vd `RD.attachDyn` (currentWord `RD.attachDyn` pageEvent)
+        (liftIO . typesetPage textIndex) <$> vd `RD.attachDyn` (currentWord `RD.attachDyn` pageEvent)
 
 
 pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)

@@ -5,7 +5,6 @@ module Typography
     ( measureLineHeight
     , PageEvent(..)
     , ViewDimensions(..)
-    , processedWords
     , typesetPage
     ) where
 
@@ -105,10 +104,10 @@ par1' textWidth = parLines . last . fromMaybe (trace "par1' fold1" [])
                                  else q : ps
 
 
-typesetPage :: (ViewDimensions, ((Int, Int), PageEvent)) -> IO (Int, Int)
-typesetPage (ViewDimensions _ textWidth viewHeight lineH, ((0, wordsOnPage), PrevPage)) = return (0, wordsOnPage)
-typesetPage (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber, wordsOnPage), pageEvent))
-  | pageEvent == NextPage && length processedWords == wordNumber + wordsOnPage = return (wordNumber, wordsOnPage)
+typesetPage :: Int -> (ViewDimensions, ((Int, Int), PageEvent)) -> IO (Int, Int)
+typesetPage _ (ViewDimensions _ textWidth viewHeight lineH, ((0, wordsOnPage), PrevPage)) = return (0, wordsOnPage)
+typesetPage textIndex (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber, wordsOnPage), pageEvent))
+  | pageEvent == NextPage && length (processedWords textIndex) == wordNumber + wordsOnPage = return (wordNumber, wordsOnPage)
   | otherwise = do
 
     let linesPerPage = floor $ textHeight / (lineH + 5) -- 3 is margin-bottom TODO remove this magic number
@@ -122,12 +121,12 @@ typesetPage (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber, wordsOnP
         Start    -> return 0
         Resize   -> return wordNumber
         PrevPage -> do let boxify = wordsWithWidths . take numWords . reverse
-                       boxesMeasure <- boxify $ take wordNumber processedWords
+                       boxesMeasure <- boxify . take wordNumber $ processedWords textIndex
                        let parMeasure = take linesPerPage $ par1' textWidth boxesMeasure
                            wordsOnPageMeasure = sum $ map length parMeasure
                        return $ max 0 $ wordNumber - wordsOnPageMeasure
 
-    boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords
+    boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords textIndex
     let par = take linesPerPage $ par1' textWidth boxes
         wordsOnPage' = sum $ map length par
     ls <- mapM (renderLine lineH textWidth lineSpacing) par
@@ -317,5 +316,5 @@ preprocess = prepareText
     replace = map (\x -> if x == '-' || x == emdash then nonBreakingHypenString else x)
 
 
-processedWords :: [String]
-processedWords = preprocess contextText
+processedWords :: Int -> [String]
+processedWords index = preprocess (texts !! index)
