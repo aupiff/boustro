@@ -4,11 +4,6 @@ body {
   font-family: Georgia, serif;
 }
 
-html, body {
-  overflow-x: hidden;
-  overflow-y: hidden;
-}
-
 body {
   position: relative
 }

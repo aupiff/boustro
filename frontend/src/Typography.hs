@@ -70,7 +70,7 @@ lineWaste textWidth l = numSpaces * weighting (spaceWidth - spaceSize / numSpace
           hyphenHeadPenalty = if itemIsPenalty (head l) then 1000000 else 0
           weighting x -- too close is worse than too far apart : TODO This seems backwards to me
             | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
-            | otherwise = if x > 1.5 then 1000 else 3 * x ^ (2 :: Int) -- spaces smaller than optimal width
+            | otherwise = if x > 1.5 then 10000000 else 2 * x ^ (2 :: Int) -- spaces smaller than optimal width
     -- Write quickcheck properties for this
 
 
@@ -111,7 +111,7 @@ typesetPage textIndex (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber
   | pageEvent == NextPage && length (processedWords textIndex) == wordNumber + wordsOnPage = return (wordNumber, wordsOnPage)
   | otherwise = do
 
-    let linesPerPage = floor $ textHeight / (lineH + 4) -- 3 is margin-bottom TODO remove this magic number
+    let linesPerPage = floor $ textHeight / (lineH + 3) -- 3 is margin-bottom TODO remove this magic number
         lineSpacing = (textHeight - fromIntegral linesPerPage * lineH) / (fromIntegral linesPerPage - 1)
         numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
         textHeight = viewHeight * 0.9
@@ -158,7 +158,6 @@ typesetParagraph (ViewDimensions _ textWidth viewHeight lineH, _) = do
     ls <- mapM (renderLine lineH textWidth lineSpacing) (init par)
     l <- renderLastLine lineH textWidth lineSpacing (last par)
 
-
     boustroLines <- boustro $ ls ++ l
     -- Should I be applying this style every time? Definitely on window change
     -- dim, so maybe it's not so bad.
@@ -167,8 +166,6 @@ typesetParagraph (ViewDimensions _ textWidth viewHeight lineH, _) = do
     return ()
 
       where widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
-
-
 
 wordsWithWidths :: [String] -> IO [Word]
 wordsWithWidths inputWords = do
@@ -219,7 +216,6 @@ instance Show b => Show (Item a b) where
 itemWidth :: Num b => Item a b -> b
 itemWidth (Box w _) = w
 itemWidth (Spring w _ _) = w
--- itemWidth (Penalty w _ _ _) = w
 itemWidth Penalty{} = 0
 
 

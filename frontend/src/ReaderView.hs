@@ -42,7 +42,7 @@ titlePage = RD.Workflow $ do
 
              RD.el "p" $
 
-                RD.text "It is a strange fact that many ancient civilizations read not left-to-right or right-to-left but alternating between the two. We invite you to discover the potential benefits of this ancient form of typsetting. To read the following paragraph, first read from left to right and then, on the next line, read mirrored text from right to left."
+                RD.text "It is a strange fact that many ancient civilizations read not left-to-right or right-to-left but alternated between the two. The text below demonstrates the advantages of this ancient style of typesetting called Boustrophedon. To read the following paragraph, read the first line from left to right, then read the next line's mirrored text from right to left, and repeat this alternation of reading direction until you finish the text."
 
              RD.elAttr "div" (Map.singleton "id" "demo") $
 
@@ -72,22 +72,14 @@ selectionPage = RD.Workflow $ do
 
       RD.elAttr "div" (Map.singleton "id" "instruction") $ do
 
-               RD.el "p" $ RD.text "To turn pages in the reader view, \
-                                  \ use the left and right the arrows on \
-                                  \ PCs or, if using a mobile device, single \
-                                  \ click the left and right sides of the \
-                                  \ screen. Additionally, paging and home \
-                                  \ buttons are displayed at the bottom of \
-                                  \ the screen."
-
                RD.el "p" $
 
-                    RD.text "Select one of the works below to enter the reader:"
+                    RD.text "Select one of the works below to read. Works labelled \"ALL-CAPS\" are recommended for beginners."
 
-               RD.elAttr "div" (Map.singleton "id" "menu") $ do
+               x <- RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
-                  one <- RD.button "\"The Velveteen Rabbit\" -- Margery Williams"
-                  twain <- RD.button "\"The The Celebrated Jumping Frog of Calaveras County\" -- Mark Twain"
+                  one <- RD.button "\"The Velveteen Rabbit\" -- Margery Williams  (ALL-CAPS)"
+                  twain <- RD.button "\"The The Celebrated Jumping Frog of Calaveras County\" -- Mark Twain (ALL-CAPS)"
                   two <- RD.button "\"Walden, Chapter III\" -- Henry David Thoreau"
                   three <- RD.button "\"The Man of the Crowd\" -- Edgar Allan Poe"
                   four <- RD.button "\"Eveline\" -- James Joyce"
@@ -101,6 +93,15 @@ selectionPage = RD.Workflow $ do
 
                   return ((), textView <$> selectionEvent)
 
+               RD.el "p" $ RD.text "To turn pages in the reader view, \
+                                  \ use the left and right the arrows on \
+                                  \ PCs or, if using a mobile device, single \
+                                  \ click the left and right sides of the \
+                                  \ screen. Additionally, paging and home \
+                                  \ buttons are displayed at the bottom of \
+                                  \ the screen."
+
+               return x
 
 textView :: forall (m :: * -> *) t. MonadWidget t m
          => Int -> RD.Workflow t m ()
