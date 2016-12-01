@@ -111,7 +111,7 @@ typesetPage textIndex (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber
   | pageEvent == NextPage && length (processedWords textIndex) == wordNumber + wordsOnPage = return (wordNumber, wordsOnPage)
   | otherwise = do
 
-    let linesPerPage = floor $ textHeight / (lineH + 5) -- 3 is margin-bottom TODO remove this magic number
+    let linesPerPage = floor $ textHeight / (lineH + 4) -- 3 is margin-bottom TODO remove this magic number
         lineSpacing = (textHeight - fromIntegral linesPerPage * lineH) / (fromIntegral linesPerPage - 1)
         numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
         textHeight = viewHeight * 0.9
@@ -122,14 +122,18 @@ typesetPage textIndex (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber
         Start    -> return 0
         Resize   -> return wordNumber
         PrevPage -> do let boxify = wordsWithWidths . take numWords . reverse
-                       boxesMeasure <- boxify . take wordNumber $ processedWords textIndex
+                       boxesMeasure <- boxify . take wordNumber $
+                              processedWords textIndex
                        let parMeasure = take linesPerPage $ par1' textWidth boxesMeasure
                            wordsOnPageMeasure = sum $ map length parMeasure
                        return $ max 0 $ wordNumber - wordsOnPageMeasure
 
-    boxes <- wordsWithWidths . take numWords . drop wordNumber' $ processedWords textIndex
+    boxes <- wordsWithWidths . take numWords . drop wordNumber' $
+                processedWords textIndex
+
     let par = take linesPerPage $ par1' textWidth boxes
         wordsOnPage' = sum $ map length par
+
     ls <- mapM (renderLine lineH textWidth lineSpacing) par
 
     boustroLines <- boustro ls
@@ -144,19 +148,18 @@ typesetPage textIndex (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber
 
 typesetParagraph :: (ViewDimensions, ()) -> IO ()
 typesetParagraph (ViewDimensions _ textWidth viewHeight lineH, _) = do
-
-    let linesPerPage = floor $ textHeight / (lineH + 5) -- 3 is margin-bottom TODO remove this magic number
-        lineSpacing = (textHeight - fromIntegral linesPerPage * lineH) / (fromIntegral linesPerPage - 1)
-        numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
+    let lineSpacing = 3
         textHeight = viewHeight * 0.9
 
     boxes <- wordsWithWidths $ processedWords 5
 
-    let par = take linesPerPage $ par1' textWidth boxes
-        wordsOnPage' = sum $ map length par
-    ls <- mapM (renderLine lineH textWidth lineSpacing) par
+    let par = par1' textWidth boxes
 
-    boustroLines <- boustro ls
+    ls <- mapM (renderLine lineH textWidth lineSpacing) (init par)
+    l <- renderLastLine lineH textWidth lineSpacing (last par)
+
+
+    boustroLines <- boustro $ ls ++ l
     -- Should I be applying this style every time? Definitely on window change
     -- dim, so maybe it's not so bad.
     textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#demo"
@@ -290,18 +293,38 @@ renderLine lineH textW lineSpacing ls = do
 
     where
       toJQueryWithWidth i = assignCssWidth (itemWidth' i) =<< itemElement i
-      dehyphen :: Word -> [Word] -> [Word]
-      dehyphen n [] = [n]
-      dehyphen n@(Box{}) p =
-                        let sp = space 0
-                        in case head p of
-                            Box{} -> n : sp : p
-                            Penalty{} -> case tail p of
-                                             (Box{}:_) -> n : tail p
-                                             _         -> n : p
-      dehyphen n@(Penalty{}) p = n : p
-      dehyphen _ p = p
 
+renderLastLine :: Double -> Double -> Double -> [Word] -> IO [JQ.JQuery]
+renderLastLine lineH textW lineSpacing ls = do
+    lineDiv <- JQ.select "<div class='line'></div>"
+                 >>= JQ.setCss "width" (textToJSString . T.pack $ show textW)
+                 >>= JQ.setCss "height" (textToJSString . T.pack $ show lineH)
+                 >>= JQ.setCss "white-space" "nowrap"
+                 >>= JQ.setCss "margin-bottom" ((textToJSString . T.pack . show $ lineSpacing) <> "px")
+
+    let nls = foldr dehyphen [] ls
+        numSpaces = fromIntegral (length $ filter itemIsSpace nls)
+        spaceSize = min spaceWidth $ realToFrac $ (textW - sum (fmap itemWidth' nls)) / numSpaces
+        nls' = map (\x -> case x of
+                             (Spring _ a b) -> Spring spaceSize a b
+                             _ -> x) nls
+    mapM_ ((`JQ.appendJQuery` lineDiv) <=< toJQueryWithWidth) nls'
+    return [lineDiv]
+
+    where
+      toJQueryWithWidth i = assignCssWidth (itemWidth' i) =<< itemElement i
+
+dehyphen :: Word -> [Word] -> [Word]
+dehyphen n [] = [n]
+dehyphen n@(Box{}) p =
+                  let sp = space 0
+                  in case head p of
+                      Box{} -> n : sp : p
+                      Penalty{} -> case tail p of
+                                       (Box{}:_) -> n : tail p
+                                       _         -> n : p
+dehyphen n@(Penalty{}) p = n : p
+dehyphen _ p = p
 
 reverseLine :: JQ.JQuery -> IO JQ.JQuery
 reverseLine = JQ.setCss "-moz-transform" "scaleX(-1)" <=<

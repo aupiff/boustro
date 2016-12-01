@@ -42,9 +42,11 @@ titlePage = RD.Workflow $ do
 
              RD.el "p" $
 
-                RD.text "It is a strange fact that many ancient civilizations read not left-to-right or right-to-left but alternating between the two. We invite you to discover the potential benefits of this ancient form of typsetting below. To read the following paragraph, first read from left to right and then, on the next line, read mirrored text from right to left."
+                RD.text "It is a strange fact that many ancient civilizations read not left-to-right or right-to-left but alternating between the two. We invite you to discover the potential benefits of this ancient form of typsetting. To read the following paragraph, first read from left to right and then, on the next line, read mirrored text from right to left."
 
-             RD.elAttr "div" (Map.singleton "id" "demo") $ loadBoustro pb viewDimsD
+             RD.elAttr "div" (Map.singleton "id" "demo") $
+
+                loadBoustro pb viewDimsD
 
              RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
