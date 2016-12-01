@@ -32,35 +32,72 @@ titlePage = RD.Workflow $ do
 
     contentStyleMap <- RD.mapDyn viewDimsToStyleMap viewDimsD
 
-    RD.elDynAttr "div" contentStyleMap $
+    pb <- RD.getPostBuild
 
-          do RD.el "h1" $ RD.text "βουστροφηδόν"
+    RD.elDynAttr "div" contentStyleMap $ do
+
+          RD.el "h1" $ RD.text "βουστροφηδόν"
+
+          RD.elAttr "div" (Map.singleton "id" "instruction") $ do
 
              RD.el "p" $
 
-                RD.text "An ancient, efficient, yet \
-                       \ unfortunately forgotten style of typsetting."
+                RD.text "It is a strange fact that many ancient civilizations read not left-to-right or right-to-left but alternating between the two. We invite you to discover the potential benefits of this ancient form of typsetting below. To read the following paragraph, first read from left to right and then, on the next line, read mirrored text from right to left."
 
-             RD.el "p" $ RD.text "To turn pages in the reader view, \
-                                \ use the left and right the arrows on \
-                                \ PCs or, if using a mobile device, single \
-                                \ click the left and right sides of the \
-                                \ screen. Additionally, paging and home \
-                                \ buttons are displayed at the bottom of \
-                                \ the screen."
+             RD.elAttr "div" (Map.singleton "id" "demo") $ loadBoustro pb viewDimsD
 
              RD.elAttr "div" (Map.singleton "id" "menu") $ do
 
-                one <- RD.button "\"The Velveteen Rabbit\" -- Margery Williams"
-                two <- RD.button "\"Walden, Chapter III\" -- Henry David Thoreau"
-                three <- RD.button "\"Eveline\" -- James Joyce"
+                readButton <- RD.button "READ MORE"
 
-                let selectionEvent = RD.leftmost [ const 0 <$> one
-                                                 , const 1 <$> two
-                                                 , const 2 <$> three
-                                                 ]
+                return ((), selectionPage <$ readButton)
 
-                return ((), textView <$> selectionEvent)
+loadBoustro :: MonadWidget t m
+            => RD.Event t () -> RD.Dynamic t ViewDimensions
+            -> m (RD.Event t ())
+loadBoustro pageEvent viewDimsD = RD.performEvent $
+        (liftIO . typesetParagraph) <$> viewDimsD `RD.attachDyn` pageEvent
+
+selectionPage :: forall t (m :: * -> *). MonadWidget t m
+              => RD.Workflow t m ()
+selectionPage = RD.Workflow $ do
+
+    viewDimsD <- viewDimensions
+
+    contentStyleMap <- RD.mapDyn viewDimsToStyleMap viewDimsD
+
+    RD.elDynAttr "div" contentStyleMap $
+
+      RD.elAttr "div" (Map.singleton "id" "instruction") $ do
+
+               RD.el "p" $ RD.text "To turn pages in the reader view, \
+                                  \ use the left and right the arrows on \
+                                  \ PCs or, if using a mobile device, single \
+                                  \ click the left and right sides of the \
+                                  \ screen. Additionally, paging and home \
+                                  \ buttons are displayed at the bottom of \
+                                  \ the screen."
+
+               RD.el "p" $
+
+                    RD.text "Select one of the works below to enter the reader:"
+
+               RD.elAttr "div" (Map.singleton "id" "menu") $ do
+
+                  one <- RD.button "\"The Velveteen Rabbit\" -- Margery Williams"
+                  twain <- RD.button "\"The The Celebrated Jumping Frog of Calaveras County\" -- Mark Twain"
+                  two <- RD.button "\"Walden, Chapter III\" -- Henry David Thoreau"
+                  three <- RD.button "\"The Man of the Crowd\" -- Edgar Allan Poe"
+                  four <- RD.button "\"Eveline\" -- James Joyce"
+
+                  let selectionEvent = RD.leftmost [ const 0 <$> one
+                                                   , const 1 <$> twain
+                                                   , const 2 <$> two
+                                                   , const 3 <$> three
+                                                   , const 4 <$> four
+                                                   ]
+
+                  return ((), textView <$> selectionEvent)
 
 
 textView :: forall (m :: * -> *) t. MonadWidget t m

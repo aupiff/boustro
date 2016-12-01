@@ -37,6 +37,13 @@ body {
   text-align: center;
 }
 
+#instruction {
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
 #menu {
   margin-left: auto;
   margin-right: auto;

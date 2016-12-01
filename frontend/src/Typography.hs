@@ -6,6 +6,7 @@ module Typography
     , PageEvent(..)
     , ViewDimensions(..)
     , typesetPage
+    , typesetParagraph
     ) where
 
 import           Control.Monad
@@ -69,7 +70,7 @@ lineWaste textWidth l = numSpaces * weighting (spaceWidth - spaceSize / numSpace
           hyphenHeadPenalty = if itemIsPenalty (head l) then 1000000 else 0
           weighting x -- too close is worse than too far apart : TODO This seems backwards to me
             | x < 0 = x ^ (2 :: Int) -- spaces larger than optimal width
-            | otherwise = if x > 2 then 1000 else 3 * x ^ (2 :: Int) -- spaces smaller than optimal width
+            | otherwise = if x > 1.5 then 1000 else 3 * x ^ (2 :: Int) -- spaces smaller than optimal width
     -- Write quickcheck properties for this
 
 
@@ -139,6 +140,31 @@ typesetPage textIndex (ViewDimensions _ textWidth viewHeight lineH, ((wordNumber
     return (wordNumber', wordsOnPage')
 
       where widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+
+
+typesetParagraph :: (ViewDimensions, ()) -> IO ()
+typesetParagraph (ViewDimensions _ textWidth viewHeight lineH, _) = do
+
+    let linesPerPage = floor $ textHeight / (lineH + 5) -- 3 is margin-bottom TODO remove this magic number
+        lineSpacing = (textHeight - fromIntegral linesPerPage * lineH) / (fromIntegral linesPerPage - 1)
+        numWords = round $ 30 * (textWidth / 700) * fromIntegral linesPerPage
+        textHeight = viewHeight * 0.9
+
+    boxes <- wordsWithWidths $ processedWords 5
+
+    let par = take linesPerPage $ par1' textWidth boxes
+        wordsOnPage' = sum $ map length par
+    ls <- mapM (renderLine lineH textWidth lineSpacing) par
+
+    boustroLines <- boustro ls
+    -- Should I be applying this style every time? Definitely on window change
+    -- dim, so maybe it's not so bad.
+    textArea <- (JQ.empty >=> widthCss) =<< JQ.select "#demo"
+    mapM_ (`JQ.appendJQuery` textArea) boustroLines
+    return ()
+
+      where widthCss = JQ.setCss "width" (textToJSString . T.pack $ show textWidth)
+
 
 
 wordsWithWidths :: [String] -> IO [Word]
@@ -226,7 +252,7 @@ itemIsPenalty Penalty{} = True
 itemIsPenalty _ = False
 
 spaceWidth :: Double
-spaceWidth = 5.5
+spaceWidth = 4.5
 
 
 space :: Double -> Word
