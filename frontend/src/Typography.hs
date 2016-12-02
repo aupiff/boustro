@@ -11,7 +11,7 @@ module Typography
 
 import           Control.Monad
 import           Data.JSString.Text
-import           Data.List (intersperse)
+import           Data.List (intersperse, groupBy)
 import           Data.Maybe
 import           Data.Monoid ((<>))
 import qualified Data.Text as T
@@ -211,6 +211,11 @@ instance Show b => Show (Item a b) where
     show (Spring w _ _) = "Spring " ++ show w
     show (Penalty w _ _ _) = "Penalty " ++ show w
 
+itemToText :: Word -> T.Text
+itemToText (Box _ x) = x
+itemToText Spring{} = " "
+itemToText (Penalty _ _ _ x) = x
+
 -- all hypens are flagged penality items because we don't want two hyphens in
 -- a row
 itemWidth :: Num b => Item a b -> b
@@ -280,15 +285,43 @@ renderLine lineH textW lineSpacing ls = do
 
     let nls = foldr dehyphen [] ls
         numSpaces = fromIntegral (length $ filter itemIsSpace nls)
-        spaceSize = realToFrac $ (textW - sum (fmap itemWidth' nls)) / numSpaces
-        nls' = map (\x -> case x of
+
+    nls' <- collapseHyphenatedWords nls
+
+    let spaceSize = realToFrac $ (textW - sum (fmap itemWidth' nls')) / numSpaces
+        nls'' = map (\x -> case x of
                              (Spring _ a b) -> Spring spaceSize a b
-                             _ -> x) nls
-    mapM_ ((`JQ.appendJQuery` lineDiv) <=< toJQueryWithWidth) nls'
+                             _ -> x) nls'
+
+    mapM_ ((`JQ.appendJQuery` lineDiv) <=< toJQueryWithWidth) nls''
     return lineDiv
 
     where
       toJQueryWithWidth i = assignCssWidth (itemWidth' i) =<< itemElement i
+
+
+collapseHyphenatedWords :: [Word] -> IO [Word]
+collapseHyphenatedWords ws = do
+     scratchArea <- JQ.empty =<< JQ.select "#scratch-area"
+
+     let func :: [Word] -> [Word] -> IO [Word]
+         func [y@Box{}] p = return $ y : p
+         func x@(Box{}:_) p = do
+           let text = T.concat $ map itemToText x
+           jq <- toItem text
+           _ <- jq `JQ.appendJQuery` scratchArea
+           jqWidth <- JQ.getInnerWidth jq
+           return $ (toItem' text jqWidth) : p
+         func x p = return $ x ++ p
+
+     foldM func [] $ foldr groupBoxes [] ws
+
+  where toItem' :: T.Text -> Double -> Word
+        toItem' "-" w = hyphen w "-"
+        toItem' " " _ = space spaceWidth
+        toItem' str w = Box w str
+        groupBoxes x@Box{} (y@(Box{}:_):t) = (x:y) : t
+        groupBoxes n p = [n] : p
 
 renderLastLine :: Double -> Double -> Double -> [Word] -> IO [JQ.JQuery]
 renderLastLine lineH textW lineSpacing ls = do
