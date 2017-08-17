@@ -10,7 +10,7 @@ in reflex-platform.ghcjs.override {
         src = nixpkgs.fetchgit {
          url = "https://github.com/ghcjs/ghcjs-jquery";
          rev = "6e8023229342eaf78204cde3189865be891e5aa4";
-         sha256 = "0i03p1mv82r01wiz4l4ysb4znavriva2zyxc713ds6y35nf8xpzm";
+         sha256 = "0idqg67zxr6yj1957nm55x07klllxfhahjbgp7zg6rdwha1vfvy6";
         };
         buildDepends = [
           data-default ghcjs-base ghcjs-dom text
@@ -27,7 +27,7 @@ in reflex-platform.ghcjs.override {
         src = nixpkgs.fetchgit {
          url = "https://github.com/aupiff/hyphenation";
          rev = "6371bdc3446e7eb6fe74e24922e812f41af2a8e";
-         sha256 = "1crr75kg1mn69x4c0wa91d81n8shp3h01nk99fxjx0zvnhpcla9k";
+         sha256 = "00ckxiz0adr8xq3ix6alnwrlz786jp4p9yd6pybi4y8z1kbqbhbs";
         };
 
         buildDepends = [
