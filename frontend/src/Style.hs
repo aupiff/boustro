@@ -1,11 +1,15 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Style where
 
+import           Data.Text (Text)
+import qualified Data.Text as T
 import           Data.Monoid ((<>))
 import           Data.Map.Strict
 import           Reflex.Dom ((=:))
 
-type Style = Map String String
+type Style = Map Text Text
 
-style :: [(String, String)] -> Style
+style :: [(Text, Text)] -> Style
 style ls = "style" =: styleValues
-  where styleValues = concatMap (\(x, y) -> x ++ ": " ++ y ++ ";") ls
+  where styleValues = T.concat $ (\(x, y) -> T.concat [x , ": " , y , ";"]) <$> ls

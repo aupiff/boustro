@@ -8,14 +8,16 @@
 
 module ReaderView where
 
+import           Data.Text (Text)
+import qualified Data.Text as T
 import           Data.Monoid ((<>))
 import           Control.Monad.IO.Class
 import qualified Data.Map.Strict as Map
-import           GHCJS.DOM (webViewGetDomDocument)
-import           GHCJS.DOM.Window ( getInnerHeight, getInnerWidth
-                                  , getWindow, resize)
-import           GHCJS.DOM.EventM (on, preventDefault)
-import           GHCJS.DOM.Element (keyDown)
+import           GHCJS.DOM (currentDocumentUnchecked) -- (askWebView)  -- (webViewGetDomDocument)
+import           GHCJS.DOM.Window ( getInnerHeight, getInnerWidth )
+--                                  , getWindow, resize)
+import           GHCJS.DOM.EventM (on, preventDefault, uiView, uiKeyCode)
+-- import           GHCJS.DOM.Element (keyDown)
 import           GHCJS.DOM.Document (getBody)
 import           Reflex.Dom.Class
 import qualified Reflex.Dom as RD
@@ -24,7 +26,7 @@ import Style
 import Typography
 
 
-titlePage :: forall t (m :: * -> *). MonadWidget t m
+titlePage :: forall t (m :: * -> *). RD.MonadWidget t m
           => RD.Workflow t m ()
 titlePage = RD.Workflow $ do
 
@@ -54,13 +56,13 @@ titlePage = RD.Workflow $ do
 
                 return ((), selectionPage <$ readButton)
 
-loadBoustro :: MonadWidget t m
+loadBoustro :: RD.MonadWidget t m
             => RD.Event t () -> RD.Dynamic t ViewDimensions
             -> m (RD.Event t ())
 loadBoustro pageEvent viewDimsD = RD.performEvent $
         (liftIO . typesetParagraph) <$> viewDimsD `RD.attachDyn` pageEvent
 
-selectionPage :: forall t (m :: * -> *). MonadWidget t m
+selectionPage :: forall t (m :: * -> *). RD.MonadWidget t m
               => RD.Workflow t m ()
 selectionPage = RD.Workflow $ do
 
@@ -103,7 +105,7 @@ selectionPage = RD.Workflow $ do
 
                return x
 
-textView :: forall (m :: * -> *) t. MonadWidget t m
+textView :: forall (m :: * -> *) t. RD.MonadWidget t m
          => Int -> RD.Workflow t m ()
 textView textIndex = RD.Workflow . RD.el "div" $ do
 
@@ -149,7 +151,7 @@ textView textIndex = RD.Workflow . RD.el "div" $ do
           return (a, b)
 
 
-viewDimensions :: forall (m :: * -> *) t. MonadWidget t m
+viewDimensions :: forall (m :: * -> *) t. RD.MonadWidget t m
                => m (RD.Dynamic t ViewDimensions)
 viewDimensions = do
     (w, h) <- windowDimensions
@@ -161,13 +163,13 @@ viewDimensions = do
                                in ViewDimensions w w' h' lineH
 
 
-viewDimsToStyleMap :: ViewDimensions -> Map.Map String String
+viewDimsToStyleMap :: ViewDimensions -> Map.Map Text Text
 viewDimsToStyleMap (ViewDimensions _ textWidth fullHeight _) =
-    "id" =: "content" <> style [ ("width", show textWidth)
-                               , ("height", show fullHeight) ]
+    "id" =: "content" <> style [ ("width", T.pack $ show textWidth)
+                               , ("height", T.pack $ show fullHeight) ]
 
 
-pageEventResponse :: MonadWidget t m
+pageEventResponse :: RD.MonadWidget t m
                   => Int -> RD.Event t PageEvent -> RD.Dynamic t (Int, Int)
                   -> RD.Dynamic t ViewDimensions -> m (RD.Event t (Int, Int))
 pageEventResponse textIndex pageEvent currentWord vd = RD.performEvent $
@@ -175,23 +177,27 @@ pageEventResponse textIndex pageEvent currentWord vd = RD.performEvent $
         (liftIO . typesetPage textIndex) <$> vd `RD.attachDyn` (currentWord `RD.attachDyn` pageEvent)
 
 
-pagingEvent :: MonadWidget t m => m (RD.Event t PageEvent)
+pagingEvent :: RD.MonadWidget t m => m (RD.Event t PageEvent)
 pagingEvent = do
 
-     wv <- askWebView
-     bodyM <- liftIO $ webViewGetDomDocument wv >>= maybe (return Nothing) getBody
+    --return RD.never
 
-     case bodyM of
+     -- wv <- askWebView
+    -- bodyM <- liftIO $ currentDocumentUnchecked >>= maybe (return Nothing) getBody
 
-         Just body -> do
+    --case bodyM of
 
-            kp <- RD.wrapDomEvent body (`on` keyDown) $ do
-              i <- RD.getKeyEvent
-              preventDefault
-              return i
-            return $ RD.fmapMaybe toPageEvent kp
+    --    Just body -> do
+           kp <- uiKeyCode
 
-         Nothing -> return RD.never
+           -- kp <- RD.wrapDomEvent body (`on` keyDown) $ do
+           --   i <- RD.getKeyEvent
+           --   preventDefault
+           --   return i
+           return $ RD.fmapMaybe toPageEvent kp
+           -- return RD.never
+
+    --     Nothing -> return RD.never
 
   where toPageEvent keyCode
            | keyCode == leftArrow  = Just PrevPage
@@ -201,35 +207,36 @@ pagingEvent = do
         leftArrow                = 37 :: Int
 
 
-windowDimensionsE :: MonadWidget t m => m (RD.Event t (Int, Int))
+windowDimensionsE :: RD.MonadWidget t m => m (RD.Event t (Int, Int))
 windowDimensionsE = do
-     wv <- askWebView
-     windowM <- liftIO $ getWindow wv
+     return RD.never
+     -- wv <- askWebView
+     -- windowM <- liftIO $ getWindow wv
 
-     case windowM of
+     -- case windowM of
 
-        Just window ->
+     --    Just window ->
 
-            RD.wrapDomEvent window (`on` resize) $ do
-              w <- liftIO $ getInnerWidth window
-              h <- liftIO $ getInnerHeight window
-              preventDefault
-              return (w, h)
+     --        RD.wrapDomEvent window (`on` resize) $ do
+     --          w <- liftIO $ getInnerWidth window
+     --          h <- liftIO $ getInnerHeight window
+     --          preventDefault
+     --          return (w, h)
 
-        Nothing -> return RD.never
+     --    Nothing -> return RD.never
 
 
-windowDimensions :: MonadWidget t m => m (Int, Int)
-windowDimensions = do
-     wv <- askWebView
-     windowM <- liftIO $ getWindow wv
+windowDimensions :: RD.MonadWidget t m => m (Int, Int)
+windowDimensions = do  return (100, 100)
+     -- wv <- askWebView
+     -- windowM <- liftIO $ getWindow wv
 
-     case windowM of
+     -- case windowM of
 
-        (Just window) -> do
+     --    (Just window) -> do
 
-          w <- liftIO $ getInnerWidth window
-          h <- liftIO $ getInnerHeight window
-          return (w, h)
+     --      w <- liftIO $ getInnerWidth window
+     --      h <- liftIO $ getInnerHeight window
+     --      return (w, h)
 
-        Nothing -> return (100, 100)
+     --    Nothing -> return (100, 100)
